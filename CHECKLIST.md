@@ -69,31 +69,36 @@
 
 ---
 
-## Phase 3: Authentication
+## Phase 3: Authentication ✅
 **Goal:** Set up NextAuth with magic link authentication via Resend
 
-- [ ] Set up Resend account and get API key
-- [ ] Create NextAuth configuration in `src/lib/auth.ts`
+- [x] Set up Resend account and get API key
+- [x] Create NextAuth configuration in `src/lib/auth.ts`
   - Configure Resend provider for magic links
   - Set up Prisma adapter
   - Configure session handling
-  - Add callbacks for user creation
-- [ ] Create auth API route `src/app/api/auth/[...nextauth]/route.ts`
-- [ ] Create login page `src/app/(auth)/login/page.tsx`
-- [ ] Create auth middleware for protected routes
-- [ ] Create invitation system
-  - API route `src/app/api/invite/route.ts`
-  - Invite page `src/app/(auth)/invite/[token]/page.tsx`
-- [ ] Test magic link flow end-to-end
-- [ ] Test invitation flow
+  - Add callbacks for user creation (first user becomes admin)
+- [x] Create auth API route `src/app/api/auth/[...nextauth]/route.ts`
+- [x] Create login page `src/app/(auth)/login/page.tsx`
+- [x] Create check-email page `src/app/(auth)/login/check-email/page.tsx`
+- [x] Create error page `src/app/(auth)/login/error/page.tsx`
+- [x] Create auth middleware for protected routes
+- [x] Create SessionProvider for client components
+- [x] Create landing page with sign-in CTA
+- [x] Create dashboard page for authenticated users
+- [ ] Create invitation system (can add later)
+- [ ] Test magic link flow end-to-end ⏳
 
 **Files created:**
 - `src/lib/auth.ts`
 - `src/app/api/auth/[...nextauth]/route.ts`
 - `src/app/(auth)/login/page.tsx`
-- `src/app/(auth)/invite/[token]/page.tsx`
-- `src/app/api/invite/route.ts`
+- `src/app/(auth)/login/check-email/page.tsx`
+- `src/app/(auth)/login/error/page.tsx`
 - `src/middleware.ts`
+- `src/components/providers/SessionProvider.tsx`
+- `src/app/page.tsx` (updated)
+- `src/app/(main)/dashboard/page.tsx`
 
 ---
 
@@ -382,12 +387,14 @@ After each phase, verify:
 
 **Last Updated:** 2025-01-25
 
-**Current Phase:** 3 - Authentication (Ready to Start)
+**Current Phase:** 3 - Authentication (Testing)
 
 **Notes:**
 - Phase 1 complete: Next.js 16 + TypeScript + Tailwind + all dependencies
 - Phase 2 complete: Turso database with 14 tables, Prisma client configured
-- Next: Set up Resend account and configure NextAuth with magic links
+- Phase 3 complete: NextAuth + Resend magic links, login/dashboard pages
+- Ready to test: Run `npm run dev` and try the login flow
+- Next: Test magic link, then build entry system (Phase 5)
 
 ---
 
