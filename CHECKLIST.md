@@ -39,28 +39,13 @@
 
 ---
 
-## Phase 2: Database Setup
+## Phase 2: Database Setup ✅
 **Goal:** Configure Turso database with Prisma schema
 
-- [ ] Set up Turso account and create database
-  ```bash
-  # Install Turso CLI
-  brew install tursodatabase/tap/turso
-  # Login
-  turso auth login
-  # Create database
-  turso db create family-history
-  # Get connection URL
-  turso db show family-history --url
-  # Create auth token
-  turso db tokens create family-history
-  ```
-- [ ] Initialize Prisma
-  ```bash
-  npx prisma init
-  ```
-- [ ] Write complete schema in `prisma/schema.prisma`
-  - User model
+- [x] Set up Turso account and create database (via web UI)
+- [x] Initialize Prisma
+- [x] Write complete schema in `prisma/schema.prisma`
+  - User model (with NextAuth relations)
   - Entry model with all fields
   - Person model
   - FamilyRelation model
@@ -68,18 +53,19 @@
   - Media model
   - Comment model
   - Invitation model
-  - All enums (Role, Category, DatePrecision, MediaType, RelationType)
-- [ ] Configure Prisma for Turso/libSQL adapter
-- [ ] Create `src/lib/prisma.ts` client singleton
-- [ ] Run initial migration: `npx prisma migrate dev --name init`
-- [ ] Generate Prisma client: `npx prisma generate`
-- [ ] Create seed script `prisma/seed.ts` with sample data
-- [ ] Test database connection
+- [x] Configure Prisma for Turso/libSQL adapter
+- [x] Create `src/lib/prisma.ts` client singleton
+- [x] Apply schema to Turso: `npx tsx scripts/apply-migration.ts`
+- [x] Generate Prisma client: `npx prisma generate`
+- [ ] Create seed script `prisma/seed.ts` with sample data (optional, can do later)
+- [x] Test database connection (14 tables created in Turso)
 
 **Files created:**
 - `prisma/schema.prisma`
-- `prisma/seed.ts`
+- `prisma.config.ts`
+- `prisma/migration.sql`
 - `src/lib/prisma.ts`
+- `scripts/apply-migration.ts`
 
 ---
 
@@ -396,12 +382,12 @@ After each phase, verify:
 
 **Last Updated:** 2025-01-25
 
-**Current Phase:** 2 - Database Setup (Ready to Start)
+**Current Phase:** 3 - Authentication (Ready to Start)
 
 **Notes:**
-- Phase 1 complete: Next.js 16 + TypeScript + Tailwind + all dependencies installed
-- Need to set up Turso account and create database before continuing
-- .env.local creation blocked until we have Turso credentials
+- Phase 1 complete: Next.js 16 + TypeScript + Tailwind + all dependencies
+- Phase 2 complete: Turso database with 14 tables, Prisma client configured
+- Next: Set up Resend account and configure NextAuth with magic links
 
 ---
 

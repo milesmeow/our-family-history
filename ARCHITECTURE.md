@@ -316,6 +316,98 @@ UPLOADTHING_APP_ID="your-app-id"
 
 ---
 
+## Database Schema Changes
+
+When you need to modify the database (add fields, new tables, etc.), follow this workflow:
+
+### Step 1: Edit the Schema
+
+Open `prisma/schema.prisma` and make your changes:
+
+```prisma
+// Example: Adding a "featured" field to Entry
+model Entry {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  featured  Boolean  @default(false)  // ← New field
+  // ... rest of fields
+}
+```
+
+### Step 2: Generate New Migration SQL
+
+```bash
+# Generate SQL that describes the changes
+npx prisma migrate diff \
+  --from-empty \
+  --to-schema prisma/schema.prisma \
+  --script \
+  | grep -v "dotenv" \
+  | grep -v "Loaded Prisma" \
+  > prisma/migration.sql
+```
+
+**Note:** The `grep -v` filters remove console output that would corrupt the SQL file.
+
+### Step 3: Apply to Turso
+
+```bash
+npx tsx scripts/apply-migration.ts
+```
+
+The script will:
+- Skip tables/indexes that already exist
+- Create new tables and indexes
+- Report success/failure for each statement
+
+### Step 4: Regenerate Prisma Client
+
+```bash
+npx prisma generate
+```
+
+This updates the TypeScript types so your IDE knows about the new fields.
+
+### Step 5: Update Local Dev Database
+
+```bash
+npx prisma db push
+```
+
+This syncs your local `prisma/dev.db` with the schema.
+
+---
+
+### Quick Reference Commands
+
+```bash
+# Full workflow (copy-paste friendly)
+npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script | grep -v "dotenv" | grep -v "Loaded Prisma" > prisma/migration.sql
+npx tsx scripts/apply-migration.ts
+npx prisma generate
+npx prisma db push
+```
+
+### Viewing Your Database
+
+```bash
+# Open Prisma Studio (visual database browser)
+npx prisma studio
+
+# View tables in Turso (if CLI installed)
+turso db shell family-history
+```
+
+### Important Notes
+
+1. **The migration script is additive** - it won't delete existing data when adding new fields
+2. **For destructive changes** (removing columns, renaming tables), you may need to write custom SQL
+3. **Always test locally first** - use `npx prisma db push` with local SQLite before applying to Turso
+4. **Backup before major changes** - Turso dashboard lets you create database snapshots
+
+---
+
 ## Authentication Flow
 
 ```
