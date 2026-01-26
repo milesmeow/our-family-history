@@ -5,6 +5,7 @@ import { prisma } from "./prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  debug: process.env.NODE_ENV === "development",
 
   providers: [
     Resend({
