@@ -1,0 +1,409 @@
+# Family History App - Architecture
+
+## Overview
+
+A full-featured web application for capturing, preserving, and visualizing family history. Multiple family members can contribute stories, photos, and memories, viewable on an interactive timeline and family tree.
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Why We Chose It |
+|-------|------------|-----------------|
+| **Framework** | Next.js 14+ (App Router) | Full-stack React, server components, API routes in one project |
+| **Database** | Turso | Distributed SQLite, 9GB free tier, portable data format |
+| **ORM** | Prisma | Type-safe queries, easy migrations, works with Turso |
+| **Auth** | NextAuth.js v5 | Flexible auth with magic link support |
+| **Email** | Resend | Modern email API, 3K emails/month free, great DX |
+| **File Storage** | Uploadthing | Built for Next.js, simple uploads, free tier |
+| **Styling** | Tailwind CSS | Utility-first, consistent design, small bundle |
+| **Hosting** | Vercel | Free tier, auto-deploys from GitHub, perfect for Next.js |
+
+### Why This Stack?
+
+**Flexibility & Portability**
+- Each service is independent and swappable
+- SQLite data format = easy backups and exports
+- No vendor lock-in
+
+**Cost**
+- All services have generous free tiers
+- Perfect for a family/personal project
+
+**Developer Experience**
+- Type-safe from database to frontend
+- Modern tooling with good documentation
+
+---
+
+## Data Model
+
+### Entry (Core - Family Story/Memory)
+
+The central entity - a story, memory, or event in family history.
+
+```
+Entry
+├── id                 String (cuid)
+├── title              String - "Grandma's Immigration Story"
+├── content            String - Rich text/markdown content
+├── summary            String? - Short excerpt for timeline view
+│
+├── eventDate          DateTime? - When the event happened
+├── eventDateEnd       DateTime? - For events spanning time
+├── dateApproximate    Boolean - "Around 1952" vs exact date
+├── datePrecision      Enum (DECADE/YEAR/MONTH/DAY)
+│
+├── category           Enum - STORY, BIRTH, DEATH, WEDDING, MIGRATION, etc.
+├── tags               Tag[] - Many-to-many
+│
+├── location           String? - "Ellis Island, New York"
+├── locationLat        Float? - For future map features
+├── locationLng        Float?
+│
+├── author             User - Who wrote this entry
+├── peopleInvolved     Person[] - Family members in the story
+├── media              Media[] - Photos, documents
+├── comments           Comment[]
+│
+├── createdAt          DateTime
+├── updatedAt          DateTime
+├── publishedAt        DateTime? - null = draft
+```
+
+### Person (Family Member)
+
+Represents a family member who appears in stories (may or may not be an app user).
+
+```
+Person
+├── id                 String (cuid)
+├── firstName          String
+├── lastName           String
+├── maidenName         String?
+├── nickname           String? - "Grandma Rose"
+│
+├── birthDate          DateTime?
+├── deathDate          DateTime?
+├── relationship       String? - "Great-grandmother", "Uncle"
+├── bio                String?
+│
+├── entries            Entry[] - Stories they appear in
+├── familyRelations    FamilyRelation[] - Parent/child/spouse links
+```
+
+### User (App Contributor)
+
+Someone who can log in and contribute to the app.
+
+```
+User
+├── id                 String (cuid)
+├── email              String (unique)
+├── name               String
+├── nickname           String?
+├── avatarUrl          String?
+├── role               Enum (ADMIN/MEMBER/VIEWER)
+│
+├── entries            Entry[] - Stories they authored
+├── comments           Comment[]
+├── person             Person? - Link to their Person record
+```
+
+### FamilyRelation (Family Tree)
+
+Links Person records to form the family tree.
+
+```
+FamilyRelation
+├── id                 String (cuid)
+├── personId           String - The person
+├── relatedPersonId    String - The related person
+├── relationType       Enum (PARENT/CHILD/SPOUSE/SIBLING)
+```
+
+### Supporting Models
+
+```
+Tag
+├── id                 String
+├── name               String (unique) - "WWII", "Recipes", "Immigration"
+├── entries            Entry[]
+
+Media
+├── id                 String
+├── url                String - Uploadthing URL
+├── type               Enum (IMAGE/VIDEO/AUDIO/DOCUMENT)
+├── caption            String?
+├── dateTaken          DateTime?
+├── entry              Entry
+├── peopleTagged       Person[]
+
+Comment
+├── id                 String
+├── content            String
+├── author             User
+├── entry              Entry
+├── createdAt          DateTime
+
+Invitation
+├── id                 String
+├── email              String
+├── token              String (unique)
+├── role               Enum (ADMIN/MEMBER/VIEWER)
+├── expiresAt          DateTime
+├── usedAt             DateTime?
+├── invitedBy          User
+```
+
+---
+
+## Project Structure
+
+```
+our-family-history/
+├── ARCHITECTURE.md           ← You are here
+├── CHECKLIST.md              ← Implementation progress
+├── README.md
+│
+├── prisma/
+│   ├── schema.prisma         # Database schema
+│   └── seed.ts               # Sample data for dev
+│
+├── public/
+│   └── images/               # Static assets
+│
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx        # Root layout with providers
+│   │   ├── page.tsx          # Landing page
+│   │   ├── globals.css       # Global styles
+│   │   │
+│   │   ├── (auth)/           # Public auth routes
+│   │   │   ├── login/page.tsx
+│   │   │   └── invite/[token]/page.tsx
+│   │   │
+│   │   ├── (main)/           # Protected routes
+│   │   │   ├── layout.tsx    # App shell with nav
+│   │   │   ├── dashboard/page.tsx
+│   │   │   ├── entries/
+│   │   │   │   ├── page.tsx          # List entries
+│   │   │   │   ├── new/page.tsx      # Create entry
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx      # View entry
+│   │   │   │       └── edit/page.tsx # Edit entry
+│   │   │   ├── timeline/page.tsx
+│   │   │   ├── people/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/page.tsx
+│   │   │   ├── tree/page.tsx
+│   │   │   └── settings/page.tsx
+│   │   │
+│   │   └── api/
+│   │       ├── auth/[...nextauth]/route.ts
+│   │       ├── entries/
+│   │       │   ├── route.ts          # GET all, POST new
+│   │       │   └── [id]/route.ts     # GET, PUT, DELETE one
+│   │       ├── people/
+│   │       │   ├── route.ts
+│   │       │   └── [id]/route.ts
+│   │       ├── comments/route.ts
+│   │       ├── upload/route.ts
+│   │       └── invite/route.ts
+│   │
+│   ├── components/
+│   │   ├── ui/               # Reusable primitives
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   └── DatePicker.tsx
+│   │   ├── layout/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── Navigation.tsx
+│   │   ├── entries/
+│   │   │   ├── EntryCard.tsx
+│   │   │   ├── EntryForm.tsx
+│   │   │   ├── EntryList.tsx
+│   │   │   └── RichTextEditor.tsx
+│   │   ├── timeline/
+│   │   │   ├── Timeline.tsx
+│   │   │   ├── TimelineEvent.tsx
+│   │   │   └── TimelineFilters.tsx
+│   │   ├── people/
+│   │   │   ├── PersonCard.tsx
+│   │   │   ├── PersonForm.tsx
+│   │   │   └── PersonSelector.tsx
+│   │   ├── tree/
+│   │   │   ├── FamilyTree.tsx
+│   │   │   └── TreeNode.tsx
+│   │   └── media/
+│   │       ├── MediaUploader.tsx
+│   │       └── MediaGallery.tsx
+│   │
+│   ├── lib/
+│   │   ├── prisma.ts         # Database client singleton
+│   │   ├── auth.ts           # NextAuth configuration
+│   │   ├── uploadthing.ts    # Uploadthing config
+│   │   ├── utils.ts          # Helper functions
+│   │   └── validations.ts    # Zod schemas
+│   │
+│   ├── hooks/
+│   │   ├── useEntries.ts
+│   │   ├── usePeople.ts
+│   │   └── useTimeline.ts
+│   │
+│   └── types/
+│       └── index.ts          # Shared TypeScript types
+│
+├── .env.local                # Local environment (gitignored)
+├── .env.example              # Template for env vars
+├── .gitignore
+├── next.config.js
+├── tailwind.config.js
+├── tsconfig.json
+└── package.json
+```
+
+---
+
+## Environment Variables
+
+```bash
+# === Database (Turso) ===
+TURSO_DATABASE_URL="libsql://your-database-name.turso.io"
+TURSO_AUTH_TOKEN="your-auth-token"
+
+# === Auth (NextAuth) ===
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="generate-with: openssl rand -base64 32"
+
+# === Email (Resend) ===
+RESEND_API_KEY="re_xxxxxxxxxx"
+EMAIL_FROM="Family History <login@yourdomain.com>"
+
+# === File Upload (Uploadthing) ===
+UPLOADTHING_SECRET="sk_live_xxxxxxxxxx"
+UPLOADTHING_APP_ID="your-app-id"
+```
+
+---
+
+## External Service Setup
+
+### 1. Turso (Database)
+1. Sign up at https://turso.tech
+2. Create a database: `turso db create family-history`
+3. Get credentials: `turso db tokens create family-history`
+4. Copy URL and token to `.env.local`
+
+### 2. Resend (Email)
+1. Sign up at https://resend.com
+2. Create API key in dashboard
+3. (Optional) Add custom domain for branded emails
+4. Copy API key to `.env.local`
+
+### 3. Uploadthing (File Storage)
+1. Sign up at https://uploadthing.com
+2. Create a new app
+3. Copy secret and app ID to `.env.local`
+
+### 4. Vercel (Hosting)
+1. Connect GitHub repo to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push to main
+
+---
+
+## Authentication Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        MAGIC LINK FLOW                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. User visits /login                                          │
+│           │                                                     │
+│           ▼                                                     │
+│  2. Enters email address                                        │
+│           │                                                     │
+│           ▼                                                     │
+│  3. NextAuth generates one-time token                           │
+│           │                                                     │
+│           ▼                                                     │
+│  4. Resend sends email with magic link                          │
+│     Link: https://app.vercel.app/api/auth/callback/resend?...   │
+│           │                                                     │
+│           ▼                                                     │
+│  5. User clicks link in email                                   │
+│           │                                                     │
+│           ▼                                                     │
+│  6. NextAuth verifies token, creates session                    │
+│           │                                                     │
+│           ▼                                                     │
+│  7. User redirected to /dashboard (logged in!)                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                      INVITATION FLOW                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Admin visits /settings → Invite Family                      │
+│           │                                                     │
+│           ▼                                                     │
+│  2. Enters family member's email + role (member/viewer)         │
+│           │                                                     │
+│           ▼                                                     │
+│  3. System creates Invitation record with token                 │
+│           │                                                     │
+│           ▼                                                     │
+│  4. Resend sends invitation email                               │
+│     Link: https://app.vercel.app/invite/[token]                 │
+│           │                                                     │
+│           ▼                                                     │
+│  5. Family member clicks link                                   │
+│           │                                                     │
+│           ▼                                                     │
+│  6. Token validated, User created, logged in                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Key Design Decisions
+
+### 1. Entry Date Handling
+Family stories often have imprecise dates ("sometime in the 1950s"). The schema supports:
+- **datePrecision**: DECADE, YEAR, MONTH, DAY
+- **dateApproximate**: Boolean for "around" dates
+- **eventDateEnd**: For events spanning time periods
+
+### 2. Person vs User
+- **Person**: Any family member mentioned in stories (alive or deceased)
+- **User**: Someone with app access who can contribute
+- A User can optionally link to their Person record
+
+### 3. Category System
+Pre-defined categories help with filtering and timeline display:
+- STORY, BIRTH, DEATH, WEDDING, GRADUATION
+- MIGRATION, MILITARY, CAREER, TRADITION
+- RECIPE, PHOTO_MEMORY, DOCUMENT, OTHER
+
+### 4. Family Tree Approach
+Using a `FamilyRelation` join table allows flexible relationship modeling:
+- Bidirectional relationships (parent ↔ child)
+- Multiple relationship types
+- Easy tree traversal queries
+
+---
+
+## Future Extensibility
+
+1. **Map View**: Location fields support geographic visualization
+2. **AI Features**: Content structure supports summarization/generation
+3. **Export**: Can generate PDF books, GEDCOM files, static sites
+4. **Mobile App**: API-first design enables React Native app
+5. **Collaboration**: Comment system can expand to suggestions/edits
