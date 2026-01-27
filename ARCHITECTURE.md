@@ -266,8 +266,10 @@ our-family-history/
 │   │   ├── usePeople.ts
 │   │   └── useTimeline.ts
 │   │
-│   └── types/
-│       └── index.ts          # Shared TypeScript types
+│   ├── types/
+│   │   └── index.ts          # Shared TypeScript types
+│   │
+│   └── proxy.ts              # ✅ Route protection (Node.js runtime)
 │
 ├── .env.local                # Local environment (gitignored)
 ├── .env.example              # Template for env vars
@@ -515,6 +517,13 @@ Using a `FamilyRelation` join table allows flexible relationship modeling:
 - Bidirectional relationships (parent ↔ child)
 - Multiple relationship types
 - Easy tree traversal queries
+
+### 5. Proxy vs Middleware (Next.js 16)
+Next.js 16 deprecates `middleware.ts` in favor of `proxy.ts`. We migrated for two reasons:
+1. **Edge Runtime Size Limit**: The `middleware.ts` file ran on Edge Runtime with a 1MB size limit (Vercel free tier). Our NextAuth + Prisma bundle was 1.3MB, exceeding the limit.
+2. **Node.js Runtime**: `proxy.ts` runs on Node.js runtime with no size restrictions, solving the deployment blocker.
+
+The functionality is identical - route protection, auth checks, and redirects - but the runtime changed from Edge to Node.js.
 
 ---
 

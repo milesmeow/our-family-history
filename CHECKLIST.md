@@ -386,6 +386,7 @@
 
 - [x] Connect GitHub repo to Vercel
 - [x] Fix build script for Vercel (`prisma generate && next build`)
+- [x] Migrate `middleware.ts` to `proxy.ts` (fixes Edge Runtime 1MB size limit)
 - [ ] Configure environment variables in Vercel dashboard
   - [ ] TURSO_DATABASE_URL
   - [ ] TURSO_AUTH_TOKEN
@@ -405,11 +406,17 @@
 - [ ] (Optional) Configure custom domain
 - [ ] Invite first family members!
 
-**Build Fix Applied:**
-> Prisma client must be generated during Vercel build. Updated `package.json`:
-> ```json
-> "build": "prisma generate && next build"
-> ```
+**Build Fixes Applied:**
+> 1. Prisma client must be generated during Vercel build. Updated `package.json`:
+>    ```json
+>    "build": "prisma generate && next build"
+>    ```
+> 2. Migrated `middleware.ts` → `proxy.ts` to fix Edge Runtime 1MB size limit.
+>    The NextAuth + Prisma bundle was 1.3MB, exceeding Vercel's free tier Edge limit.
+>    `proxy.ts` runs on Node.js runtime with no size restrictions.
+
+**Files changed:**
+- `src/middleware.ts` → `src/proxy.ts` (renamed, same functionality)
 
 ---
 
@@ -431,7 +438,7 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2025-01-26
+**Last Updated:** 2025-01-27
 
 **Current Phase:** 5 Complete, 7 Complete, 12 Partial, 14 In Progress
 
@@ -468,6 +475,7 @@ After each phase, verify:
 - Draft/Published status for entries
 - App version footer on all pages
 - Timezone-safe date handling
+- Route protection via `proxy.ts` (Node.js runtime)
 
 **Next Steps:**
 - Complete Phase 14: Configure Vercel environment variables, deploy
@@ -490,6 +498,7 @@ npx prisma generate  # Regenerate client after schema change
 - Architecture: `ARCHITECTURE.md`
 - Database Schema: `prisma/schema.prisma`
 - Auth Config: `src/lib/auth.ts`
+- Route Protection: `src/proxy.ts`
 - Utilities: `src/lib/utils.ts`
 - API Routes: `src/app/api/`
 - Server Actions: `src/actions/`
