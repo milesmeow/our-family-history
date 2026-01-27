@@ -313,10 +313,44 @@ UPLOADTHING_APP_ID="your-app-id"
 4. Copy URL and token to `.env.local`
 
 ### 2. Resend (Email)
+
+**Local Development:**
 1. Sign up at https://resend.com
 2. Create API key in dashboard
-3. (Optional) Add custom domain for branded emails
-4. Copy API key to `.env.local`
+3. Copy API key to `.env.local`
+4. Use `EMAIL_FROM="Family History <onboarding@resend.dev>"` for testing
+   - Note: The test domain only sends to your Resend-registered email address
+
+**Production Deployment (Required for multiple users):**
+
+To send magic link emails to other family members, you must verify a custom domain:
+
+1. Go to https://resend.com/domains → **Add Domain**
+2. Enter a subdomain (recommended): `mail.yourdomain.com` or `contact.yourdomain.com`
+   - Using a subdomain keeps transactional emails separate from your personal email
+3. Resend will show you DNS records to add. Typically:
+   | Type | Name | Purpose |
+   |------|------|---------|
+   | TXT | `resend._domainkey.subdomain` | DKIM (email signing) |
+   | MX | `send.subdomain` | Bounce handling |
+   | TXT | `send.subdomain` | SPF (sender authorization) |
+   | TXT | `_dmarc.subdomain` | DMARC policy (optional) |
+4. Add these records in your DNS provider (Squarespace, Cloudflare, etc.)
+5. Return to Resend and click **Verify DNS**
+   - DNS propagation can take 5 minutes to 48 hours
+6. Once verified, update `EMAIL_FROM` in Vercel to use your domain:
+   ```
+   EMAIL_FROM="Family History <noreply@mail.yourdomain.com>"
+   ```
+
+**Testing Your Setup:**
+```bash
+# Test Resend API key validity
+npx tsx scripts/test-resend.ts
+
+# Send a test email (to your registered email only with test domain)
+npx tsx scripts/test-resend.ts your-email@example.com
+```
 
 ### 3. Uploadthing (File Storage)
 1. Sign up at https://uploadthing.com
@@ -325,8 +359,25 @@ UPLOADTHING_APP_ID="your-app-id"
 
 ### 4. Vercel (Hosting)
 1. Connect GitHub repo to Vercel
-2. Add environment variables in Vercel dashboard
+2. Add environment variables in Vercel dashboard:
+   - `TURSO_DATABASE_URL` - Your Turso database URL
+   - `TURSO_AUTH_TOKEN` - Your Turso auth token
+   - `NEXTAUTH_URL` - Your production URL (e.g., `https://your-app.vercel.app`)
+   - `NEXTAUTH_SECRET` - Generate with `openssl rand -base64 32`
+   - `RESEND_API_KEY` - Your Resend API key
+   - `EMAIL_FROM` - Your verified sending address
 3. Deploy automatically on push to main
+
+**Prisma + Vercel Caching Note:**
+Vercel caches `node_modules` between deployments for faster builds. This can cause
+issues with Prisma because the generated client lives in `node_modules/.prisma/client`.
+To ensure the client is always properly generated, we use a `postinstall` script
+instead of generating in the `build` script:
+```json
+"postinstall": "prisma generate",
+"build": "next build"
+```
+This runs `prisma generate` right after `npm install`, before Vercel caches the modules.
 
 ---
 

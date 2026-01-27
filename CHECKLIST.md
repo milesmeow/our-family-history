@@ -396,6 +396,11 @@
   - [ ] EMAIL_FROM
   - [ ] UPLOADTHING_SECRET (when Phase 6 implemented)
   - [ ] UPLOADTHING_APP_ID (when Phase 6 implemented)
+- [ ] Set up custom email domain in Resend (required for multiple users)
+  - [ ] Add subdomain in Resend (e.g., `mail.yourdomain.com`)
+  - [ ] Add DNS records (DKIM, MX, SPF, DMARC) in domain provider
+  - [ ] Verify domain in Resend dashboard
+  - [ ] Update EMAIL_FROM in Vercel to use verified domain
 - [ ] Deploy to Vercel successfully
 - [ ] Test production deployment:
   - [ ] Magic link login works
@@ -407,16 +412,27 @@
 - [ ] Invite first family members!
 
 **Build Fixes Applied:**
-> 1. Prisma client must be generated during Vercel build. Updated `package.json`:
+> 1. **Prisma client generation moved to `postinstall`** (not `build` script).
+>    Vercel caches `node_modules` between deployments. If `prisma generate` runs
+>    in the `build` script, the generated client in `node_modules/.prisma/client`
+>    may be stale or missing due to caching. Moving it to `postinstall` ensures
+>    the client is generated right after `npm install`, before caching occurs.
 >    ```json
->    "build": "prisma generate && next build"
+>    "postinstall": "prisma generate",
+>    "build": "next build"
 >    ```
+>    Error this fixed: `Module not found: Can't resolve '.prisma/client/default'`
+>
 > 2. Migrated `middleware.ts` → `proxy.ts` to fix Edge Runtime 1MB size limit.
 >    The NextAuth + Prisma bundle was 1.3MB, exceeding Vercel's free tier Edge limit.
 >    `proxy.ts` runs on Node.js runtime with no size restrictions.
 
 **Files changed:**
 - `src/middleware.ts` → `src/proxy.ts` (renamed, same functionality)
+
+**Files created:**
+- `scripts/test-turso.ts` - Verify Turso database connection
+- `scripts/test-resend.ts` - Verify Resend email configuration
 
 ---
 
