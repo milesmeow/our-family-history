@@ -411,6 +411,11 @@
   - [ ] Photos upload successfully
   - [ ] Timeline displays correctly
   - [ ] Family tree renders
+
+> **Note:** Magic link testing on Preview deployments may fail if Vercel's
+> "Deployment Protection" is enabled. The protection intercepts callback URLs
+> and redirects to Vercel login. Either disable protection for previews
+> (Settings → Deployment Protection) or test on Production where it's not enabled.
 - [ ] (Optional) Configure custom domain
 - [ ] Invite first family members!
 
