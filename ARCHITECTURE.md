@@ -215,6 +215,7 @@ our-family-history/
 │   │       └── invite/route.ts
 │   │
 │   ├── actions/              # ✅ Server Actions
+│   │   ├── entries.ts        # Entry CRUD + people linking
 │   │   ├── people.ts         # CRUD + relationships
 │   │   └── settings.ts       # Profile linking
 │   │
@@ -226,14 +227,12 @@ our-family-history/
 │   │   │   ├── Modal.tsx
 │   │   │   └── DatePicker.tsx
 │   │   ├── layout/
-│   │   │   ├── Header.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── Navigation.tsx
-│   │   ├── entries/
+│   │   │   └── Footer.tsx        # ✅ App version display
+│   │   ├── entries/             # ✅ Implemented
 │   │   │   ├── EntryCard.tsx
 │   │   │   ├── EntryForm.tsx
-│   │   │   ├── EntryList.tsx
-│   │   │   └── RichTextEditor.tsx
+│   │   │   ├── PersonSelector.tsx
+│   │   │   └── DeleteEntryButton.tsx
 │   │   ├── timeline/
 │   │   │   ├── Timeline.tsx
 │   │   │   ├── TimelineEvent.tsx
@@ -257,9 +256,10 @@ our-family-history/
 │   │   ├── prisma.ts         # Database client singleton
 │   │   ├── auth.ts           # NextAuth configuration
 │   │   ├── uploadthing.ts    # Uploadthing config
-│   │   ├── utils.ts          # Helper functions
+│   │   ├── utils.ts          # Helper functions (parseDateString for timezone-safe dates)
 │   │   └── validations/      # ✅ Zod schemas
-│   │       └── person.ts     # Person + relationship validation
+│   │       ├── person.ts     # Person + relationship validation
+│   │       └── entry.ts      # Entry validation + category constants
 │   │
 │   ├── hooks/
 │   │   ├── useEntries.ts

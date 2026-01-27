@@ -381,11 +381,11 @@
 
 ---
 
-## Phase 14: Deployment
+## Phase 14: Deployment (In Progress)
 **Goal:** Deploy to production on Vercel
 
-- [ ] Ensure all environment variables documented
-- [ ] Connect GitHub repo to Vercel
+- [x] Connect GitHub repo to Vercel
+- [x] Fix build script for Vercel (`prisma generate && next build`)
 - [ ] Configure environment variables in Vercel dashboard
   - [ ] TURSO_DATABASE_URL
   - [ ] TURSO_AUTH_TOKEN
@@ -393,9 +393,9 @@
   - [ ] NEXTAUTH_SECRET
   - [ ] RESEND_API_KEY
   - [ ] EMAIL_FROM
-  - [ ] UPLOADTHING_SECRET
-  - [ ] UPLOADTHING_APP_ID
-- [ ] Deploy to Vercel
+  - [ ] UPLOADTHING_SECRET (when Phase 6 implemented)
+  - [ ] UPLOADTHING_APP_ID (when Phase 6 implemented)
+- [ ] Deploy to Vercel successfully
 - [ ] Test production deployment:
   - [ ] Magic link login works
   - [ ] Entries can be created
@@ -404,6 +404,12 @@
   - [ ] Family tree renders
 - [ ] (Optional) Configure custom domain
 - [ ] Invite first family members!
+
+**Build Fix Applied:**
+> Prisma client must be generated during Vercel build. Updated `package.json`:
+> ```json
+> "build": "prisma generate && next build"
+> ```
 
 ---
 
@@ -427,7 +433,7 @@ After each phase, verify:
 
 **Last Updated:** 2025-01-26
 
-**Current Phase:** 5 Complete, Phase 7 Complete, Phase 12 Partial
+**Current Phase:** 5 Complete, 7 Complete, 12 Partial, 14 In Progress
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
@@ -436,6 +442,7 @@ After each phase, verify:
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - 🔶 Phase 12: Settings (partial) - User-Person profile linking
+- 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 
 **Key Decisions Made:**
 > **User-Person Linking via Settings**: Users can link their account to a Person
@@ -445,6 +452,10 @@ After each phase, verify:
 > **Entry System MVP**: Using textarea for content (rich text editor deferred).
 > Entries support 13 categories, date handling with approximate flag, and
 > linking multiple people to each story.
+
+> **Date Parsing Fix**: Created `parseDateString()` utility in `src/lib/utils.ts`
+> to prevent timezone shift issues. HTML date inputs ("1979-01-15") are parsed
+> at noon UTC to display correctly in all timezones.
 
 **What's Working:**
 - Magic link authentication (login → email → dashboard)
@@ -456,11 +467,12 @@ After each phase, verify:
 - Linking people to stories (PersonOnEntry many-to-many)
 - Draft/Published status for entries
 - App version footer on all pages
+- Timezone-safe date handling
 
 **Next Steps:**
+- Complete Phase 14: Configure Vercel environment variables, deploy
 - Phase 6: Photo Uploads (Uploadthing integration)
 - Phase 8: Timeline View (chronological visualization)
-- Phase 4: Core Layout & UI (shared navigation, reusable components)
 
 ---
 
@@ -478,7 +490,9 @@ npx prisma generate  # Regenerate client after schema change
 - Architecture: `ARCHITECTURE.md`
 - Database Schema: `prisma/schema.prisma`
 - Auth Config: `src/lib/auth.ts`
+- Utilities: `src/lib/utils.ts`
 - API Routes: `src/app/api/`
+- Server Actions: `src/actions/`
 
 ### External Dashboards
 - Turso: https://turso.tech/app
