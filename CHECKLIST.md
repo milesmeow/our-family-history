@@ -139,34 +139,43 @@
 
 ---
 
-## Phase 5: Entry System
+## Phase 5: Entry System ✅
 **Goal:** Full CRUD for family history entries
 
-- [ ] Create Entry API routes
-  - [ ] `src/app/api/entries/route.ts` - GET all, POST new
-  - [ ] `src/app/api/entries/[id]/route.ts` - GET, PUT, DELETE one
-- [ ] Create Zod validation schemas in `src/lib/validations.ts`
-- [ ] Create entry components
-  - [ ] `src/components/entries/EntryCard.tsx`
-  - [ ] `src/components/entries/EntryList.tsx`
-  - [ ] `src/components/entries/EntryForm.tsx`
-  - [ ] `src/components/entries/RichTextEditor.tsx` (use Tiptap or similar)
-- [ ] Create entry pages
-  - [ ] `src/app/(main)/entries/page.tsx` - List with filters
-  - [ ] `src/app/(main)/entries/new/page.tsx` - Create form
-  - [ ] `src/app/(main)/entries/[id]/page.tsx` - View detail
-  - [ ] `src/app/(main)/entries/[id]/edit/page.tsx` - Edit form
-- [ ] Create `src/hooks/useEntries.ts` for data fetching
-- [ ] Implement filtering and sorting
-- [ ] Test entry CRUD operations
+- [x] Create Zod validation schemas in `src/lib/validations/entry.ts`
+- [x] Create server actions `src/actions/entries.ts`
+  - createEntry, updateEntry, deleteEntry, togglePublish
+- [x] Create entry components
+  - [x] `src/components/entries/EntryCard.tsx` - Card for list display
+  - [x] `src/components/entries/EntryForm.tsx` - Create/edit form with useActionState
+  - [x] `src/components/entries/PersonSelector.tsx` - Multi-select people to link
+  - [x] `src/components/entries/DeleteEntryButton.tsx` - Delete with confirmation
+- [x] Create entry pages
+  - [x] `src/app/(main)/entries/page.tsx` - List with category filter
+  - [x] `src/app/(main)/entries/new/page.tsx` - Create form
+  - [x] `src/app/(main)/entries/[id]/page.tsx` - View detail with linked people
+  - [x] `src/app/(main)/entries/[id]/edit/page.tsx` - Edit form
+- [x] Implement category filtering
+- [x] Link people to entries (PersonOnEntry many-to-many)
+- [x] Draft/Published status toggle
+- [x] Test entry CRUD operations
+
+**MVP Notes:**
+- Using textarea for content (rich text editor deferred)
+- Media uploads deferred to Phase 6
+- Tags and comments deferred to later phases
 
 **Files created:**
-- `src/app/api/entries/route.ts`
-- `src/app/api/entries/[id]/route.ts`
-- `src/lib/validations.ts`
-- `src/components/entries/*.tsx`
-- `src/app/(main)/entries/**/*.tsx`
-- `src/hooks/useEntries.ts`
+- `src/lib/validations/entry.ts`
+- `src/actions/entries.ts`
+- `src/components/entries/EntryCard.tsx`
+- `src/components/entries/EntryForm.tsx`
+- `src/components/entries/PersonSelector.tsx`
+- `src/components/entries/DeleteEntryButton.tsx`
+- `src/app/(main)/entries/page.tsx`
+- `src/app/(main)/entries/new/page.tsx`
+- `src/app/(main)/entries/[id]/page.tsx`
+- `src/app/(main)/entries/[id]/edit/page.tsx`
 
 ---
 
@@ -191,30 +200,42 @@
 
 ---
 
-## Phase 7: People Management
+## Phase 7: People Management ✅
 **Goal:** Manage family members who appear in stories
 
-- [ ] Create People API routes
-  - [ ] `src/app/api/people/route.ts`
-  - [ ] `src/app/api/people/[id]/route.ts`
-- [ ] Create people components
-  - [ ] `src/components/people/PersonCard.tsx`
-  - [ ] `src/components/people/PersonForm.tsx`
-  - [ ] `src/components/people/PersonSelector.tsx` (for entry form)
-  - [ ] `src/components/people/PersonList.tsx`
-- [ ] Create people pages
-  - [ ] `src/app/(main)/people/page.tsx` - List all
-  - [ ] `src/app/(main)/people/[id]/page.tsx` - Profile with related entries
-- [ ] Create `src/hooks/usePeople.ts`
-- [ ] Link people to entries in EntryForm
-- [ ] Test people management
+- [x] Create People API routes
+  - [x] `src/app/api/people/route.ts`
+  - [x] `src/app/api/people/unlinked/route.ts` (for profile linking)
+- [x] Create people components
+  - [x] `src/components/people/PersonCard.tsx`
+  - [x] `src/components/people/PersonForm.tsx`
+  - [x] `src/components/people/RelationshipList.tsx`
+  - [x] `src/components/people/AddRelationshipDialog.tsx`
+  - [x] `src/components/people/DeletePersonButton.tsx`
+- [x] Create people pages
+  - [x] `src/app/(main)/people/page.tsx` - List all
+  - [x] `src/app/(main)/people/new/page.tsx` - Create new person
+  - [x] `src/app/(main)/people/[id]/page.tsx` - Profile with relationships
+  - [x] `src/app/(main)/people/[id]/edit/page.tsx` - Edit person
+- [x] Create server actions `src/actions/people.ts`
+- [x] Implement bidirectional relationships (PARENT↔CHILD, SPOUSE↔SPOUSE, SIBLING↔SIBLING)
+- [x] Test people CRUD and relationship management
+- [ ] Link people to entries in EntryForm (Phase 5)
 
 **Files created:**
+- `src/lib/validations/person.ts`
+- `src/actions/people.ts`
 - `src/app/api/people/route.ts`
-- `src/app/api/people/[id]/route.ts`
-- `src/components/people/*.tsx`
-- `src/app/(main)/people/**/*.tsx`
-- `src/hooks/usePeople.ts`
+- `src/app/api/people/unlinked/route.ts`
+- `src/components/people/PersonCard.tsx`
+- `src/components/people/PersonForm.tsx`
+- `src/components/people/RelationshipList.tsx`
+- `src/components/people/AddRelationshipDialog.tsx`
+- `src/components/people/DeletePersonButton.tsx`
+- `src/app/(main)/people/page.tsx`
+- `src/app/(main)/people/new/page.tsx`
+- `src/app/(main)/people/[id]/page.tsx`
+- `src/app/(main)/people/[id]/edit/page.tsx`
 
 ---
 
@@ -309,20 +330,39 @@
 
 ---
 
-## Phase 12: Settings & Admin
+## Phase 12: Settings & Admin (Partially Complete)
 **Goal:** User settings and admin controls
 
-- [ ] Create settings page `src/app/(main)/settings/page.tsx`
-  - [ ] Profile editing
+- [x] Create settings page `src/app/(main)/settings/page.tsx`
+  - [x] **User-Person Profile Linking** ← Key decision: users link to a Person in Settings
+  - [ ] Profile editing (name, avatar)
   - [ ] Notification preferences
   - [ ] Invite family members (for admins)
+- [x] Create profile linking components
+  - [x] `src/components/settings/LinkProfileSection.tsx` - Link/create/unlink profile
+  - [x] `src/actions/settings.ts` - Server actions for profile linking
+- [x] Add Settings link (gear icon) to dashboard header
 - [ ] Create admin user management (for admins)
 - [ ] Add role-based access controls throughout app
 - [ ] Test admin vs member vs viewer permissions
 
+**Decision: User-Person Linking**
+> Users can link their account to a Person record in the family tree via Settings.
+> This establishes "who they are" in the family, enabling relationship-based features.
+> Options: Create new Person profile OR link to existing unlinked Person.
+
+**Cleanup: Removed "Relationship to You" field**
+> The text field for "Relationship to You" (e.g., "Great-grandmother") was removed from
+> PersonForm and the profile page display. It was redundant since relationships are now
+> tracked via the FamilyRelation system and user profile linking.
+
 **Files created:**
 - `src/app/(main)/settings/page.tsx`
-- `src/components/settings/*.tsx`
+- `src/components/settings/LinkProfileSection.tsx`
+- `src/actions/settings.ts`
+
+**Files modified:**
+- `src/app/(main)/dashboard/page.tsx` (added Settings icon in header)
 
 ---
 
@@ -341,11 +381,12 @@
 
 ---
 
-## Phase 14: Deployment
+## Phase 14: Deployment (In Progress)
 **Goal:** Deploy to production on Vercel
 
-- [ ] Ensure all environment variables documented
-- [ ] Connect GitHub repo to Vercel
+- [x] Connect GitHub repo to Vercel
+- [x] Fix build script for Vercel (`prisma generate && next build`)
+- [x] Migrate `middleware.ts` to `proxy.ts` (fixes Edge Runtime 1MB size limit)
 - [ ] Configure environment variables in Vercel dashboard
   - [ ] TURSO_DATABASE_URL
   - [ ] TURSO_AUTH_TOKEN
@@ -353,9 +394,9 @@
   - [ ] NEXTAUTH_SECRET
   - [ ] RESEND_API_KEY
   - [ ] EMAIL_FROM
-  - [ ] UPLOADTHING_SECRET
-  - [ ] UPLOADTHING_APP_ID
-- [ ] Deploy to Vercel
+  - [ ] UPLOADTHING_SECRET (when Phase 6 implemented)
+  - [ ] UPLOADTHING_APP_ID (when Phase 6 implemented)
+- [ ] Deploy to Vercel successfully
 - [ ] Test production deployment:
   - [ ] Magic link login works
   - [ ] Entries can be created
@@ -364,6 +405,18 @@
   - [ ] Family tree renders
 - [ ] (Optional) Configure custom domain
 - [ ] Invite first family members!
+
+**Build Fixes Applied:**
+> 1. Prisma client must be generated during Vercel build. Updated `package.json`:
+>    ```json
+>    "build": "prisma generate && next build"
+>    ```
+> 2. Migrated `middleware.ts` → `proxy.ts` to fix Edge Runtime 1MB size limit.
+>    The NextAuth + Prisma bundle was 1.3MB, exceeding Vercel's free tier Edge limit.
+>    `proxy.ts` runs on Node.js runtime with no size restrictions.
+
+**Files changed:**
+- `src/middleware.ts` → `src/proxy.ts` (renamed, same functionality)
 
 ---
 
@@ -385,16 +438,49 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2025-01-25
+**Last Updated:** 2025-01-27
 
-**Current Phase:** 3 - Authentication (Testing)
+**Current Phase:** 5 Complete, 7 Complete, 12 Partial, 14 In Progress
 
-**Notes:**
-- Phase 1 complete: Next.js 16 + TypeScript + Tailwind + all dependencies
-- Phase 2 complete: Turso database with 14 tables, Prisma client configured
-- Phase 3 complete: NextAuth + Resend magic links, login/dashboard pages
-- Ready to test: Run `npm run dev` and try the login flow
-- Next: Test magic link, then build entry system (Phase 5)
+**Completed Phases:**
+- ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
+- ✅ Phase 2: Database Setup - Turso + Prisma with 14 tables
+- ✅ Phase 3: Authentication - NextAuth + Resend magic links
+- ✅ Phase 5: Entry System - Full CRUD for stories with people linking
+- ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
+- 🔶 Phase 12: Settings (partial) - User-Person profile linking
+- 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
+
+**Key Decisions Made:**
+> **User-Person Linking via Settings**: Users can link their account to a Person
+> record in the family tree through `/settings`. This enables relationship-aware
+> features and establishes "who you are" in the family.
+
+> **Entry System MVP**: Using textarea for content (rich text editor deferred).
+> Entries support 13 categories, date handling with approximate flag, and
+> linking multiple people to each story.
+
+> **Date Parsing Fix**: Created `parseDateString()` utility in `src/lib/utils.ts`
+> to prevent timezone shift issues. HTML date inputs ("1979-01-15") are parsed
+> at noon UTC to display correctly in all timezones.
+
+**What's Working:**
+- Magic link authentication (login → email → dashboard)
+- People management (create, edit, delete, view profiles)
+- Family relationships (add/remove bidirectional PARENT/CHILD/SPOUSE/SIBLING)
+- Settings page with profile linking (create new or link to existing Person)
+- Entry/story management (create, edit, delete, view stories)
+- Category filtering on entries list
+- Linking people to stories (PersonOnEntry many-to-many)
+- Draft/Published status for entries
+- App version footer on all pages
+- Timezone-safe date handling
+- Route protection via `proxy.ts` (Node.js runtime)
+
+**Next Steps:**
+- Complete Phase 14: Configure Vercel environment variables, deploy
+- Phase 6: Photo Uploads (Uploadthing integration)
+- Phase 8: Timeline View (chronological visualization)
 
 ---
 
@@ -412,7 +498,10 @@ npx prisma generate  # Regenerate client after schema change
 - Architecture: `ARCHITECTURE.md`
 - Database Schema: `prisma/schema.prisma`
 - Auth Config: `src/lib/auth.ts`
+- Route Protection: `src/proxy.ts`
+- Utilities: `src/lib/utils.ts`
 - API Routes: `src/app/api/`
+- Server Actions: `src/actions/`
 
 ### External Dashboards
 - Turso: https://turso.tech/app

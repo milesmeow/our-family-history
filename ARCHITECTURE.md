@@ -193,23 +193,31 @@ our-family-history/
 │   │   │   │       ├── page.tsx      # View entry
 │   │   │   │       └── edit/page.tsx # Edit entry
 │   │   │   ├── timeline/page.tsx
-│   │   │   ├── people/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [id]/page.tsx
+│   │   │   ├── people/               # ✅ Implemented
+│   │   │   │   ├── page.tsx          # List all family members
+│   │   │   │   ├── new/page.tsx      # Create new person
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx      # View profile + relationships
+│   │   │   │       └── edit/page.tsx # Edit person
 │   │   │   ├── tree/page.tsx
-│   │   │   └── settings/page.tsx
+│   │   │   └── settings/page.tsx     # ✅ Implemented (profile linking)
 │   │   │
 │   │   └── api/
 │   │       ├── auth/[...nextauth]/route.ts
 │   │       ├── entries/
 │   │       │   ├── route.ts          # GET all, POST new
 │   │       │   └── [id]/route.ts     # GET, PUT, DELETE one
-│   │       ├── people/
-│   │       │   ├── route.ts
-│   │       │   └── [id]/route.ts
+│   │       ├── people/               # ✅ Implemented
+│   │       │   ├── route.ts          # GET people list
+│   │       │   └── unlinked/route.ts # GET unlinked people (for profile linking)
 │   │       ├── comments/route.ts
 │   │       ├── upload/route.ts
 │   │       └── invite/route.ts
+│   │
+│   ├── actions/              # ✅ Server Actions
+│   │   ├── entries.ts        # Entry CRUD + people linking
+│   │   ├── people.ts         # CRUD + relationships
+│   │   └── settings.ts       # Profile linking
 │   │
 │   ├── components/
 │   │   ├── ui/               # Reusable primitives
@@ -219,22 +227,24 @@ our-family-history/
 │   │   │   ├── Modal.tsx
 │   │   │   └── DatePicker.tsx
 │   │   ├── layout/
-│   │   │   ├── Header.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── Navigation.tsx
-│   │   ├── entries/
+│   │   │   └── Footer.tsx        # ✅ App version display
+│   │   ├── entries/             # ✅ Implemented
 │   │   │   ├── EntryCard.tsx
 │   │   │   ├── EntryForm.tsx
-│   │   │   ├── EntryList.tsx
-│   │   │   └── RichTextEditor.tsx
+│   │   │   ├── PersonSelector.tsx
+│   │   │   └── DeleteEntryButton.tsx
 │   │   ├── timeline/
 │   │   │   ├── Timeline.tsx
 │   │   │   ├── TimelineEvent.tsx
 │   │   │   └── TimelineFilters.tsx
-│   │   ├── people/
+│   │   ├── people/               # ✅ Implemented
 │   │   │   ├── PersonCard.tsx
 │   │   │   ├── PersonForm.tsx
-│   │   │   └── PersonSelector.tsx
+│   │   │   ├── RelationshipList.tsx
+│   │   │   ├── AddRelationshipDialog.tsx
+│   │   │   └── DeletePersonButton.tsx
+│   │   ├── settings/             # ✅ Implemented
+│   │   │   └── LinkProfileSection.tsx
 │   │   ├── tree/
 │   │   │   ├── FamilyTree.tsx
 │   │   │   └── TreeNode.tsx
@@ -246,16 +256,20 @@ our-family-history/
 │   │   ├── prisma.ts         # Database client singleton
 │   │   ├── auth.ts           # NextAuth configuration
 │   │   ├── uploadthing.ts    # Uploadthing config
-│   │   ├── utils.ts          # Helper functions
-│   │   └── validations.ts    # Zod schemas
+│   │   ├── utils.ts          # Helper functions (parseDateString for timezone-safe dates)
+│   │   └── validations/      # ✅ Zod schemas
+│   │       ├── person.ts     # Person + relationship validation
+│   │       └── entry.ts      # Entry validation + category constants
 │   │
 │   ├── hooks/
 │   │   ├── useEntries.ts
 │   │   ├── usePeople.ts
 │   │   └── useTimeline.ts
 │   │
-│   └── types/
-│       └── index.ts          # Shared TypeScript types
+│   ├── types/
+│   │   └── index.ts          # Shared TypeScript types
+│   │
+│   └── proxy.ts              # ✅ Route protection (Node.js runtime)
 │
 ├── .env.local                # Local environment (gitignored)
 ├── .env.example              # Template for env vars
@@ -478,6 +492,20 @@ Family stories often have imprecise dates ("sometime in the 1950s"). The schema 
 - **User**: Someone with app access who can contribute
 - A User can optionally link to their Person record
 
+**User-Person Linking (via Settings):**
+Users link their account to a Person record through `/settings`, not during person creation.
+This was chosen because:
+1. Separation of concerns - creating family members is distinct from account linking
+2. Flexibility - users might want to browse/add people before linking themselves
+3. One-to-one integrity - each User can link to at most one Person (enforced by unique constraint)
+
+The linking flow in Settings offers two options:
+- **Create new**: Fill out a simplified Person form (just for yourself)
+- **Link existing**: Select from People not already linked to another User
+
+**Note:** The `relationship` field on Person (e.g., "Great-grandmother") was removed from the UI
+as it's redundant - relationships are now tracked via `FamilyRelation` and user profile linking.
+
 ### 3. Category System
 Pre-defined categories help with filtering and timeline display:
 - STORY, BIRTH, DEATH, WEDDING, GRADUATION
@@ -489,6 +517,13 @@ Using a `FamilyRelation` join table allows flexible relationship modeling:
 - Bidirectional relationships (parent ↔ child)
 - Multiple relationship types
 - Easy tree traversal queries
+
+### 5. Proxy vs Middleware (Next.js 16)
+Next.js 16 deprecates `middleware.ts` in favor of `proxy.ts`. We migrated for two reasons:
+1. **Edge Runtime Size Limit**: The `middleware.ts` file ran on Edge Runtime with a 1MB size limit (Vercel free tier). Our NextAuth + Prisma bundle was 1.3MB, exceeding the limit.
+2. **Node.js Runtime**: `proxy.ts` runs on Node.js runtime with no size restrictions, solving the deployment blocker.
+
+The functionality is identical - route protection, auth checks, and redirects - but the runtime changed from Edge to Node.js.
 
 ---
 
