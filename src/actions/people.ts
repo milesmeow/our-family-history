@@ -69,6 +69,7 @@ export async function createPerson(
     return { success: false, error: "Failed to create person" };
   }
 
+  // redirect() must be outside try-catch because it throws NEXT_REDIRECT internally
   revalidatePath("/people");
   redirect(`/people/${personId}`);
 }
@@ -133,13 +134,13 @@ export async function deletePerson(id: string): Promise<ActionResult> {
     await prisma.person.delete({
       where: { id },
     });
-
-    revalidatePath("/people");
-    redirect("/people");
   } catch (error) {
     console.error("Failed to delete person:", error);
     return { success: false, error: "Failed to delete person" };
   }
+
+  revalidatePath("/people");
+  redirect("/people");
 }
 
 // ADD RELATIONSHIP
