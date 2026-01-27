@@ -359,14 +359,35 @@ npx tsx scripts/test-resend.ts your-email@example.com
 
 ### 4. Vercel (Hosting)
 1. Connect GitHub repo to Vercel
-2. Add environment variables in Vercel dashboard:
-   - `TURSO_DATABASE_URL` - Your Turso database URL
-   - `TURSO_AUTH_TOKEN` - Your Turso auth token
-   - `NEXTAUTH_URL` - Your production URL (e.g., `https://your-app.vercel.app`)
-   - `NEXTAUTH_SECRET` - Generate with `openssl rand -base64 32`
-   - `RESEND_API_KEY` - Your Resend API key
-   - `EMAIL_FROM` - Your verified sending address
+2. Add environment variables in Vercel dashboard (see scoping table below)
 3. Deploy automatically on push to main
+
+**Environment Variable Scoping:**
+
+Vercel has three environments: Production, Preview (branch/PR deploys), and Development.
+Most variables should be available in all environments, but `NEXTAUTH_URL` is special:
+
+| Variable | Scope | Value | Notes |
+|----------|-------|-------|-------|
+| `TURSO_DATABASE_URL` | All | `libsql://your-db.turso.io` | Same DB for all deploys |
+| `TURSO_AUTH_TOKEN` | All | Your Turso token | Same credentials everywhere |
+| `NEXTAUTH_SECRET` | All | `openssl rand -base64 32` | Must be consistent for sessions |
+| `RESEND_API_KEY` | All | Your Resend key | Same email service |
+| `EMAIL_FROM` | All | `Name <email@domain.com>` | Your verified domain |
+| `NEXTAUTH_URL` | **Production only** | `https://your-app.vercel.app` | See note below |
+
+**Why `NEXTAUTH_URL` is Production-only:**
+- Preview deployments get dynamic URLs (e.g., `app-git-branch-user.vercel.app`)
+- If `NEXTAUTH_URL` is set in Preview, magic link callbacks point to the wrong URL
+- NextAuth v5 automatically uses Vercel's `VERCEL_URL` when `NEXTAUTH_URL` is not set
+- By scoping to Production only, preview deploys auto-detect their correct callback URL
+
+To configure in Vercel: Variable → Edit → Uncheck "Preview" and "Development" → Keep only "Production"
+
+**Required: `trustHost: true` in NextAuth config:**
+For NextAuth to auto-detect the URL from the request's Host header (when `NEXTAUTH_URL`
+is not set), you must enable `trustHost: true` in `src/lib/auth.ts`. Without this,
+NextAuth throws a "Configuration" error on preview deployments.
 
 **Prisma + Vercel Caching Note:**
 Vercel caches `node_modules` between deployments for faster builds. This can cause
