@@ -193,23 +193,30 @@ our-family-history/
 │   │   │   │       ├── page.tsx      # View entry
 │   │   │   │       └── edit/page.tsx # Edit entry
 │   │   │   ├── timeline/page.tsx
-│   │   │   ├── people/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [id]/page.tsx
+│   │   │   ├── people/               # ✅ Implemented
+│   │   │   │   ├── page.tsx          # List all family members
+│   │   │   │   ├── new/page.tsx      # Create new person
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx      # View profile + relationships
+│   │   │   │       └── edit/page.tsx # Edit person
 │   │   │   ├── tree/page.tsx
-│   │   │   └── settings/page.tsx
+│   │   │   └── settings/page.tsx     # ✅ Implemented (profile linking)
 │   │   │
 │   │   └── api/
 │   │       ├── auth/[...nextauth]/route.ts
 │   │       ├── entries/
 │   │       │   ├── route.ts          # GET all, POST new
 │   │       │   └── [id]/route.ts     # GET, PUT, DELETE one
-│   │       ├── people/
-│   │       │   ├── route.ts
-│   │       │   └── [id]/route.ts
+│   │       ├── people/               # ✅ Implemented
+│   │       │   ├── route.ts          # GET people list
+│   │       │   └── unlinked/route.ts # GET unlinked people (for profile linking)
 │   │       ├── comments/route.ts
 │   │       ├── upload/route.ts
 │   │       └── invite/route.ts
+│   │
+│   ├── actions/              # ✅ Server Actions
+│   │   ├── people.ts         # CRUD + relationships
+│   │   └── settings.ts       # Profile linking
 │   │
 │   ├── components/
 │   │   ├── ui/               # Reusable primitives
@@ -231,10 +238,14 @@ our-family-history/
 │   │   │   ├── Timeline.tsx
 │   │   │   ├── TimelineEvent.tsx
 │   │   │   └── TimelineFilters.tsx
-│   │   ├── people/
+│   │   ├── people/               # ✅ Implemented
 │   │   │   ├── PersonCard.tsx
 │   │   │   ├── PersonForm.tsx
-│   │   │   └── PersonSelector.tsx
+│   │   │   ├── RelationshipList.tsx
+│   │   │   ├── AddRelationshipDialog.tsx
+│   │   │   └── DeletePersonButton.tsx
+│   │   ├── settings/             # ✅ Implemented
+│   │   │   └── LinkProfileSection.tsx
 │   │   ├── tree/
 │   │   │   ├── FamilyTree.tsx
 │   │   │   └── TreeNode.tsx
@@ -247,7 +258,8 @@ our-family-history/
 │   │   ├── auth.ts           # NextAuth configuration
 │   │   ├── uploadthing.ts    # Uploadthing config
 │   │   ├── utils.ts          # Helper functions
-│   │   └── validations.ts    # Zod schemas
+│   │   └── validations/      # ✅ Zod schemas
+│   │       └── person.ts     # Person + relationship validation
 │   │
 │   ├── hooks/
 │   │   ├── useEntries.ts
@@ -477,6 +489,18 @@ Family stories often have imprecise dates ("sometime in the 1950s"). The schema 
 - **Person**: Any family member mentioned in stories (alive or deceased)
 - **User**: Someone with app access who can contribute
 - A User can optionally link to their Person record
+
+**User-Person Linking (via Settings):**
+Users link their account to a Person record through `/settings`, not during person creation.
+This was chosen because:
+1. Separation of concerns - creating family members is distinct from account linking
+2. Flexibility - users might want to browse/add people before linking themselves
+3. Prevents confusion - the "Relationship to You" field on Person is redundant once linked
+4. One-to-one integrity - each User can link to at most one Person (enforced by unique constraint)
+
+The linking flow in Settings offers two options:
+- **Create new**: Fill out a simplified Person form (just for yourself)
+- **Link existing**: Select from People not already linked to another User
 
 ### 3. Category System
 Pre-defined categories help with filtering and timeline display:

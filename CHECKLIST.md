@@ -191,30 +191,42 @@
 
 ---
 
-## Phase 7: People Management
+## Phase 7: People Management ✅
 **Goal:** Manage family members who appear in stories
 
-- [ ] Create People API routes
-  - [ ] `src/app/api/people/route.ts`
-  - [ ] `src/app/api/people/[id]/route.ts`
-- [ ] Create people components
-  - [ ] `src/components/people/PersonCard.tsx`
-  - [ ] `src/components/people/PersonForm.tsx`
-  - [ ] `src/components/people/PersonSelector.tsx` (for entry form)
-  - [ ] `src/components/people/PersonList.tsx`
-- [ ] Create people pages
-  - [ ] `src/app/(main)/people/page.tsx` - List all
-  - [ ] `src/app/(main)/people/[id]/page.tsx` - Profile with related entries
-- [ ] Create `src/hooks/usePeople.ts`
-- [ ] Link people to entries in EntryForm
-- [ ] Test people management
+- [x] Create People API routes
+  - [x] `src/app/api/people/route.ts`
+  - [x] `src/app/api/people/unlinked/route.ts` (for profile linking)
+- [x] Create people components
+  - [x] `src/components/people/PersonCard.tsx`
+  - [x] `src/components/people/PersonForm.tsx`
+  - [x] `src/components/people/RelationshipList.tsx`
+  - [x] `src/components/people/AddRelationshipDialog.tsx`
+  - [x] `src/components/people/DeletePersonButton.tsx`
+- [x] Create people pages
+  - [x] `src/app/(main)/people/page.tsx` - List all
+  - [x] `src/app/(main)/people/new/page.tsx` - Create new person
+  - [x] `src/app/(main)/people/[id]/page.tsx` - Profile with relationships
+  - [x] `src/app/(main)/people/[id]/edit/page.tsx` - Edit person
+- [x] Create server actions `src/actions/people.ts`
+- [x] Implement bidirectional relationships (PARENT↔CHILD, SPOUSE↔SPOUSE, SIBLING↔SIBLING)
+- [x] Test people CRUD and relationship management
+- [ ] Link people to entries in EntryForm (Phase 5)
 
 **Files created:**
+- `src/lib/validations/person.ts`
+- `src/actions/people.ts`
 - `src/app/api/people/route.ts`
-- `src/app/api/people/[id]/route.ts`
-- `src/components/people/*.tsx`
-- `src/app/(main)/people/**/*.tsx`
-- `src/hooks/usePeople.ts`
+- `src/app/api/people/unlinked/route.ts`
+- `src/components/people/PersonCard.tsx`
+- `src/components/people/PersonForm.tsx`
+- `src/components/people/RelationshipList.tsx`
+- `src/components/people/AddRelationshipDialog.tsx`
+- `src/components/people/DeletePersonButton.tsx`
+- `src/app/(main)/people/page.tsx`
+- `src/app/(main)/people/new/page.tsx`
+- `src/app/(main)/people/[id]/page.tsx`
+- `src/app/(main)/people/[id]/edit/page.tsx`
 
 ---
 
@@ -309,20 +321,34 @@
 
 ---
 
-## Phase 12: Settings & Admin
+## Phase 12: Settings & Admin (Partially Complete)
 **Goal:** User settings and admin controls
 
-- [ ] Create settings page `src/app/(main)/settings/page.tsx`
-  - [ ] Profile editing
+- [x] Create settings page `src/app/(main)/settings/page.tsx`
+  - [x] **User-Person Profile Linking** ← Key decision: users link to a Person in Settings
+  - [ ] Profile editing (name, avatar)
   - [ ] Notification preferences
   - [ ] Invite family members (for admins)
+- [x] Create profile linking components
+  - [x] `src/components/settings/LinkProfileSection.tsx` - Link/create/unlink profile
+  - [x] `src/actions/settings.ts` - Server actions for profile linking
+- [x] Add Settings link (gear icon) to dashboard header
 - [ ] Create admin user management (for admins)
 - [ ] Add role-based access controls throughout app
 - [ ] Test admin vs member vs viewer permissions
 
+**Decision: User-Person Linking**
+> Users can link their account to a Person record in the family tree via Settings.
+> This establishes "who they are" in the family, enabling relationship-based features.
+> Options: Create new Person profile OR link to existing unlinked Person.
+
 **Files created:**
 - `src/app/(main)/settings/page.tsx`
-- `src/components/settings/*.tsx`
+- `src/components/settings/LinkProfileSection.tsx`
+- `src/actions/settings.ts`
+
+**Files modified:**
+- `src/app/(main)/dashboard/page.tsx` (added Settings icon in header)
 
 ---
 
@@ -385,16 +411,32 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2025-01-25
+**Last Updated:** 2025-01-26
 
-**Current Phase:** 3 - Authentication (Testing)
+**Current Phase:** 7 Complete, Phase 12 Partial
 
-**Notes:**
-- Phase 1 complete: Next.js 16 + TypeScript + Tailwind + all dependencies
-- Phase 2 complete: Turso database with 14 tables, Prisma client configured
-- Phase 3 complete: NextAuth + Resend magic links, login/dashboard pages
-- Ready to test: Run `npm run dev` and try the login flow
-- Next: Test magic link, then build entry system (Phase 5)
+**Completed Phases:**
+- ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
+- ✅ Phase 2: Database Setup - Turso + Prisma with 14 tables
+- ✅ Phase 3: Authentication - NextAuth + Resend magic links
+- ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
+- 🔶 Phase 12: Settings (partial) - User-Person profile linking
+
+**Key Decision Made:**
+> **User-Person Linking via Settings**: Users can link their account to a Person
+> record in the family tree through `/settings`. This enables relationship-aware
+> features and establishes "who you are" in the family.
+
+**What's Working:**
+- Magic link authentication (login → email → dashboard)
+- People management (create, edit, delete, view profiles)
+- Family relationships (add/remove bidirectional PARENT/CHILD/SPOUSE/SIBLING)
+- Settings page with profile linking (create new or link to existing Person)
+
+**Next Steps:**
+- Phase 4: Core Layout & UI (shared navigation, reusable components)
+- Phase 5: Entry System (stories/memories CRUD)
+- Phase 6: Photo Uploads (Uploadthing integration)
 
 ---
 

@@ -1,6 +1,7 @@
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { BookOpen, Users, Clock, TreePine } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, Users, Clock, TreePine, Settings } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -20,6 +21,13 @@ export default async function DashboardPage() {
               <span className="text-sm text-gray-600">
                 {session.user?.email}
               </span>
+              <Link
+                href="/settings"
+                className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </Link>
               <form
                 action={async () => {
                   "use server";
