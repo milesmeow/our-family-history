@@ -495,12 +495,14 @@ Users link their account to a Person record through `/settings`, not during pers
 This was chosen because:
 1. Separation of concerns - creating family members is distinct from account linking
 2. Flexibility - users might want to browse/add people before linking themselves
-3. Prevents confusion - the "Relationship to You" field on Person is redundant once linked
-4. One-to-one integrity - each User can link to at most one Person (enforced by unique constraint)
+3. One-to-one integrity - each User can link to at most one Person (enforced by unique constraint)
 
 The linking flow in Settings offers two options:
 - **Create new**: Fill out a simplified Person form (just for yourself)
 - **Link existing**: Select from People not already linked to another User
+
+**Note:** The `relationship` field on Person (e.g., "Great-grandmother") was removed from the UI
+as it's redundant - relationships are now tracked via `FamilyRelation` and user profile linking.
 
 ### 3. Category System
 Pre-defined categories help with filtering and timeline display:

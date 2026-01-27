@@ -342,6 +342,11 @@
 > This establishes "who they are" in the family, enabling relationship-based features.
 > Options: Create new Person profile OR link to existing unlinked Person.
 
+**Cleanup: Removed "Relationship to You" field**
+> The text field for "Relationship to You" (e.g., "Great-grandmother") was removed from
+> PersonForm and the profile page display. It was redundant since relationships are now
+> tracked via the FamilyRelation system and user profile linking.
+
 **Files created:**
 - `src/app/(main)/settings/page.tsx`
 - `src/components/settings/LinkProfileSection.tsx`

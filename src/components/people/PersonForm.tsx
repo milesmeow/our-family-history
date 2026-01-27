@@ -137,24 +137,6 @@ export function PersonForm({ person }: PersonFormProps) {
         </div>
       </div>
 
-      {/* Relationship */}
-      <div>
-        <label
-          htmlFor="relationship"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Relationship to You
-        </label>
-        <input
-          type="text"
-          id="relationship"
-          name="relationship"
-          defaultValue={person?.relationship ?? ""}
-          placeholder="e.g., Great-grandmother, Uncle, Cousin"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-        />
-      </div>
-
       {/* Bio */}
       <div>
         <label
