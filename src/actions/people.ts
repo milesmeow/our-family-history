@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseDateString } from "@/lib/utils";
 import {
   personFormSchema,
   relationshipSchema,
@@ -59,8 +60,8 @@ export async function createPerson(
     const person = await prisma.person.create({
       data: {
         ...rest,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        deathDate: deathDate ? new Date(deathDate) : null,
+        birthDate: birthDate ? parseDateString(birthDate) : null,
+        deathDate: deathDate ? parseDateString(deathDate) : null,
       },
     });
     personId = person.id;
@@ -109,8 +110,8 @@ export async function updatePerson(
       where: { id },
       data: {
         ...rest,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        deathDate: deathDate ? new Date(deathDate) : null,
+        birthDate: birthDate ? parseDateString(birthDate) : null,
+        deathDate: deathDate ? parseDateString(deathDate) : null,
       },
     });
   } catch (error) {

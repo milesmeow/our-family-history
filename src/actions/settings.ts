@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseDateString } from "@/lib/utils";
 import { personFormSchema } from "@/lib/validations/person";
 import { revalidatePath } from "next/cache";
 
@@ -99,7 +100,7 @@ export async function createAndLinkPerson(
       const person = await tx.person.create({
         data: {
           ...rest,
-          birthDate: birthDate ? new Date(birthDate) : null,
+          birthDate: birthDate ? parseDateString(birthDate) : null,
           deathDate: null,
         },
       });

@@ -139,34 +139,43 @@
 
 ---
 
-## Phase 5: Entry System
+## Phase 5: Entry System ✅
 **Goal:** Full CRUD for family history entries
 
-- [ ] Create Entry API routes
-  - [ ] `src/app/api/entries/route.ts` - GET all, POST new
-  - [ ] `src/app/api/entries/[id]/route.ts` - GET, PUT, DELETE one
-- [ ] Create Zod validation schemas in `src/lib/validations.ts`
-- [ ] Create entry components
-  - [ ] `src/components/entries/EntryCard.tsx`
-  - [ ] `src/components/entries/EntryList.tsx`
-  - [ ] `src/components/entries/EntryForm.tsx`
-  - [ ] `src/components/entries/RichTextEditor.tsx` (use Tiptap or similar)
-- [ ] Create entry pages
-  - [ ] `src/app/(main)/entries/page.tsx` - List with filters
-  - [ ] `src/app/(main)/entries/new/page.tsx` - Create form
-  - [ ] `src/app/(main)/entries/[id]/page.tsx` - View detail
-  - [ ] `src/app/(main)/entries/[id]/edit/page.tsx` - Edit form
-- [ ] Create `src/hooks/useEntries.ts` for data fetching
-- [ ] Implement filtering and sorting
-- [ ] Test entry CRUD operations
+- [x] Create Zod validation schemas in `src/lib/validations/entry.ts`
+- [x] Create server actions `src/actions/entries.ts`
+  - createEntry, updateEntry, deleteEntry, togglePublish
+- [x] Create entry components
+  - [x] `src/components/entries/EntryCard.tsx` - Card for list display
+  - [x] `src/components/entries/EntryForm.tsx` - Create/edit form with useActionState
+  - [x] `src/components/entries/PersonSelector.tsx` - Multi-select people to link
+  - [x] `src/components/entries/DeleteEntryButton.tsx` - Delete with confirmation
+- [x] Create entry pages
+  - [x] `src/app/(main)/entries/page.tsx` - List with category filter
+  - [x] `src/app/(main)/entries/new/page.tsx` - Create form
+  - [x] `src/app/(main)/entries/[id]/page.tsx` - View detail with linked people
+  - [x] `src/app/(main)/entries/[id]/edit/page.tsx` - Edit form
+- [x] Implement category filtering
+- [x] Link people to entries (PersonOnEntry many-to-many)
+- [x] Draft/Published status toggle
+- [x] Test entry CRUD operations
+
+**MVP Notes:**
+- Using textarea for content (rich text editor deferred)
+- Media uploads deferred to Phase 6
+- Tags and comments deferred to later phases
 
 **Files created:**
-- `src/app/api/entries/route.ts`
-- `src/app/api/entries/[id]/route.ts`
-- `src/lib/validations.ts`
-- `src/components/entries/*.tsx`
-- `src/app/(main)/entries/**/*.tsx`
-- `src/hooks/useEntries.ts`
+- `src/lib/validations/entry.ts`
+- `src/actions/entries.ts`
+- `src/components/entries/EntryCard.tsx`
+- `src/components/entries/EntryForm.tsx`
+- `src/components/entries/PersonSelector.tsx`
+- `src/components/entries/DeleteEntryButton.tsx`
+- `src/app/(main)/entries/page.tsx`
+- `src/app/(main)/entries/new/page.tsx`
+- `src/app/(main)/entries/[id]/page.tsx`
+- `src/app/(main)/entries/[id]/edit/page.tsx`
 
 ---
 
@@ -418,30 +427,40 @@ After each phase, verify:
 
 **Last Updated:** 2025-01-26
 
-**Current Phase:** 7 Complete, Phase 12 Partial
+**Current Phase:** 5 Complete, Phase 7 Complete, Phase 12 Partial
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
 - ✅ Phase 2: Database Setup - Turso + Prisma with 14 tables
 - ✅ Phase 3: Authentication - NextAuth + Resend magic links
+- ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - 🔶 Phase 12: Settings (partial) - User-Person profile linking
 
-**Key Decision Made:**
+**Key Decisions Made:**
 > **User-Person Linking via Settings**: Users can link their account to a Person
 > record in the family tree through `/settings`. This enables relationship-aware
 > features and establishes "who you are" in the family.
+
+> **Entry System MVP**: Using textarea for content (rich text editor deferred).
+> Entries support 13 categories, date handling with approximate flag, and
+> linking multiple people to each story.
 
 **What's Working:**
 - Magic link authentication (login → email → dashboard)
 - People management (create, edit, delete, view profiles)
 - Family relationships (add/remove bidirectional PARENT/CHILD/SPOUSE/SIBLING)
 - Settings page with profile linking (create new or link to existing Person)
+- Entry/story management (create, edit, delete, view stories)
+- Category filtering on entries list
+- Linking people to stories (PersonOnEntry many-to-many)
+- Draft/Published status for entries
+- App version footer on all pages
 
 **Next Steps:**
-- Phase 4: Core Layout & UI (shared navigation, reusable components)
-- Phase 5: Entry System (stories/memories CRUD)
 - Phase 6: Photo Uploads (Uploadthing integration)
+- Phase 8: Timeline View (chronological visualization)
+- Phase 4: Core Layout & UI (shared navigation, reusable components)
 
 ---
 
