@@ -7,6 +7,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   debug: process.env.NODE_ENV === "development",
 
+  // Trust the host header on Vercel (required when NEXTAUTH_URL is not set)
+  // This allows preview deployments to auto-detect their URL
+  trustHost: true,
+
   providers: [
     Resend({
       apiKey: process.env.RESEND_API_KEY,
