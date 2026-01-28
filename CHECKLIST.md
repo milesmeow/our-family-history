@@ -239,34 +239,81 @@
 
 ---
 
-## Phase 8: Timeline View
+## Phase 8: Timeline View ✅
 **Goal:** Visual chronological display of family history
 
-- [ ] Install timeline library
-  ```bash
-  npm install vis-timeline vis-data
-  # OR
-  npm install react-chrono
-  ```
-- [ ] Create timeline components
-  - [ ] `src/components/timeline/Timeline.tsx` - Main visualization
-  - [ ] `src/components/timeline/TimelineEvent.tsx` - Individual event
-  - [ ] `src/components/timeline/TimelineFilters.tsx` - Filter controls
-- [ ] Create timeline page `src/app/(main)/timeline/page.tsx`
-- [ ] Create `src/hooks/useTimeline.ts` for data transformation
-- [ ] Implement filtering by:
-  - [ ] Date range
-  - [ ] Category
-  - [ ] Person
-  - [ ] Tags
-- [ ] Add click-to-view-entry functionality
-- [ ] Add zoom and navigation controls
-- [ ] Test timeline with various data
+**Design Decision:** Build custom vertical timeline with Tailwind CSS (no external library).
+Architecture supports future timeline styles (horizontal, year-grouped cards).
+
+### Step 1: Date Utilities
+- [x] Add `formatEventDate()` helper to `src/lib/utils.ts`
+  - Handles date precision (DECADE → "1950s", YEAR → "1952", MONTH → "May 1952", DAY → "May 15, 1952")
+  - Handles approximate dates (`~` prefix)
+- [x] Add `getEventYear()` helper for year grouping
+
+### Step 2: Timeline Page
+- [x] Create `src/app/(main)/timeline/page.tsx`
+  - Server component with data fetching
+  - Query entries ordered by `eventDate ASC`
+  - Filter by URL params: `?category=BIRTH&personId=abc&startDate=1950-01-01&endDate=2000-12-31`
+  - Handle entries without dates (show in "Undated" section)
+  - Only show published entries
+
+### Step 3: Timeline Event Component
+- [x] Create `src/components/timeline/TimelineEvent.tsx`
+  - Event card with category badge (with category-specific colors)
+  - Title (linked to entry detail)
+  - Summary or truncated content
+  - Date with precision-aware formatting
+  - People involved
+  - Connector dot to timeline line (color matches category)
+
+### Step 4: Vertical Timeline Renderer
+- [x] Create `src/components/timeline/VerticalTimeline.tsx`
+  - Central vertical line
+  - Year markers when year changes
+  - Events alternate left/right on desktop
+  - Events stack on right on mobile
+  - Responsive breakpoint at `md:`
+
+### Step 5: Timeline Filters
+- [x] Create `src/components/timeline/TimelineFilters.tsx` (client component)
+  - Category dropdown (13 categories)
+  - Person selector (fetches from `/api/people`)
+  - Date range picker (start/end)
+  - Updates URL params with `useRouter`
+  - Collapsible with filter count badge
+  - Quick-remove filter chips when collapsed
+
+### Step 6: Polish & Edge Cases
+- [x] Empty state when no entries match filters
+- [x] Loading state (Suspense fallback)
+- [x] "Undated" section for entries without eventDate
+- [x] Mobile responsive design
+- [x] Navigation link already exists on dashboard
+
+**Verification Checklist:**
+- [x] Entries display in chronological order (oldest first)
+- [x] Year markers appear when year changes
+- [x] Approximate dates show `~` prefix
+- [x] Category filter works
+- [x] Person filter shows only entries with that person
+- [x] Date range filter works
+- [x] Clicking event goes to entry detail
+- [x] Filters persist in URL (shareable links)
+- [x] Responsive: mobile stacks, desktop alternates
 
 **Files created:**
-- `src/components/timeline/*.tsx`
+- `src/lib/utils.ts` (modified - added formatEventDate, getEventYear)
 - `src/app/(main)/timeline/page.tsx`
-- `src/hooks/useTimeline.ts`
+- `src/components/timeline/TimelineFilters.tsx`
+- `src/components/timeline/VerticalTimeline.tsx`
+- `src/components/timeline/TimelineEvent.tsx`
+
+**Architecture Notes:**
+> The timeline uses a pluggable renderer pattern. `VerticalTimeline` can be swapped
+> with `HorizontalTimeline` or `YearGroupedCards` in the future without changing
+> the data fetching or filter logic in the page component.
 
 ---
 
@@ -464,7 +511,7 @@ After each phase, verify:
 
 **Last Updated:** 2025-01-27
 
-**Current Phase:** 5 Complete, 7 Complete, 12 Partial, 14 In Progress
+**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Partial, 14 In Progress
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
@@ -472,6 +519,7 @@ After each phase, verify:
 - ✅ Phase 3: Authentication - NextAuth + Resend magic links
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
+- ✅ Phase 8: Timeline View - Chronological display with filters
 - 🔶 Phase 12: Settings (partial) - User-Person profile linking
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 
@@ -488,6 +536,10 @@ After each phase, verify:
 > to prevent timezone shift issues. HTML date inputs ("1979-01-15") are parsed
 > at noon UTC to display correctly in all timezones.
 
+> **Timeline Architecture**: The timeline uses a pluggable renderer pattern.
+> `VerticalTimeline` can be swapped with `HorizontalTimeline` or `YearGroupedCards`
+> in the future without changing the data fetching or filter logic.
+
 **What's Working:**
 - Magic link authentication (login → email → dashboard)
 - People management (create, edit, delete, view profiles)
@@ -500,11 +552,18 @@ After each phase, verify:
 - App version footer on all pages
 - Timezone-safe date handling
 - Route protection via `proxy.ts` (Node.js runtime)
+- **Timeline view with:**
+  - Vertical timeline with year markers
+  - Category, person, and date range filtering
+  - URL-based filters (shareable links)
+  - Responsive design (alternating on desktop, stacked on mobile)
+  - Category-specific color coding
+  - Undated entries section
 
 **Next Steps:**
 - Complete Phase 14: Configure Vercel environment variables, deploy
 - Phase 6: Photo Uploads (Uploadthing integration)
-- Phase 8: Timeline View (chronological visualization)
+- Phase 9: Family Tree visualization
 
 ---
 
