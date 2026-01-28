@@ -389,6 +389,27 @@ For NextAuth to auto-detect the URL from the request's Host header (when `NEXTAU
 is not set), you must enable `trustHost: true` in `src/lib/auth.ts`. Without this,
 NextAuth throws a "Configuration" error on preview deployments.
 
+**Vercel Deployment Protection & Magic Links:**
+Vercel's "Deployment Protection" feature can block magic link authentication on preview
+deployments. When enabled, Vercel requires visitors to authenticate via Vercel SSO before
+accessing the preview URL. This intercepts the magic link callback URL, preventing
+NextAuth from receiving the authentication token.
+
+Symptoms:
+- User clicks magic link → briefly sees "Authenticating" → redirected to `vercel.com/login`
+- The callback URL never reaches your app
+
+Solutions:
+1. **Disable for previews**: Vercel Dashboard → Settings → Deployment Protection →
+   Turn off "Standard Protection" for Preview deployments
+2. **Test on production**: Magic links work normally on production URLs since they're
+   typically not protected
+3. **Bypass for auth routes**: Some Vercel plans allow bypassing protection for specific
+   paths (e.g., `/api/auth/*`), but this requires configuration
+
+For development/testing, Option 1 or 2 is recommended. For a family app with limited
+users, disabling preview protection is usually fine.
+
 **Prisma + Vercel Caching Note:**
 Vercel caches `node_modules` between deployments for faster builds. This can cause
 issues with Prisma because the generated client lives in `node_modules/.prisma/client`.
