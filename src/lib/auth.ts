@@ -30,6 +30,47 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Resend({
       apiKey: process.env.RESEND_API_KEY,
       from: process.env.EMAIL_FROM,
+      // Custom email template to improve deliverability
+      async sendVerificationRequest({ identifier: email, url, provider }) {
+        const { Resend: ResendClient } = await import("resend");
+        const resend = new ResendClient(provider.apiKey);
+
+        const { error } = await resend.emails.send({
+          from: provider.from!,
+          to: email,
+          subject: "Your Family History sign-in link",
+          html: `
+            <!DOCTYPE html>
+            <html>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 24px;">
+                  <h1 style="color: #92400e; margin: 0 0 8px; font-size: 28px;">Family History</h1>
+                  <p style="color: #b45309; margin: 0; font-size: 14px;">Preserving memories for generations</p>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
+                  <h2 style="color: #1f2937; margin: 0 0 16px; font-size: 20px;">Sign in to Family History</h2>
+                  <p style="margin: 0 0 24px;">Click the button below to sign in. This link expires in 24 hours.</p>
+                  <div style="text-align: center; margin: 32px 0;">
+                    <a href="${url}" style="display: inline-block; background-color: #d97706; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                      Sign In
+                    </a>
+                  </div>
+                  <p style="margin: 0 0 8px; font-size: 14px; color: #6b7280;">Or copy and paste this link:</p>
+                  <p style="margin: 0; font-size: 14px; word-break: break-all; color: #d97706;">${url}</p>
+                </div>
+                <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 24px;">
+                  If you didn't request this email, you can safely ignore it.
+                </p>
+              </body>
+            </html>
+          `,
+          text: `Sign in to Family History\n\nClick this link to sign in:\n${url}\n\nThis link expires in 24 hours.\n\nIf you didn't request this email, you can safely ignore it.`,
+        });
+
+        if (error) {
+          throw new Error(`Failed to send verification email: ${error.message}`);
+        }
+      },
     }),
   ],
 

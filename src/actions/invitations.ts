@@ -37,11 +37,22 @@ function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
+/**
+ * Get the base URL for invitation links.
+ *
+ * Priority:
+ * 1. NEXTAUTH_URL - explicitly configured (production)
+ * 2. VERCEL_URL - auto-set by Vercel (preview deployments)
+ * 3. localhost - local development fallback
+ */
 function getBaseUrl(): string {
-  // Use NEXTAUTH_URL if set, otherwise construct from headers
-  return process.env.NEXTAUTH_URL || process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
 }
 
 /**
