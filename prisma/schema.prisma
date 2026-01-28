@@ -1,0 +1,252 @@
+// Family History App - Database Schema
+// Using Turso (libSQL) as the database provider
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ============================================
+// USER & AUTH MODELS
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  nickname      String?   // Family nickname (e.g., "Grandma Rose")
+  avatarUrl     String?
+  role          String    @default("MEMBER") // ADMIN, MEMBER, VIEWER
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  entries       Entry[]
+  comments      Comment[]
+  person        Person?   @relation(fields: [personId], references: [id])
+  personId      String?   @unique
+
+  // NextAuth relations
+  accounts      Account[]
+  sessions      Session[]
+
+  // Invitation tracking
+  invitedBy     User?     @relation("InvitedBy", fields: [invitedById], references: [id])
+  invitedById   String?
+  invitations   User[]    @relation("InvitedBy")
+  sentInvites   Invitation[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  token       String    @unique
+  role        String    @default("MEMBER") // ADMIN, MEMBER, VIEWER
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  invitedBy   User      @relation(fields: [invitedById], references: [id])
+  invitedById String
+}
+
+// ============================================
+// CORE CONTENT MODELS
+// ============================================
+
+model Entry {
+  id              String    @id @default(cuid())
+
+  // Content
+  title           String
+  content         String    // Rich text/markdown
+  summary         String?   // Short excerpt for timeline view
+
+  // Temporal Data
+  eventDate       DateTime? // When the event happened
+  eventDateEnd    DateTime? // For events spanning time periods
+  dateApproximate Boolean   @default(false) // "Around 1952"
+  datePrecision   String    @default("DAY") // DECADE, YEAR, MONTH, DAY
+  era             String?   // Optional era label: "WWII", "Immigration"
+
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  publishedAt     DateTime? // null = draft
+
+  // Categorization
+  category        String    @default("STORY") // STORY, BIRTH, DEATH, WEDDING, etc.
+
+  // Location
+  location        String?   // Free text location
+  locationLat     Float?    // For future map features
+  locationLng     Float?
+
+  // Relations
+  author          User      @relation(fields: [authorId], references: [id])
+  authorId        String
+
+  peopleInvolved  PersonOnEntry[]
+  media           Media[]
+  comments        Comment[]
+  tags            TagOnEntry[]
+}
+
+model Person {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  maidenName    String?
+  nickname      String?   // "Grandpa Joe"
+  birthDate     DateTime?
+  deathDate     DateTime?
+  relationship  String?   // "Great-grandmother", "Uncle"
+  bio           String?
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  entries       PersonOnEntry[]
+  mediaTagged   PersonOnMedia[]
+  user          User?     // Link to User if this person has an account
+
+  // Family tree relations
+  relationsFrom FamilyRelation[] @relation("FromPerson")
+  relationsTo   FamilyRelation[] @relation("ToPerson")
+}
+
+// Many-to-many: Person <-> Entry
+model PersonOnEntry {
+  id        String   @id @default(cuid())
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId   String
+  role      String?  // Optional role in the story: "subject", "mentioned"
+  createdAt DateTime @default(now())
+
+  @@unique([personId, entryId])
+}
+
+// ============================================
+// FAMILY TREE
+// ============================================
+
+model FamilyRelation {
+  id              String   @id @default(cuid())
+  fromPerson      Person   @relation("FromPerson", fields: [fromPersonId], references: [id], onDelete: Cascade)
+  fromPersonId    String
+  toPerson        Person   @relation("ToPerson", fields: [toPersonId], references: [id], onDelete: Cascade)
+  toPersonId      String
+  relationType    String   // PARENT, CHILD, SPOUSE, SIBLING
+  createdAt       DateTime @default(now())
+
+  @@unique([fromPersonId, toPersonId, relationType])
+}
+
+// ============================================
+// MEDIA
+// ============================================
+
+model Media {
+  id          String    @id @default(cuid())
+  url         String
+  type        String    @default("IMAGE") // IMAGE, VIDEO, AUDIO, DOCUMENT
+  filename    String?
+  caption     String?
+  altText     String?
+  dateTaken   DateTime?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  entry       Entry     @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId     String
+  peopleTagged PersonOnMedia[]
+}
+
+// Many-to-many: Person <-> Media
+model PersonOnMedia {
+  id        String   @id @default(cuid())
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  mediaId   String
+  createdAt DateTime @default(now())
+
+  @@unique([personId, mediaId])
+}
+
+// ============================================
+// TAGS & COMMENTS
+// ============================================
+
+model Tag {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  createdAt DateTime     @default(now())
+  entries   TagOnEntry[]
+}
+
+// Many-to-many: Tag <-> Entry
+model TagOnEntry {
+  id        String   @id @default(cuid())
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId     String
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId   String
+  createdAt DateTime @default(now())
+
+  @@unique([tagId, entryId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId   String
+}
