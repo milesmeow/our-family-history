@@ -313,10 +313,44 @@ UPLOADTHING_APP_ID="your-app-id"
 4. Copy URL and token to `.env.local`
 
 ### 2. Resend (Email)
+
+**Local Development:**
 1. Sign up at https://resend.com
 2. Create API key in dashboard
-3. (Optional) Add custom domain for branded emails
-4. Copy API key to `.env.local`
+3. Copy API key to `.env.local`
+4. Use `EMAIL_FROM="Family History <onboarding@resend.dev>"` for testing
+   - Note: The test domain only sends to your Resend-registered email address
+
+**Production Deployment (Required for multiple users):**
+
+To send magic link emails to other family members, you must verify a custom domain:
+
+1. Go to https://resend.com/domains → **Add Domain**
+2. Enter a subdomain (recommended): `mail.yourdomain.com` or `contact.yourdomain.com`
+   - Using a subdomain keeps transactional emails separate from your personal email
+3. Resend will show you DNS records to add. Typically:
+   | Type | Name | Purpose |
+   |------|------|---------|
+   | TXT | `resend._domainkey.subdomain` | DKIM (email signing) |
+   | MX | `send.subdomain` | Bounce handling |
+   | TXT | `send.subdomain` | SPF (sender authorization) |
+   | TXT | `_dmarc.subdomain` | DMARC policy (optional) |
+4. Add these records in your DNS provider (Squarespace, Cloudflare, etc.)
+5. Return to Resend and click **Verify DNS**
+   - DNS propagation can take 5 minutes to 48 hours
+6. Once verified, update `EMAIL_FROM` in Vercel to use your domain:
+   ```
+   EMAIL_FROM="Family History <noreply@mail.yourdomain.com>"
+   ```
+
+**Testing Your Setup:**
+```bash
+# Test Resend API key validity
+npx tsx scripts/test-resend.ts
+
+# Send a test email (to your registered email only with test domain)
+npx tsx scripts/test-resend.ts your-email@example.com
+```
 
 ### 3. Uploadthing (File Storage)
 1. Sign up at https://uploadthing.com
@@ -325,8 +359,67 @@ UPLOADTHING_APP_ID="your-app-id"
 
 ### 4. Vercel (Hosting)
 1. Connect GitHub repo to Vercel
-2. Add environment variables in Vercel dashboard
+2. Add environment variables in Vercel dashboard (see scoping table below)
 3. Deploy automatically on push to main
+
+**Environment Variable Scoping:**
+
+Vercel has three environments: Production, Preview (branch/PR deploys), and Development.
+Most variables should be available in all environments, but `NEXTAUTH_URL` is special:
+
+| Variable | Scope | Value | Notes |
+|----------|-------|-------|-------|
+| `TURSO_DATABASE_URL` | All | `libsql://your-db.turso.io` | Same DB for all deploys |
+| `TURSO_AUTH_TOKEN` | All | Your Turso token | Same credentials everywhere |
+| `NEXTAUTH_SECRET` | All | `openssl rand -base64 32` | Must be consistent for sessions |
+| `RESEND_API_KEY` | All | Your Resend key | Same email service |
+| `EMAIL_FROM` | All | `Name <email@domain.com>` | Your verified domain |
+| `NEXTAUTH_URL` | **Production only** | `https://your-app.vercel.app` | See note below |
+
+**Why `NEXTAUTH_URL` is Production-only:**
+- Preview deployments get dynamic URLs (e.g., `app-git-branch-user.vercel.app`)
+- If `NEXTAUTH_URL` is set in Preview, magic link callbacks point to the wrong URL
+- NextAuth v5 automatically uses Vercel's `VERCEL_URL` when `NEXTAUTH_URL` is not set
+- By scoping to Production only, preview deploys auto-detect their correct callback URL
+
+To configure in Vercel: Variable → Edit → Uncheck "Preview" and "Development" → Keep only "Production"
+
+**Required: `trustHost: true` in NextAuth config:**
+For NextAuth to auto-detect the URL from the request's Host header (when `NEXTAUTH_URL`
+is not set), you must enable `trustHost: true` in `src/lib/auth.ts`. Without this,
+NextAuth throws a "Configuration" error on preview deployments.
+
+**Vercel Deployment Protection & Magic Links:**
+Vercel's "Deployment Protection" feature can block magic link authentication on preview
+deployments. When enabled, Vercel requires visitors to authenticate via Vercel SSO before
+accessing the preview URL. This intercepts the magic link callback URL, preventing
+NextAuth from receiving the authentication token.
+
+Symptoms:
+- User clicks magic link → briefly sees "Authenticating" → redirected to `vercel.com/login`
+- The callback URL never reaches your app
+
+Solutions:
+1. **Disable for previews**: Vercel Dashboard → Settings → Deployment Protection →
+   Turn off "Standard Protection" for Preview deployments
+2. **Test on production**: Magic links work normally on production URLs since they're
+   typically not protected
+3. **Bypass for auth routes**: Some Vercel plans allow bypassing protection for specific
+   paths (e.g., `/api/auth/*`), but this requires configuration
+
+For development/testing, Option 1 or 2 is recommended. For a family app with limited
+users, disabling preview protection is usually fine.
+
+**Prisma + Vercel Caching Note:**
+Vercel caches `node_modules` between deployments for faster builds. This can cause
+issues with Prisma because the generated client lives in `node_modules/.prisma/client`.
+To ensure the client is always properly generated, we use a `postinstall` script
+instead of generating in the `build` script:
+```json
+"postinstall": "prisma generate",
+"build": "next build"
+```
+This runs `prisma generate` right after `npm install`, before Vercel caches the modules.
 
 ---
 
