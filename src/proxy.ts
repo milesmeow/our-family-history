@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
+  const isInvitePage = req.nextUrl.pathname.startsWith("/invite");
   const isPublicPage = req.nextUrl.pathname === "/";
   const isApiAuth = req.nextUrl.pathname.startsWith("/api/auth");
 
@@ -17,8 +18,9 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
-  // Allow public pages and auth pages
-  if (isPublicPage || isAuthPage) {
+  // Allow public pages, auth pages, and invite pages
+  // Invite pages must be public since invitees aren't logged in yet
+  if (isPublicPage || isAuthPage || isInvitePage) {
     return NextResponse.next();
   }
 

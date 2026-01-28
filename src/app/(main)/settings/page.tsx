@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Settings } from "lucide-react";
 import { LinkProfileSection } from "@/components/settings/LinkProfileSection";
+import { InviteFamilySection, type InvitationWithStatus } from "@/components/settings/InviteFamilySection";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -22,6 +23,35 @@ export default async function SettingsPage() {
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Fetch invitations if user is admin
+  let initialInvitations: InvitationWithStatus[] = [];
+  if (user.role === "ADMIN") {
+    const invitations = await prisma.invitation.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        invitedBy: {
+          select: { name: true, email: true },
+        },
+      },
+    });
+
+    const now = new Date();
+    initialInvitations = invitations.map((inv) => ({
+      id: inv.id,
+      email: inv.email,
+      role: inv.role,
+      createdAt: inv.createdAt,
+      expiresAt: inv.expiresAt,
+      usedAt: inv.usedAt,
+      invitedBy: inv.invitedBy,
+      status: inv.usedAt
+        ? ("accepted" as const)
+        : inv.expiresAt < now
+          ? ("expired" as const)
+          : ("pending" as const),
+    }));
   }
 
   return (
@@ -71,6 +101,13 @@ export default async function SettingsPage() {
         <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <LinkProfileSection linkedPerson={user.person} />
         </section>
+
+        {/* Invite Family Members (Admin only) */}
+        {user.role === "ADMIN" && (
+          <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+            <InviteFamilySection initialInvitations={initialInvitations} />
+          </section>
+        )}
       </main>
     </div>
   );
