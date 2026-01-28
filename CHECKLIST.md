@@ -86,7 +86,15 @@
 - [x] Create SessionProvider for client components
 - [x] Create landing page with sign-in CTA
 - [x] Create dashboard page for authenticated users
-- [ ] Create invitation system (can add later)
+- [x] Create invitation system (email gating)
+  - [x] signIn callback gates magic links to approved emails only
+  - [x] createUser event consumes invitation and sets role
+  - [x] Not-approved rejection page
+  - [x] Invitation validation schema
+  - [x] Server actions (create, resend, revoke)
+  - [x] Invitation email template
+  - [x] Invite token landing page
+  - [x] Admin UI in settings page
 - [ ] Test magic link flow end-to-end ⏳
 
 **Files created:**
@@ -95,10 +103,16 @@
 - `src/app/(auth)/login/page.tsx`
 - `src/app/(auth)/login/check-email/page.tsx`
 - `src/app/(auth)/login/error/page.tsx`
+- `src/app/(auth)/login/not-approved/page.tsx` ← Email gating rejection page
+- `src/app/(auth)/invite/[token]/page.tsx` ← Invitation landing page
 - `src/middleware.ts`
 - `src/components/providers/SessionProvider.tsx`
 - `src/app/page.tsx` (updated)
 - `src/app/(main)/dashboard/page.tsx`
+- `src/lib/validations/invitation.ts` ← Invitation form validation
+- `src/lib/email/invitation.ts` ← Invitation email template
+- `src/actions/invitations.ts` ← Invitation CRUD actions
+- `src/components/settings/InviteFamilySection.tsx` ← Admin invitation UI
 
 ---
 
@@ -377,17 +391,24 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 
 ---
 
-## Phase 12: Settings & Admin (Partially Complete)
+## Phase 12: Settings & Admin (Mostly Complete)
 **Goal:** User settings and admin controls
 
 - [x] Create settings page `src/app/(main)/settings/page.tsx`
   - [x] **User-Person Profile Linking** ← Key decision: users link to a Person in Settings
   - [ ] Profile editing (name, avatar)
   - [ ] Notification preferences
-  - [ ] Invite family members (for admins)
+  - [x] **Invite family members (for admins)** ✅ Email gating system
 - [x] Create profile linking components
   - [x] `src/components/settings/LinkProfileSection.tsx` - Link/create/unlink profile
   - [x] `src/actions/settings.ts` - Server actions for profile linking
+- [x] **Create invitation system (email gating)**
+  - [x] `src/components/settings/InviteFamilySection.tsx` - Admin invitation management UI
+  - [x] `src/actions/invitations.ts` - Create/resend/revoke invitations
+  - [x] `src/lib/email/invitation.ts` - Invitation email template
+  - [x] `src/lib/validations/invitation.ts` - Zod validation schema
+  - [x] `src/app/(auth)/invite/[token]/page.tsx` - Invitation landing page
+  - [x] `src/app/(auth)/login/not-approved/page.tsx` - Rejection page for unapproved emails
 - [x] Add Settings link (gear icon) to dashboard header
 - [ ] Create admin user management (for admins)
 - [ ] Add role-based access controls throughout app
@@ -398,6 +419,15 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 > This establishes "who they are" in the family, enabling relationship-based features.
 > Options: Create new Person profile OR link to existing unlinked Person.
 
+**Decision: Email Gating (Invite-Only Access)**
+> The app is invite-only to protect family privacy. An email is "approved" if:
+> 1. It already exists as a User in the database, OR
+> 2. It has a valid (non-expired, unused) Invitation record, OR
+> 3. The database has zero users (first user bootstrap)
+>
+> Gating happens in the NextAuth `signIn` callback BEFORE the magic link is sent.
+> This prevents strangers from even receiving authentication emails.
+
 **Cleanup: Removed "Relationship to You" field**
 > The text field for "Relationship to You" (e.g., "Great-grandmother") was removed from
 > PersonForm and the profile page display. It was redundant since relationships are now
@@ -406,10 +436,17 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 **Files created:**
 - `src/app/(main)/settings/page.tsx`
 - `src/components/settings/LinkProfileSection.tsx`
+- `src/components/settings/InviteFamilySection.tsx`
 - `src/actions/settings.ts`
+- `src/actions/invitations.ts`
+- `src/lib/validations/invitation.ts`
+- `src/lib/email/invitation.ts`
+- `src/app/(auth)/login/not-approved/page.tsx`
+- `src/app/(auth)/invite/[token]/page.tsx`
 
 **Files modified:**
 - `src/app/(main)/dashboard/page.tsx` (added Settings icon in header)
+- `src/lib/auth.ts` (added signIn callback + updated createUser event)
 
 ---
 
@@ -509,24 +546,29 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2025-01-27
+**Last Updated:** 2025-01-28
 
-**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Partial, 14 In Progress
+**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
 - ✅ Phase 2: Database Setup - Turso + Prisma with 14 tables
-- ✅ Phase 3: Authentication - NextAuth + Resend magic links
+- ✅ Phase 3: Authentication - NextAuth + Resend magic links + Email Gating
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - ✅ Phase 8: Timeline View - Chronological display with filters
-- 🔶 Phase 12: Settings (partial) - User-Person profile linking
+- 🔶 Phase 12: Settings (mostly complete) - User-Person profile linking + Invitation system
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 
 **Key Decisions Made:**
 > **User-Person Linking via Settings**: Users can link their account to a Person
 > record in the family tree through `/settings`. This enables relationship-aware
 > features and establishes "who you are" in the family.
+
+> **Email Gating (Invite-Only Access)**: The app is private and invite-only.
+> Magic links are only sent to approved emails (existing users, valid invitations,
+> or first-user bootstrap). Unapproved emails see a friendly rejection page.
+> This protects family privacy by preventing strangers from accessing the app.
 
 > **Entry System MVP**: Using textarea for content (rich text editor deferred).
 > Entries support 13 categories, date handling with approximate flag, and
@@ -542,6 +584,11 @@ After each phase, verify:
 
 **What's Working:**
 - Magic link authentication (login → email → dashboard)
+- **Email gating (invite-only access)**
+  - Unapproved emails redirected to friendly rejection page
+  - Admins can send/resend/revoke invitations from Settings
+  - Invitation links validate token and guide user through sign-in
+  - First user automatically becomes admin (bootstrap flow)
 - People management (create, edit, delete, view profiles)
 - Family relationships (add/remove bidirectional PARENT/CHILD/SPOUSE/SIBLING)
 - Settings page with profile linking (create new or link to existing Person)
