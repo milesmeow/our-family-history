@@ -2,9 +2,13 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  // Pre-fill email from query parameter (used by invite flow)
+  const initialEmail = searchParams.get("email") || "";
+  const [email, setEmail] = useState(initialEmail);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +96,7 @@ export default function LoginPage() {
 
           {/* Info */}
           <p className="mt-6 text-center text-sm text-gray-500">
-            We'll send you a magic link to sign in. No password needed!
+            We&apos;ll send you a magic link to sign in. No password needed!
           </p>
         </div>
 

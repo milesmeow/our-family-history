@@ -180,8 +180,12 @@ our-family-history/
 │   │   ├── globals.css       # Global styles
 │   │   │
 │   │   ├── (auth)/           # Public auth routes
-│   │   │   ├── login/page.tsx
-│   │   │   └── invite/[token]/page.tsx
+│   │   │   ├── login/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── check-email/page.tsx
+│   │   │   │   ├── error/page.tsx
+│   │   │   │   └── not-approved/page.tsx  # ✅ Email gating rejection
+│   │   │   └── invite/[token]/page.tsx    # ✅ Invitation landing page
 │   │   │
 │   │   ├── (main)/           # Protected routes
 │   │   │   ├── layout.tsx    # App shell with nav
@@ -217,7 +221,8 @@ our-family-history/
 │   ├── actions/              # ✅ Server Actions
 │   │   ├── entries.ts        # Entry CRUD + people linking
 │   │   ├── people.ts         # CRUD + relationships
-│   │   └── settings.ts       # Profile linking
+│   │   ├── settings.ts       # Profile linking
+│   │   └── invitations.ts    # ✅ Invitation CRUD (email gating)
 │   │
 │   ├── components/
 │   │   ├── ui/               # Reusable primitives
@@ -244,7 +249,8 @@ our-family-history/
 │   │   │   ├── AddRelationshipDialog.tsx
 │   │   │   └── DeletePersonButton.tsx
 │   │   ├── settings/             # ✅ Implemented
-│   │   │   └── LinkProfileSection.tsx
+│   │   │   ├── LinkProfileSection.tsx
+│   │   │   └── InviteFamilySection.tsx  # ✅ Admin invitation management
 │   │   ├── tree/
 │   │   │   ├── FamilyTree.tsx
 │   │   │   └── TreeNode.tsx
@@ -254,12 +260,15 @@ our-family-history/
 │   │
 │   ├── lib/
 │   │   ├── prisma.ts         # Database client singleton
-│   │   ├── auth.ts           # NextAuth configuration
+│   │   ├── auth.ts           # NextAuth configuration (+ email gating)
 │   │   ├── uploadthing.ts    # Uploadthing config
 │   │   ├── utils.ts          # Helper functions (parseDateString for timezone-safe dates)
+│   │   ├── email/            # ✅ Email templates
+│   │   │   └── invitation.ts # Invitation email using Resend
 │   │   └── validations/      # ✅ Zod schemas
 │   │       ├── person.ts     # Person + relationship validation
-│   │       └── entry.ts      # Entry validation + category constants
+│   │       ├── entry.ts      # Entry validation + category constants
+│   │       └── invitation.ts # ✅ Invitation form validation
 │   │
 │   ├── hooks/
 │   │   ├── useEntries.ts
@@ -617,6 +626,35 @@ Next.js 16 deprecates `middleware.ts` in favor of `proxy.ts`. We migrated for tw
 2. **Node.js Runtime**: `proxy.ts` runs on Node.js runtime with no size restrictions, solving the deployment blocker.
 
 The functionality is identical - route protection, auth checks, and redirects - but the runtime changed from Edge to Node.js.
+
+### 6. Email Gating (Invite-Only Access)
+The app implements invite-only access to protect family privacy. This is enforced at the authentication layer:
+
+**How it works:**
+- The NextAuth `signIn` callback intercepts magic link requests BEFORE emails are sent
+- An email is "approved" if it matches one of three criteria:
+  1. Already exists as a User in the database
+  2. Has a valid (non-expired, unused) Invitation record
+  3. Database has zero users (first-user bootstrap)
+- Unapproved emails are redirected to `/login/not-approved` with a friendly message
+
+**Why gate at signIn instead of after?**
+- **Security**: Prevents strangers from receiving any authentication emails
+- **UX**: Users immediately know if they need an invitation (no waiting for email)
+- **Privacy**: Email addresses aren't stored unless approved
+
+**Invitation lifecycle:**
+1. Admin creates invitation via Settings → email sent with unique token
+2. Invitee clicks link → lands on `/invite/[token]` → validates token
+3. Invitee proceeds to login → email pre-filled → magic link sent
+4. On first login, `createUser` event consumes invitation and sets role
+5. Invitation marked as "used" (cannot be reused)
+
+**Edge cases handled:**
+- First user bootstrap (empty database = anyone can sign up, becomes admin)
+- Expired invitations (7-day default, can be resent)
+- Duplicate invitations (prevented, show "resend" option instead)
+- Already-registered emails (error: "This email is already registered")
 
 ---
 
