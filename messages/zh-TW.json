@@ -151,7 +151,8 @@
     "card": {
       "by": "作者",
       "readMore": "閱讀更多",
-      "approximate": "約"
+      "approximate": "約",
+      "unknownAuthor": "未知作者"
     }
   },
   "people": {

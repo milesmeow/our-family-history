@@ -35,8 +35,8 @@ export default async function EditEntryPage({ params }: PageProps) {
 
   if (!entry) notFound();
 
-  // Check if user is the author
-  if (entry.authorId !== session.user?.id) {
+  // Check if user is the author (orphaned entries with no author cannot be edited)
+  if (!entry.authorId || entry.authorId !== session.user?.id) {
     redirect(`/entries/${id}`);
   }
 

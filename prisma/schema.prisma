@@ -34,10 +34,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  // Invitation tracking
-  invitedBy     User?     @relation("InvitedBy", fields: [invitedById], references: [id])
-  invitedById   String?
-  invitations   User[]    @relation("InvitedBy")
+  // Invitations sent by this user
   sentInvites   Invitation[]
 }
 
@@ -85,8 +82,9 @@ model Invitation {
   usedAt      DateTime?
   createdAt   DateTime  @default(now())
 
-  invitedBy   User      @relation(fields: [invitedById], references: [id])
-  invitedById String
+  // Nullable to preserve invitation records when inviter is deleted
+  invitedBy   User?     @relation(fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedById String?
 }
 
 // ============================================
@@ -121,9 +119,9 @@ model Entry {
   locationLat     Float?    // For future map features
   locationLng     Float?
 
-  // Relations
-  author          User      @relation(fields: [authorId], references: [id])
-  authorId        String
+  // Relations (nullable to preserve content when user is deleted)
+  author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId        String?
 
   peopleInvolved  PersonOnEntry[]
   media           Media[]
@@ -245,8 +243,9 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
+  // Nullable to preserve comments when user is deleted
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId  String?
   entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
   entryId   String
 }
