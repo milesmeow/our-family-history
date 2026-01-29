@@ -151,7 +151,8 @@
     "card": {
       "by": "by",
       "readMore": "Read more",
-      "approximate": "circa"
+      "approximate": "circa",
+      "unknownAuthor": "Unknown Author"
     }
   },
   "people": {

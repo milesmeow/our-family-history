@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Settings } from "lucide-react";
 import { LinkProfileSection } from "@/components/settings/LinkProfileSection";
 import { InviteFamilySection, type InvitationWithStatus } from "@/components/settings/InviteFamilySection";
+import { ManageMembersSection, type UserForManagement } from "@/components/settings/ManageMembersSection";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
 
 export default async function SettingsPage() {
@@ -30,9 +31,12 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
-  // Fetch invitations if user is admin
+  // Fetch invitations and users if user is admin
   let initialInvitations: InvitationWithStatus[] = [];
+  let allUsers: UserForManagement[] = [];
+
   if (user.role === "ADMIN") {
+    // Fetch invitations
     const invitations = await prisma.invitation.findMany({
       orderBy: { createdAt: "desc" },
       include: {
@@ -57,6 +61,23 @@ export default async function SettingsPage() {
           ? ("expired" as const)
           : ("pending" as const),
     }));
+
+    // Fetch all users for member management
+    const users = await prisma.user.findMany({
+      orderBy: [
+        { role: "asc" }, // ADMINs first
+        { createdAt: "asc" },
+      ],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    allUsers = users;
   }
 
   return (
@@ -115,8 +136,15 @@ export default async function SettingsPage() {
 
         {/* Invite Family Members (Admin only) */}
         {user.role === "ADMIN" && (
-          <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <InviteFamilySection initialInvitations={initialInvitations} />
+          </section>
+        )}
+
+        {/* Manage Members (Admin only) */}
+        {user.role === "ADMIN" && (
+          <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <ManageMembersSection users={allUsers} currentUserId={session.user.id} />
           </section>
         )}
       </main>

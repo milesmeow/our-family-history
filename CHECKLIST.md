@@ -410,7 +410,12 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
   - [x] `src/app/(auth)/invite/[token]/page.tsx` - Invitation landing page
   - [x] `src/app/(auth)/login/not-approved/page.tsx` - Rejection page for unapproved emails
 - [x] Add Settings link (gear icon) to dashboard header
-- [ ] Create admin user management (for admins)
+- [x] Create admin user management (for admins)
+  - [x] `src/actions/users.ts` - deleteUser action (admin-only)
+  - [x] `src/components/settings/ManageMembersSection.tsx` - User list with delete
+  - [x] Last admin protection (cannot delete sole admin)
+  - [x] Person profile unlinking before deletion (preserves family tree)
+  - [x] Content preservation (entries/comments show "Unknown Author")
 - [ ] Add role-based access controls throughout app
 - [ ] Test admin vs member vs viewer permissions
 
@@ -428,6 +433,20 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 > Gating happens in the NextAuth `signIn` callback BEFORE the magic link is sent.
 > This prevents strangers from even receiving authentication emails.
 
+**Decision: User Deletion (Content Preservation)**
+> When a user is deleted, their entries and comments are preserved to maintain family
+> history. The `authorId` field is set to NULL (via Prisma's `onDelete: SetNull`),
+> and the UI displays "Unknown Author" for orphaned content. The user's Person profile
+> (if linked) is unlinked but not deleted, keeping them in the family tree.
+> Only admins can delete users, and the last admin cannot be deleted.
+
+**Cleanup: Removed User.invitedById field**
+> The `invitedById` field on User (tracking "who invited this user") was removed.
+> It was set during user creation but never displayed or used in the UI.
+> The `Invitation` model still tracks who sent each invite - that's used in the admin UI.
+> Removing this simplified the schema and eliminated a foreign key constraint that
+> complicated user deletion. Required table rebuild in Turso (see ARCHITECTURE.md §9).
+
 **Cleanup: Removed "Relationship to You" field**
 > The text field for "Relationship to You" (e.g., "Great-grandmother") was removed from
 > PersonForm and the profile page display. It was redundant since relationships are now
@@ -437,8 +456,10 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 - `src/app/(main)/settings/page.tsx`
 - `src/components/settings/LinkProfileSection.tsx`
 - `src/components/settings/InviteFamilySection.tsx`
+- `src/components/settings/ManageMembersSection.tsx` ← Admin user management UI
 - `src/actions/settings.ts`
 - `src/actions/invitations.ts`
+- `src/actions/users.ts` ← User deletion action
 - `src/lib/validations/invitation.ts`
 - `src/lib/email/invitation.ts`
 - `src/app/(auth)/login/not-approved/page.tsx`
@@ -446,7 +467,12 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 
 **Files modified:**
 - `src/app/(main)/dashboard/page.tsx` (added Settings icon in header)
-- `src/lib/auth.ts` (added signIn callback + updated createUser event)
+- `src/lib/auth.ts` (added signIn callback + updated createUser event, removed invitedById setting)
+- `prisma/schema.prisma` (made authorId nullable on Entry/Comment/Invitation, removed invitedById from User)
+- `src/app/(main)/entries/[id]/page.tsx` (handle null author gracefully)
+- `src/app/(main)/entries/[id]/edit/page.tsx` (block editing orphaned entries)
+- `messages/en.json` (added entries.card.unknownAuthor)
+- `messages/zh-TW.json` (added entries.card.unknownAuthor)
 
 ---
 
@@ -675,7 +701,7 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2025-01-29
+**Last Updated:** 2026-01-29
 
 **Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress, 15 Mostly Complete
 
@@ -719,6 +745,11 @@ After each phase, verify:
   - Admins can send/resend/revoke invitations from Settings
   - Invitation links validate token and guide user through sign-in
   - First user automatically becomes admin (bootstrap flow)
+- **Admin user management**
+  - Admins can view all users in Settings → Manage Members
+  - Admins can delete users (preserves their entries/comments as "Unknown Author")
+  - Last admin protection prevents orphaning the family
+  - User's Person profile is preserved in family tree when deleted
 - People management (create, edit, delete, view profiles)
 - Family relationships (add/remove bidirectional PARENT/CHILD/SPOUSE/SIBLING)
 - Settings page with profile linking (create new or link to existing Person)
