@@ -142,7 +142,9 @@
       "MIGRATION": "Migration",
       "MILITARY": "Military",
       "CAREER": "Career",
-      "PHOTO": "Photo",
+      "TRADITION": "Tradition",
+      "RECIPE": "Recipe",
+      "PHOTO_MEMORY": "Photo Memory",
       "DOCUMENT": "Document",
       "OTHER": "Other"
     },

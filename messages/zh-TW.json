@@ -142,7 +142,9 @@
       "MIGRATION": "移民",
       "MILITARY": "軍旅",
       "CAREER": "職業",
-      "PHOTO": "照片",
+      "TRADITION": "傳統",
+      "RECIPE": "食譜",
+      "PHOTO_MEMORY": "照片回憶",
       "DOCUMENT": "文件",
       "OTHER": "其他"
     },
