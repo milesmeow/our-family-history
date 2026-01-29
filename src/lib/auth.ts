@@ -152,7 +152,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: { id: user.id },
             data: {
               role: invitation.role,
-              invitedById: invitation.invitedById,
             },
           }),
           prisma.invitation.update({

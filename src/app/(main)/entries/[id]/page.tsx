@@ -47,7 +47,7 @@ export default async function EntryPage({ params }: PageProps) {
 
   if (!entry) notFound();
 
-  const isAuthor = entry.author.id === session.user?.id;
+  const isAuthor = entry.author?.id === session.user?.id;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,8 +136,11 @@ export default async function EntryPage({ params }: PageProps) {
           {/* Author Info */}
           <div className="mt-8 pt-6 border-t border-gray-200 text-sm text-gray-500">
             <p>
-              {t("card.by")} {entry.author.name || entry.author.email} •{" "}
-              {format(entry.createdAt, "MMMM d, yyyy")}
+              {t("card.by")}{" "}
+              {entry.author
+                ? entry.author.name || entry.author.email
+                : t("card.unknownAuthor")}{" "}
+              • {format(entry.createdAt, "MMMM d, yyyy")}
             </p>
           </div>
         </article>

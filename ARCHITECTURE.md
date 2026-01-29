@@ -106,10 +106,15 @@ User
 ├── avatarUrl          String?
 ├── role               Enum (ADMIN/MEMBER/VIEWER)
 │
-├── entries            Entry[] - Stories they authored
-├── comments           Comment[]
+├── entries            Entry[] - Stories they authored (nullable for deleted users)
+├── comments           Comment[] - (nullable for deleted users)
 ├── person             Person? - Link to their Person record
+├── sentInvites        Invitation[] - Invitations this user sent
 ```
+
+**Note on User Deletion:**
+When a user is deleted, their entries and comments are preserved with `authorId = null`.
+The UI displays "Unknown Author" for orphaned content. See Design Decision #8 below.
 
 ### FamilyRelation (Family Tree)
 
@@ -227,7 +232,8 @@ our-family-history/
 │   │   ├── entries.ts        # Entry CRUD + people linking
 │   │   ├── people.ts         # CRUD + relationships
 │   │   ├── settings.ts       # Profile linking
-│   │   └── invitations.ts    # ✅ Invitation CRUD (email gating)
+│   │   ├── invitations.ts    # ✅ Invitation CRUD (email gating)
+│   │   └── users.ts          # ✅ User deletion (admin-only)
 │   │
 │   ├── components/
 │   │   ├── ui/               # Reusable primitives
@@ -256,7 +262,8 @@ our-family-history/
 │   │   │   └── DeletePersonButton.tsx
 │   │   ├── settings/             # ✅ Implemented
 │   │   │   ├── LinkProfileSection.tsx
-│   │   │   └── InviteFamilySection.tsx  # ✅ Admin invitation management
+│   │   │   ├── InviteFamilySection.tsx  # ✅ Admin invitation management
+│   │   │   └── ManageMembersSection.tsx # ✅ Admin user deletion
 │   │   ├── tree/
 │   │   │   ├── FamilyTree.tsx
 │   │   │   └── TreeNode.tsx
@@ -737,6 +744,91 @@ Traditional Chinese is preferred for family history/genealogical content as it p
 
 **Font Support:**
 Added Noto Sans TC (Traditional Chinese) font for proper Chinese character rendering.
+
+---
+
+### 8. User Deletion (Content Preservation)
+
+When admins delete a user, their content is preserved to maintain family history integrity:
+
+**Strategy: Preserve Content, Remove Attribution**
+- Entries and Comments have `authorId` set to `null` (via Prisma's `onDelete: SetNull`)
+- The UI displays "Unknown Author" (English) or "未知作者" (Chinese) for orphaned content
+- The user's Person profile (if linked) is unlinked but NOT deleted, keeping them in the family tree
+- Sessions and Accounts are cascade-deleted (user can no longer log in)
+
+**Access Control:**
+- Only admins can delete users
+- The last admin cannot be deleted (prevents orphaning the family)
+- Admins can delete themselves (if not the last admin) - they'll be signed out
+
+**Implementation:**
+```typescript
+// src/actions/users.ts - deleteUser action
+await prisma.$transaction(async (tx) => {
+  // 1. Unlink Person profile (keeps Person in family tree)
+  if (targetUser.personId) {
+    await tx.user.update({ where: { id: userId }, data: { personId: null } });
+  }
+  // 2. Delete user (cascades sessions/accounts, sets null on entries/comments)
+  await tx.user.delete({ where: { id: userId } });
+});
+```
+
+**Schema (nullable foreign keys):**
+```prisma
+model Entry {
+  author    User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId  String? // Nullable to preserve entries when user deleted
+}
+
+model Comment {
+  author    User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId  String? // Nullable to preserve comments when user deleted
+}
+
+model Invitation {
+  invitedBy   User?   @relation(fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedById String? // Nullable to preserve invitation records
+}
+```
+
+**Why preserve content?**
+In a family history app, entries represent irreplaceable memories and stories contributed over time.
+Deleting a user account shouldn't erase their contributions to the family archive.
+
+---
+
+### 9. Turso Schema Migrations (SQLite Limitations)
+
+SQLite (which Turso uses) has limited `ALTER TABLE` support:
+- Cannot `DROP COLUMN` when foreign keys reference the table
+- Cannot `DROP CONSTRAINT` directly
+- `PRAGMA foreign_keys=OFF` may not persist across queries in Turso GUI
+
+**Workaround: Table Rebuild Pattern**
+
+When you need to remove a column or constraint, rebuild the table:
+
+```sql
+-- Step 1: Create new table without the unwanted column
+CREATE TABLE TableName_new (
+  -- ... all columns EXCEPT the one to remove
+);
+
+-- Step 2: Copy data
+INSERT INTO TableName_new SELECT col1, col2, ... FROM TableName;
+
+-- Step 3: Rename tables (avoids FK issues vs DROP)
+ALTER TABLE TableName RENAME TO TableName_old;
+ALTER TABLE TableName_new RENAME TO TableName;
+
+-- Step 4: Optionally drop old table later (may fail if FKs reference it)
+-- DROP TABLE TableName_old;
+```
+
+**Note:** If `DROP TABLE TableName_old` fails due to FK constraints, you can leave it.
+The `_old` table won't affect your app - it's just orphaned data.
 
 ---
 
