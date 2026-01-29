@@ -47,10 +47,10 @@ function generateToken(): string {
  */
 function getBaseUrl(): string {
   if (process.env.NEXTAUTH_URL) {
-    return process.env.NEXTAUTH_URL;
+    return process.env.NEXTAUTH_URL.trim();
   }
   if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+    return `https://${process.env.VERCEL_URL.trim()}`;
   }
   return "http://localhost:3000";
 }

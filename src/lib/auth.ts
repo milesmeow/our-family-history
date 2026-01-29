@@ -38,33 +38,40 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const { error } = await resend.emails.send({
           from: provider.from!,
           to: email,
-          subject: "Your Family History sign-in link",
+          subject: "Your Family History sign-in link | 您的家族歷史登入連結",
           html: `
             <!DOCTYPE html>
             <html>
               <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 24px;">
-                  <h1 style="color: #92400e; margin: 0 0 8px; font-size: 28px;">Family History</h1>
-                  <p style="color: #b45309; margin: 0; font-size: 14px;">Preserving memories for generations</p>
+                  <h1 style="color: #92400e; margin: 0 0 8px; font-size: 28px;">Family History | 家族歷史</h1>
+                  <p style="color: #b45309; margin: 0; font-size: 14px;">Preserving memories for generations | 為後代珍藏回憶</p>
                 </div>
                 <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px;">
                   <h2 style="color: #1f2937; margin: 0 0 16px; font-size: 20px;">Sign in to Family History</h2>
                   <p style="margin: 0 0 24px;">Click the button below to sign in. This link expires in 24 hours.</p>
                   <div style="text-align: center; margin: 32px 0;">
                     <a href="${url}" style="display: inline-block; background-color: #d97706; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                      Sign In
+                      Sign In | 登入
                     </a>
                   </div>
-                  <p style="margin: 0 0 8px; font-size: 14px; color: #6b7280;">Or copy and paste this link:</p>
+
+                  <div style="border-top: 1px solid #e5e7eb; margin: 24px 0; padding-top: 24px;">
+                    <h2 style="color: #1f2937; margin: 0 0 16px; font-size: 20px;">登入家族歷史</h2>
+                    <p style="margin: 0 0 24px;">點擊上方按鈕登入。此連結將於 24 小時後失效。</p>
+                  </div>
+
+                  <p style="margin: 0 0 8px; font-size: 14px; color: #6b7280;">Or copy and paste this link | 或複製並貼上此連結：</p>
                   <p style="margin: 0; font-size: 14px; word-break: break-all; color: #d97706;">${url}</p>
                 </div>
                 <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 24px;">
-                  If you didn't request this email, you can safely ignore it.
+                  If you didn't request this email, you can safely ignore it.<br/>
+                  如果您沒有請求此郵件，可以安全地忽略它。
                 </p>
               </body>
             </html>
           `,
-          text: `Sign in to Family History\n\nClick this link to sign in:\n${url}\n\nThis link expires in 24 hours.\n\nIf you didn't request this email, you can safely ignore it.`,
+          text: `Sign in to Family History | 登入家族歷史\n\nClick this link to sign in | 點擊此連結登入:\n${url}\n\nThis link expires in 24 hours.\n此連結將於 24 小時後失效。\n\nIf you didn't request this email, you can safely ignore it.\n如果您沒有請求此郵件，可以安全地忽略它。`,
         });
 
         if (error) {

@@ -1,0 +1,352 @@
+{
+  "common": {
+    "appName": "Family History",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "error": "Error",
+    "success": "Success",
+    "required": "Required",
+    "optional": "Optional"
+  },
+  "landing": {
+    "signIn": "Sign In",
+    "getStarted": "Get Started Free",
+    "heroTitle": "Preserve Your Family's",
+    "heroTitleHighlight": "Stories",
+    "heroDescription": "Capture memories, share stories, and build a lasting record of your family history for generations to come.",
+    "footer": "Built with love for families everywhere",
+    "features": {
+      "captureStories": {
+        "title": "Capture Stories",
+        "description": "Record family memories, traditions, and stories before they're lost to time."
+      },
+      "collaborate": {
+        "title": "Collaborate",
+        "description": "Invite family members to contribute their own memories and photos."
+      },
+      "timeline": {
+        "title": "Timeline View",
+        "description": "See your family history unfold chronologically on a beautiful timeline."
+      },
+      "preserve": {
+        "title": "Preserve Forever",
+        "description": "Create a lasting digital archive for future generations."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to Family History",
+      "subtitle": "Enter your email to receive a magic link",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "grandma@family.com",
+      "submitButton": "Send Magic Link",
+      "sending": "Sending...",
+      "inviteOnly": "Family History is invite-only. Ask a family member for an invitation.",
+      "backToHome": "Back to home"
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "description": "We've sent a sign-in link to your email. Click the link to sign in.",
+      "spam": "Don't see it? Check your spam folder.",
+      "tryAgain": "Try again"
+    },
+    "notApproved": {
+      "title": "Invitation Required",
+      "description": "Family History is invite-only. Please ask a family member to send you an invitation.",
+      "contact": "If you believe this is an error, contact your family administrator.",
+      "backToLogin": "Back to sign in"
+    },
+    "error": {
+      "title": "Authentication Error",
+      "description": "Something went wrong during sign in. Please try again.",
+      "tryAgain": "Try again"
+    },
+    "invite": {
+      "title": "You're Invited!",
+      "description": "{inviter} has invited you to join their family history.",
+      "expired": "This invitation has expired. Please ask for a new one.",
+      "used": "This invitation has already been used.",
+      "invalid": "This invitation is invalid.",
+      "acceptButton": "Accept Invitation",
+      "signInWith": "Sign in with your email to accept"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}",
+    "welcomeDefault": "Welcome back",
+    "recentEntries": "Recent Entries",
+    "viewAll": "View all",
+    "noEntries": "No entries yet",
+    "createFirst": "Create your first entry to get started.",
+    "quickActions": {
+      "title": "Quick Actions",
+      "newEntry": "New Entry",
+      "viewTimeline": "View Timeline",
+      "managePeople": "Manage People",
+      "settings": "Settings"
+    },
+    "stats": {
+      "entries": "Entries",
+      "people": "People",
+      "photos": "Photos"
+    }
+  },
+  "entries": {
+    "title": "Entries",
+    "newEntry": "New Entry",
+    "editEntry": "Edit Entry",
+    "noEntries": "No entries found",
+    "createFirst": "Start preserving your family history by creating an entry.",
+    "deleteConfirm": "Are you sure you want to delete this entry? This action cannot be undone.",
+    "form": {
+      "titleLabel": "Title",
+      "titlePlaceholder": "Give your entry a title",
+      "contentLabel": "Story",
+      "contentPlaceholder": "Tell the story...",
+      "summaryLabel": "Summary",
+      "summaryPlaceholder": "A brief summary for the timeline",
+      "categoryLabel": "Category",
+      "eventDateLabel": "Event Date",
+      "eventDateEndLabel": "End Date",
+      "dateApproximateLabel": "Date is approximate",
+      "locationLabel": "Location",
+      "locationPlaceholder": "Where did this happen?",
+      "peopleLabel": "People Involved",
+      "peopleHelp": "Tag family members in this entry",
+      "submit": "Save Entry",
+      "creating": "Creating...",
+      "updating": "Updating..."
+    },
+    "categories": {
+      "STORY": "Story",
+      "BIRTH": "Birth",
+      "DEATH": "Death",
+      "WEDDING": "Wedding",
+      "GRADUATION": "Graduation",
+      "MIGRATION": "Migration",
+      "MILITARY": "Military",
+      "CAREER": "Career",
+      "TRADITION": "Tradition",
+      "RECIPE": "Recipe",
+      "PHOTO_MEMORY": "Photo Memory",
+      "DOCUMENT": "Document",
+      "OTHER": "Other"
+    },
+    "card": {
+      "by": "by",
+      "readMore": "Read more",
+      "approximate": "circa"
+    }
+  },
+  "people": {
+    "title": "People",
+    "newPerson": "Add Person",
+    "editPerson": "Edit Person",
+    "noPeople": "No family members yet",
+    "addFirst": "Start building your family tree by adding people.",
+    "deleteConfirm": "Are you sure you want to delete this person? This action cannot be undone.",
+    "form": {
+      "firstNameLabel": "First Name",
+      "firstNamePlaceholder": "Enter first name",
+      "lastNameLabel": "Last Name",
+      "lastNamePlaceholder": "Enter last name",
+      "maidenNameLabel": "Maiden Name",
+      "maidenNamePlaceholder": "Enter maiden name",
+      "nicknameLabel": "Nickname",
+      "nicknamePlaceholder": "e.g., Grandpa Joe",
+      "birthDateLabel": "Birth Date",
+      "deathDateLabel": "Death Date",
+      "relationshipLabel": "Relationship",
+      "relationshipPlaceholder": "e.g., Great-grandmother, Uncle",
+      "bioLabel": "Biography",
+      "bioPlaceholder": "Tell us about this person...",
+      "submit": "Save Person",
+      "creating": "Creating...",
+      "updating": "Updating..."
+    },
+    "card": {
+      "born": "Born",
+      "died": "Died",
+      "viewProfile": "View profile"
+    },
+    "relationships": {
+      "title": "Relationships",
+      "add": "Add Relationship",
+      "noRelationships": "No relationships added yet",
+      "types": {
+        "PARENT": "Parent",
+        "CHILD": "Child",
+        "SPOUSE": "Spouse",
+        "SIBLING": "Sibling"
+      },
+      "dialog": {
+        "title": "Add Relationship",
+        "selectPerson": "Select person",
+        "selectType": "Select relationship type",
+        "isParentOf": "{name} is a parent of this person",
+        "isChildOf": "{name} is a child of this person",
+        "isSpouseOf": "{name} is a spouse of this person",
+        "isSiblingOf": "{name} is a sibling of this person"
+      }
+    },
+    "entries": {
+      "title": "Related Entries",
+      "noEntries": "No entries found for this person"
+    }
+  },
+  "timeline": {
+    "title": "Family Timeline",
+    "subtitle": "Explore your family's history through the years",
+    "noEvents": "No events to display",
+    "filters": {
+      "title": "Filters",
+      "active": "{count} active",
+      "category": "Category",
+      "allCategories": "All Categories",
+      "person": "Person",
+      "allPeople": "All People",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "clearAll": "Clear all filters"
+    },
+    "results": {
+      "showing": "Showing {count, plural, one {# entry} other {# entries}}",
+      "filtered": "(filtered)"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account",
+      "email": "Email",
+      "name": "Name",
+      "role": "Role"
+    },
+    "language": {
+      "title": "Language",
+      "description": "Choose your preferred language for the interface",
+      "label": "Interface Language",
+      "updated": "Language updated successfully"
+    },
+    "profile": {
+      "title": "Your Family Profile",
+      "titleLink": "Link Your Family Profile",
+      "description": "Connect your account to your profile in the family tree. This helps others know who you are!",
+      "linkedToAccount": "Linked to your account",
+      "viewProfile": "View Profile",
+      "unlinking": "Unlinking...",
+      "unlinkProfile": "Unlink profile",
+      "unlinkConfirm": "Are you sure you want to unlink your profile? You can re-link later.",
+      "createMyProfile": "Create my profile",
+      "createMyProfileDesc": "Add yourself to the family tree",
+      "linkExisting": "Link to existing profile",
+      "linkExistingDesc": "Connect to a profile already in the family tree",
+      "createTitle": "Create Your Profile",
+      "linkTitle": "Link to Existing Profile",
+      "loadingPeople": "Loading people...",
+      "noUnlinkedProfiles": "No unlinked profiles available.",
+      "createInstead": "Create a new profile instead",
+      "selectYourProfile": "Select Your Profile",
+      "choosePerson": "Choose a person...",
+      "linking": "Linking...",
+      "linkButton": "Link Profile",
+      "creating": "Creating...",
+      "createAndLink": "Create & Link Profile",
+      "aboutYou": "About You",
+      "aboutYouPlaceholder": "A little about yourself...",
+      "failedToLoad": "Failed to load people"
+    },
+    "invitations": {
+      "title": "Invite Family Members",
+      "description": "Send invitations to family members so they can join and contribute to your shared history.",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "family.member@example.com",
+      "roleLabel": "Role",
+      "sendButton": "Send Invite",
+      "sending": "Sending...",
+      "sent": "Invitation sent successfully!",
+      "resent": "Invitation resent!",
+      "revokeConfirm": "Are you sure you want to revoke this invitation? The link will no longer work.",
+      "noInvitations": "No invitations sent yet. Invite family members above!",
+      "rolesHelp": "Members can add stories and photos. Viewers can only browse. Admins can invite others.",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "expired": "Expired",
+      "joined": "Joined {date}",
+      "expires": "Expires {date}",
+      "expiredOn": "Expired {date}",
+      "resend": "Resend",
+      "resendTooltip": "Resend invitation",
+      "revokeTooltip": "Revoke invitation",
+      "status": {
+        "pending": "pending",
+        "accepted": "accepted",
+        "expired": "expired"
+      },
+      "roles": {
+        "ADMIN": "Admin",
+        "MEMBER": "Member",
+        "VIEWER": "Viewer"
+      }
+    }
+  },
+  "validation": {
+    "required": "{field} is required",
+    "email": "Please enter a valid email address",
+    "minLength": "{field} must be at least {min} characters",
+    "maxLength": "{field} must be at most {max} characters",
+    "invalidDate": "Please enter a valid date",
+    "futureDate": "Date cannot be in the future",
+    "endBeforeStart": "End date must be after start date"
+  },
+  "errors": {
+    "unauthorized": "You must be signed in to perform this action",
+    "forbidden": "You don't have permission to perform this action",
+    "notFound": "The requested resource was not found",
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "entries": {
+      "createFailed": "Failed to create entry",
+      "updateFailed": "Failed to update entry",
+      "deleteFailed": "Failed to delete entry",
+      "notOwner": "You can only edit your own entries"
+    },
+    "people": {
+      "createFailed": "Failed to create person",
+      "updateFailed": "Failed to update person",
+      "deleteFailed": "Failed to delete person",
+      "alreadyLinked": "This person is already linked to another user account",
+      "youAreLinked": "You are already linked to a profile. Unlink first to change.",
+      "selfRelationship": "Cannot create a relationship with oneself",
+      "relationshipExists": "This relationship already exists",
+      "addRelationshipFailed": "Failed to add relationship",
+      "removeRelationshipFailed": "Failed to remove relationship",
+      "linkFailed": "Failed to link profile",
+      "unlinkFailed": "Failed to unlink profile"
+    },
+    "invitations": {
+      "sendFailed": "Failed to send invitation",
+      "alreadyMember": "This email is already a family member",
+      "alreadyInvited": "This email already has a pending invitation"
+    }
+  },
+  "footer": {
+    "version": "Family History v{version}"
+  }
+}

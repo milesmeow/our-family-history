@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { addRelationship } from "@/actions/people";
 
@@ -17,12 +18,7 @@ interface PersonOption {
   lastName: string;
 }
 
-const relationTypes = [
-  { value: "PARENT", label: "Parent", description: "This person is their parent" },
-  { value: "CHILD", label: "Child", description: "This person is their child" },
-  { value: "SPOUSE", label: "Spouse", description: "This person is their spouse/partner" },
-  { value: "SIBLING", label: "Sibling", description: "This person is their sibling" },
-];
+const relationTypeValues = ["PARENT", "CHILD", "SPOUSE", "SIBLING"] as const;
 
 export function AddRelationshipDialog({
   personId,
@@ -30,6 +26,9 @@ export function AddRelationshipDialog({
   isOpen,
   onClose,
 }: AddRelationshipDialogProps) {
+  const t = useTranslations("people.relationships");
+  const tCommon = useTranslations("common");
+
   const [people, setPeople] = useState<PersonOption[]>([]);
   const [selectedPerson, setSelectedPerson] = useState("");
   const [relationType, setRelationType] = useState("");
@@ -83,14 +82,11 @@ export function AddRelationshipDialog({
 
   if (!isOpen) return null;
 
-  const selectedPersonData = people.find((p) => p.id === selectedPerson);
-  const selectedRelation = relationTypes.find((r) => r.value === relationType);
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Add Relationship</h2>
+          <h2 className="text-lg font-semibold">{t("dialog.title")}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -108,15 +104,15 @@ export function AddRelationshipDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Family Member
+              {t("dialog.selectPerson")}
             </label>
             {isFetching ? (
               <div className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-500">
-                Loading...
+                {tCommon("loading")}
               </div>
             ) : people.length === 0 ? (
               <div className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-500">
-                No other family members to connect. Add more people first.
+                {t("noRelationships")}
               </div>
             ) : (
               <select
@@ -125,7 +121,7 @@ export function AddRelationshipDialog({
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 required
               >
-                <option value="">Select a person...</option>
+                <option value="">{t("dialog.selectPerson")}...</option>
                 {people.map((person) => (
                   <option key={person.id} value={person.id}>
                     {person.firstName} {person.lastName}
@@ -137,7 +133,7 @@ export function AddRelationshipDialog({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Relationship Type
+              {t("dialog.selectType")}
             </label>
             <select
               value={relationType}
@@ -145,23 +141,14 @@ export function AddRelationshipDialog({
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               required
             >
-              <option value="">Select relationship...</option>
-              {relationTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
+              <option value="">{t("dialog.selectType")}...</option>
+              {relationTypeValues.map((type) => (
+                <option key={type} value={type}>
+                  {t(`types.${type}`)}
                 </option>
               ))}
             </select>
           </div>
-
-          {/* Preview */}
-          {selectedPersonData && selectedRelation && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-              <strong>{selectedPersonData.firstName} {selectedPersonData.lastName}</strong>{" "}
-              will be added as {personName}&apos;s{" "}
-              <strong>{selectedRelation.label.toLowerCase()}</strong>.
-            </div>
-          )}
 
           <div className="flex justify-end gap-3 pt-4">
             <button
@@ -169,14 +156,14 @@ export function AddRelationshipDialog({
               onClick={onClose}
               className="px-4 py-2 text-gray-600 hover:text-gray-900"
             >
-              Cancel
+              {tCommon("cancel")}
             </button>
             <button
               type="submit"
               disabled={isLoading || !selectedPerson || !relationType || people.length === 0}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? "Adding..." : "Add Relationship"}
+              {isLoading ? tCommon("loading") : t("add")}
             </button>
           </div>
         </form>

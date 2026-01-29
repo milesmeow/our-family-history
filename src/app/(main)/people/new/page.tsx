@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { PersonForm } from "@/components/people/PersonForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -7,6 +8,9 @@ import Link from "next/link";
 export default async function NewPersonPage() {
   const session = await auth();
   if (!session) redirect("/login");
+
+  const t = await getTranslations("people");
+  const tCommon = await getTranslations("common");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,10 +23,10 @@ export default async function NewPersonPage() {
               className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back
+              {tCommon("back")}
             </Link>
             <span className="text-gray-300">|</span>
-            <h1 className="text-xl font-bold text-gray-900">Add New Person</h1>
+            <h1 className="text-xl font-bold text-gray-900">{t("newPerson")}</h1>
           </div>
         </div>
       </header>

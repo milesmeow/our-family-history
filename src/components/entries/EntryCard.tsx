@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { Calendar, MapPin, Users, FileEdit } from "lucide-react";
-import { CATEGORY_LABELS, type Category } from "@/lib/validations/entry";
+import { type Category } from "@/lib/validations/entry";
 
 interface EntryCardProps {
   entry: {
@@ -21,7 +24,7 @@ interface EntryCardProps {
 }
 
 export function EntryCard({ entry }: EntryCardProps) {
-  const categoryLabel = CATEGORY_LABELS[entry.category as Category] || entry.category;
+  const t = useTranslations("entries");
   const isDraft = entry.publishedAt === null;
 
   // Use summary if available, otherwise truncate content
@@ -38,7 +41,7 @@ export function EntryCard({ entry }: EntryCardProps) {
       {/* Header with badges */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-          {categoryLabel}
+          {t(`categories.${entry.category as Category}`)}
         </span>
         {isDraft && (
           <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium">
@@ -63,7 +66,7 @@ export function EntryCard({ entry }: EntryCardProps) {
         {entry.eventDate && (
           <span className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
-            {entry.dateApproximate && "~"}
+            {entry.dateApproximate && t("card.approximate")}
             {format(entry.eventDate, "MMM d, yyyy")}
           </span>
         )}
@@ -75,8 +78,7 @@ export function EntryCard({ entry }: EntryCardProps) {
         )}
         <span className="flex items-center gap-1">
           <Users className="w-4 h-4" />
-          {entry._count.peopleInvolved}{" "}
-          {entry._count.peopleInvolved === 1 ? "person" : "people"}
+          {entry._count.peopleInvolved}
         </span>
       </div>
     </Link>

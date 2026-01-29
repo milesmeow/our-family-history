@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { User, BookOpen, Users } from "lucide-react";
 import type { Person } from "@prisma/client";
 
@@ -13,6 +16,7 @@ interface PersonCardProps {
 }
 
 export function PersonCard({ person }: PersonCardProps) {
+  const t = useTranslations("people");
   const fullName = `${person.firstName} ${person.lastName}`;
 
   return (
@@ -40,15 +44,15 @@ export function PersonCard({ person }: PersonCardProps) {
           {person.nickname && (
             <p className="text-sm text-gray-500">&ldquo;{person.nickname}&rdquo;</p>
           )}
-          {person.relationship && (
-            <p className="text-sm text-blue-600 font-medium">
-              {person.relationship}
-            </p>
-          )}
           {person.birthDate && (
             <p className="text-sm text-gray-500 mt-1">
-              {format(person.birthDate, "MMM d, yyyy")}
-              {person.deathDate && ` – ${format(person.deathDate, "MMM d, yyyy")}`}
+              {t("card.born")}: {format(person.birthDate, "MMM d, yyyy")}
+              {person.deathDate && (
+                <>
+                  <br />
+                  {t("card.died")}: {format(person.deathDate, "MMM d, yyyy")}
+                </>
+              )}
             </p>
           )}
         </div>
@@ -58,11 +62,11 @@ export function PersonCard({ person }: PersonCardProps) {
       <div className="mt-4 pt-4 border-t border-gray-100 flex gap-4 text-sm text-gray-500">
         <span className="flex items-center gap-1">
           <BookOpen className="w-4 h-4" />
-          {person._count.entries} {person._count.entries === 1 ? "story" : "stories"}
+          {person._count.entries}
         </span>
         <span className="flex items-center gap-1">
           <Users className="w-4 h-4" />
-          {person._count.relationsFrom} {person._count.relationsFrom === 1 ? "relation" : "relations"}
+          {person._count.relationsFrom}
         </span>
       </div>
     </Link>

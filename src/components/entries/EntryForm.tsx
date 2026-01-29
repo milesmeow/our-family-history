@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createEntry, updateEntry } from "@/actions/entries";
-import { CATEGORIES, CATEGORY_LABELS, DATE_PRECISIONS } from "@/lib/validations/entry";
+import { CATEGORIES, DATE_PRECISIONS, type Category } from "@/lib/validations/entry";
 import { format } from "date-fns";
 import Link from "next/link";
 import { PersonSelector } from "./PersonSelector";
@@ -28,6 +29,8 @@ interface EntryFormProps {
 }
 
 export function EntryForm({ entry }: EntryFormProps) {
+  const t = useTranslations("entries");
+  const tCommon = useTranslations("common");
   const action = entry ? updateEntry.bind(null, entry.id) : createEntry;
 
   const [state, formAction, isPending] = useActionState(action, null);
@@ -51,7 +54,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           htmlFor="title"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Title <span className="text-red-500">*</span>
+          {t("form.titleLabel")} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -59,7 +62,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           name="title"
           defaultValue={entry?.title ?? ""}
           required
-          placeholder="A memorable title for this story"
+          placeholder={t("form.titlePlaceholder")}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
         />
       </div>
@@ -70,7 +73,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           htmlFor="category"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Category
+          {t("form.categoryLabel")}
         </label>
         <select
           id="category"
@@ -80,7 +83,7 @@ export function EntryForm({ entry }: EntryFormProps) {
         >
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
-              {CATEGORY_LABELS[cat]}
+              {t(`categories.${cat as Category}`)}
             </option>
           ))}
         </select>
@@ -93,7 +96,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             htmlFor="eventDate"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Event Date
+            {t("form.eventDateLabel")}
           </label>
           <input
             type="date"
@@ -111,7 +114,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             htmlFor="eventDateEnd"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            End Date (optional)
+            {t("form.eventDateEndLabel")}
           </label>
           <input
             type="date"
@@ -136,7 +139,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
           <label htmlFor="dateApproximate" className="text-sm text-gray-700">
-            Date is approximate
+            {t("form.dateApproximateLabel")}
           </label>
         </div>
 
@@ -169,7 +172,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             htmlFor="era"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Era (optional)
+            Era ({tCommon("optional")})
           </label>
           <input
             type="text"
@@ -186,14 +189,14 @@ export function EntryForm({ entry }: EntryFormProps) {
             htmlFor="location"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Location (optional)
+            {t("form.locationLabel")}
           </label>
           <input
             type="text"
             id="location"
             name="location"
             defaultValue={entry?.location ?? ""}
-            placeholder='e.g., "Ellis Island, New York"'
+            placeholder={t("form.locationPlaceholder")}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
@@ -205,7 +208,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           htmlFor="content"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Story <span className="text-red-500">*</span>
+          {t("form.contentLabel")} <span className="text-red-500">*</span>
         </label>
         <textarea
           id="content"
@@ -213,7 +216,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           rows={10}
           defaultValue={entry?.content ?? ""}
           required
-          placeholder="Tell the story in detail..."
+          placeholder={t("form.contentPlaceholder")}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
         />
       </div>
@@ -224,14 +227,14 @@ export function EntryForm({ entry }: EntryFormProps) {
           htmlFor="summary"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Summary (optional)
+          {t("form.summaryLabel")}
         </label>
         <textarea
           id="summary"
           name="summary"
           rows={2}
           defaultValue={entry?.summary ?? ""}
-          placeholder="A brief excerpt for timeline view..."
+          placeholder={t("form.summaryPlaceholder")}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
         />
       </div>
@@ -239,7 +242,7 @@ export function EntryForm({ entry }: EntryFormProps) {
       {/* People in Story */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          People in this Story
+          {t("form.peopleLabel")}
         </label>
         <PersonSelector
           selectedIds={selectedPeopleIds}
@@ -260,9 +263,6 @@ export function EntryForm({ entry }: EntryFormProps) {
           <label htmlFor="isPublished" className="text-sm font-medium text-gray-700">
             Publish this story
           </label>
-          <p className="text-xs text-gray-500">
-            Published stories are visible to all family members. Leave unchecked to save as draft.
-          </p>
         </div>
       </div>
 
@@ -272,14 +272,16 @@ export function EntryForm({ entry }: EntryFormProps) {
           href={entry ? `/entries/${entry.id}` : "/entries"}
           className="px-6 py-2 text-gray-600 hover:text-gray-900"
         >
-          Cancel
+          {tCommon("cancel")}
         </Link>
         <button
           type="submit"
           disabled={isPending}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isPending ? "Saving..." : entry ? "Update Story" : "Create Story"}
+          {isPending
+            ? (entry ? t("form.updating") : t("form.creating"))
+            : t("form.submit")}
         </button>
       </div>
     </form>

@@ -1,10 +1,12 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ArrowLeft, Settings } from "lucide-react";
 import { LinkProfileSection } from "@/components/settings/LinkProfileSection";
 import { InviteFamilySection, type InvitationWithStatus } from "@/components/settings/InviteFamilySection";
+import { LanguageSelector } from "@/components/settings/LanguageSelector";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -12,6 +14,9 @@ export default async function SettingsPage() {
   if (!session?.user?.id) {
     redirect("/login");
   }
+
+  const t = await getTranslations("settings");
+  const tCommon = await getTranslations("common");
 
   // Fetch user with their linked person
   const user = await prisma.user.findUnique({
@@ -65,10 +70,11 @@ export default async function SettingsPage() {
               className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
+              <span className="sr-only">{tCommon("back")}</span>
             </Link>
             <div className="flex items-center gap-2">
               <Settings className="w-5 h-5 text-gray-600" />
-              <h1 className="text-xl font-bold text-gray-900">Settings</h1>
+              <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
             </div>
           </div>
         </div>
@@ -78,33 +84,38 @@ export default async function SettingsPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Account Info */}
         <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Account</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("account.title")}</h2>
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-gray-500">Email</label>
+              <label className="text-sm text-gray-500">{t("account.email")}</label>
               <p className="text-gray-900">{user.email}</p>
             </div>
             {user.name && (
               <div>
-                <label className="text-sm text-gray-500">Name</label>
+                <label className="text-sm text-gray-500">{t("account.name")}</label>
                 <p className="text-gray-900">{user.name}</p>
               </div>
             )}
             <div>
-              <label className="text-sm text-gray-500">Role</label>
-              <p className="text-gray-900 capitalize">{user.role.toLowerCase()}</p>
+              <label className="text-sm text-gray-500">{t("account.role")}</label>
+              <p className="text-gray-900">{t(`invitations.roles.${user.role}`)}</p>
             </div>
           </div>
         </section>
 
+        {/* Language Selection */}
+        <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <LanguageSelector />
+        </section>
+
         {/* Profile Linking */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <LinkProfileSection linkedPerson={user.person} />
         </section>
 
         {/* Invite Family Members (Admin only) */}
         {user.role === "ADMIN" && (
-          <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+          <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <InviteFamilySection initialInvitations={initialInvitations} />
           </section>
         )}

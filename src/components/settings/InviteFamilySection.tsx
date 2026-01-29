@@ -2,6 +2,7 @@
 
 import { useState, useActionState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import { UserPlus, Mail, Clock, CheckCircle, X, RefreshCw, Trash2 } from "lucide-react";
 import {
   createInvitation,
@@ -27,6 +28,8 @@ interface InviteFamilySectionProps {
 
 export function InviteFamilySection({ initialInvitations }: InviteFamilySectionProps) {
   const router = useRouter();
+  const t = useTranslations("settings.invitations");
+  const locale = useLocale();
   const [error, setError] = useState<string | null>(null);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -41,7 +44,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
     setError(null);
     const result = await createInvitation(prevState, formData);
     if (result.success) {
-      setActionSuccess("Invitation sent successfully!");
+      setActionSuccess(t("sent"));
       formRef.current?.reset();
       router.refresh();
     }
@@ -57,7 +60,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
     const result = await resendInvitation(id);
     setActionInProgress(null);
     if (result.success) {
-      setActionSuccess("Invitation resent!");
+      setActionSuccess(t("resent"));
       router.refresh();
     } else {
       setError(result.error);
@@ -65,7 +68,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm("Are you sure you want to revoke this invitation? The link will no longer work.")) {
+    if (!confirm(t("revokeConfirm"))) {
       return;
     }
     setActionInProgress(id);
@@ -86,10 +89,8 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">Invite Family Members</h2>
-      <p className="text-gray-600 text-sm mb-4">
-        Send invitations to family members so they can join and contribute to your shared history.
-      </p>
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("title")}</h2>
+      <p className="text-gray-600 text-sm mb-4">{t("description")}</p>
 
       {/* Error display */}
       {error && (
@@ -115,20 +116,20 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <label htmlFor="email" className="sr-only">
-              Email address
+              {t("emailLabel")}
             </label>
             <input
               type="email"
               id="email"
               name="email"
-              placeholder="family.member@example.com"
+              placeholder={t("emailPlaceholder")}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
             />
           </div>
           <div className="sm:w-32">
             <label htmlFor="role" className="sr-only">
-              Role
+              {t("roleLabel")}
             </label>
             <select
               id="role"
@@ -136,9 +137,9 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
               defaultValue="MEMBER"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none bg-white"
             >
-              <option value="MEMBER">Member</option>
-              <option value="VIEWER">Viewer</option>
-              <option value="ADMIN">Admin</option>
+              <option value="MEMBER">{t("roles.MEMBER")}</option>
+              <option value="VIEWER">{t("roles.VIEWER")}</option>
+              <option value="ADMIN">{t("roles.ADMIN")}</option>
             </select>
           </div>
           <button
@@ -147,12 +148,10 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
             className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
             <UserPlus className="w-4 h-4" />
-            {isCreating ? "Sending..." : "Send Invite"}
+            {isCreating ? t("sending") : t("sendButton")}
           </button>
         </div>
-        <p className="mt-2 text-xs text-gray-500">
-          Members can add stories and photos. Viewers can only browse. Admins can invite others.
-        </p>
+        <p className="mt-2 text-xs text-gray-500">{t("rolesHelp")}</p>
       </form>
 
       {/* Invitations list */}
@@ -162,7 +161,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Pending ({pendingInvitations.length})
+              {t("pending")} ({pendingInvitations.length})
             </h3>
             <div className="space-y-2">
               {pendingInvitations.map((invitation) => (
@@ -172,6 +171,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
                   onResend={handleResend}
                   onRevoke={handleRevoke}
                   isActionInProgress={actionInProgress === invitation.id}
+                  locale={locale}
                 />
               ))}
             </div>
@@ -183,7 +183,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-green-600" />
-              Accepted ({acceptedInvitations.length})
+              {t("accepted")} ({acceptedInvitations.length})
             </h3>
             <div className="space-y-2">
               {acceptedInvitations.map((invitation) => (
@@ -193,6 +193,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
                   onResend={handleResend}
                   onRevoke={handleRevoke}
                   isActionInProgress={actionInProgress === invitation.id}
+                  locale={locale}
                 />
               ))}
             </div>
@@ -204,7 +205,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-2">
               <X className="w-4 h-4" />
-              Expired ({expiredInvitations.length})
+              {t("expired")} ({expiredInvitations.length})
             </h3>
             <div className="space-y-2">
               {expiredInvitations.map((invitation) => (
@@ -214,6 +215,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
                   onResend={handleResend}
                   onRevoke={handleRevoke}
                   isActionInProgress={actionInProgress === invitation.id}
+                  locale={locale}
                 />
               ))}
             </div>
@@ -221,9 +223,7 @@ export function InviteFamilySection({ initialInvitations }: InviteFamilySectionP
         )}
 
         {initialInvitations.length === 0 && (
-          <p className="text-gray-500 text-center py-4">
-            No invitations sent yet. Invite family members above!
-          </p>
+          <p className="text-gray-500 text-center py-4">{t("noInvitations")}</p>
         )}
       </div>
     </div>
@@ -235,9 +235,12 @@ interface InvitationRowProps {
   onResend: (id: string) => void;
   onRevoke: (id: string) => void;
   isActionInProgress: boolean;
+  locale: string;
 }
 
-function InvitationRow({ invitation, onResend, onRevoke, isActionInProgress }: InvitationRowProps) {
+function InvitationRow({ invitation, onResend, onRevoke, isActionInProgress, locale }: InvitationRowProps) {
+  const t = useTranslations("settings.invitations");
+
   const statusColors = {
     pending: "bg-amber-100 text-amber-700",
     accepted: "bg-green-100 text-green-700",
@@ -245,11 +248,21 @@ function InvitationRow({ invitation, onResend, onRevoke, isActionInProgress }: I
   };
 
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
+    return new Date(date).toLocaleDateString(locale === "zh-TW" ? "zh-TW" : "en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  const getDateText = () => {
+    if (invitation.status === "accepted") {
+      return t("joined", { date: formatDate(invitation.usedAt!) });
+    } else if (invitation.status === "expired") {
+      return t("expiredOn", { date: formatDate(invitation.expiresAt) });
+    } else {
+      return t("expires", { date: formatDate(invitation.expiresAt) });
+    }
   };
 
   return (
@@ -260,16 +273,11 @@ function InvitationRow({ invitation, onResend, onRevoke, isActionInProgress }: I
       <div className="flex-1 min-w-0">
         <p className="font-medium text-gray-900 truncate">{invitation.email}</p>
         <p className="text-xs text-gray-500">
-          {invitation.role.toLowerCase()} &middot;{" "}
-          {invitation.status === "accepted"
-            ? `Joined ${formatDate(invitation.usedAt!)}`
-            : invitation.status === "expired"
-              ? `Expired ${formatDate(invitation.expiresAt)}`
-              : `Expires ${formatDate(invitation.expiresAt)}`}
+          {t(`roles.${invitation.role}`)} &middot; {getDateText()}
         </p>
       </div>
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[invitation.status]}`}>
-        {invitation.status}
+        {t(`status.${invitation.status}`)}
       </span>
       {invitation.status === "pending" && (
         <div className="flex items-center gap-1">
@@ -277,7 +285,7 @@ function InvitationRow({ invitation, onResend, onRevoke, isActionInProgress }: I
             onClick={() => onResend(invitation.id)}
             disabled={isActionInProgress}
             className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors disabled:opacity-50"
-            title="Resend invitation"
+            title={t("resendTooltip")}
           >
             <RefreshCw className={`w-4 h-4 ${isActionInProgress ? "animate-spin" : ""}`} />
           </button>
@@ -285,7 +293,7 @@ function InvitationRow({ invitation, onResend, onRevoke, isActionInProgress }: I
             onClick={() => onRevoke(invitation.id)}
             disabled={isActionInProgress}
             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-            title="Revoke invitation"
+            title={t("revokeTooltip")}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -297,7 +305,7 @@ function InvitationRow({ invitation, onResend, onRevoke, isActionInProgress }: I
           disabled={isActionInProgress}
           className="px-3 py-1 text-xs text-amber-600 hover:bg-amber-50 rounded transition-colors disabled:opacity-50"
         >
-          {isActionInProgress ? "Sending..." : "Resend"}
+          {isActionInProgress ? t("sending") : t("resend")}
         </button>
       )}
     </div>
