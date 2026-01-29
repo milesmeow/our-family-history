@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { ShieldX, Heart } from "lucide-react";
+import { ShieldX } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export default function NotApprovedPage() {
+export default async function NotApprovedPage() {
+  const t = await getTranslations("auth.notApproved");
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
       <div className="max-w-md w-full mx-4">
@@ -13,27 +16,11 @@ export default function NotApprovedPage() {
 
           {/* Content */}
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Invite Required
+            {t("title")}
           </h1>
           <p className="text-gray-600 mb-6">
-            This family history app is private. You&apos;ll need an invitation from a
-            family member to join.
+            {t("description")}
           </p>
-
-          {/* Explanation box */}
-          <div className="bg-amber-50 rounded-lg p-4 text-left text-sm text-gray-700 mb-6">
-            <div className="flex items-start gap-3">
-              <Heart className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium mb-1">Why do we require invitations?</p>
-                <p className="text-gray-600">
-                  Family stories and memories are precious. We keep this space
-                  private to ensure only family members can access and contribute
-                  to our shared history.
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Actions */}
           <div className="space-y-3">
@@ -41,18 +28,14 @@ export default function NotApprovedPage() {
               href="/login"
               className="block w-full py-3 px-4 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
             >
-              Try a different email
+              {t("backToLogin")}
             </Link>
-            <p className="text-sm text-gray-500">
-              Already have an invitation link?{" "}
-              <span className="text-amber-600">Check your email</span>
-            </p>
           </div>
         </div>
 
         {/* Footer */}
         <p className="mt-6 text-center text-sm text-gray-600">
-          Contact a family member to request an invitation
+          {t("contact")}
         </p>
       </div>
     </div>

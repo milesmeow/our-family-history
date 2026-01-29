@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Plus, X, User, Users } from "lucide-react";
 import { AddRelationshipDialog } from "./AddRelationshipDialog";
 import { removeRelationship } from "@/actions/people";
@@ -13,35 +14,17 @@ interface RelationshipListProps {
   relationships: (FamilyRelation & { toPerson: Person })[];
 }
 
-const relationTypeLabels: Record<string, string> = {
-  PARENT: "Parents",
-  CHILD: "Children",
-  SPOUSE: "Spouses",
-  SIBLING: "Siblings",
-};
-
-const relationTypeSingular: Record<string, string> = {
-  PARENT: "Parent",
-  CHILD: "Child",
-  SPOUSE: "Spouse",
-  SIBLING: "Sibling",
-};
-
 export function RelationshipList({
   personId,
   personName,
   relationships,
 }: RelationshipListProps) {
+  const t = useTranslations("people.relationships");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   const handleRemove = async (relation: FamilyRelation & { toPerson: Person }) => {
-    const relationLabel = relationTypeSingular[relation.relationType].toLowerCase();
-    if (
-      !confirm(
-        `Remove ${relation.toPerson.firstName} as ${personName}'s ${relationLabel}?`
-      )
-    ) {
+    if (!confirm(`Remove relationship?`)) {
       return;
     }
 
@@ -66,20 +49,20 @@ export function RelationshipList({
   );
 
   // Order: Parents, Spouses, Siblings, Children
-  const orderedTypes = ["PARENT", "SPOUSE", "SIBLING", "CHILD"];
+  const orderedTypes = ["PARENT", "SPOUSE", "SIBLING", "CHILD"] as const;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Users className="w-5 h-5" />
-          Family Relationships
+          {t("title")}
         </h2>
       </div>
 
       {relationships.length === 0 ? (
         <p className="text-gray-500 text-center py-4">
-          No family relationships added yet.
+          {t("noRelationships")}
         </p>
       ) : (
         <div className="space-y-6">
@@ -90,7 +73,7 @@ export function RelationshipList({
             return (
               <div key={type}>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  {relationTypeLabels[type]}
+                  {t(`types.${type}`)}
                 </h3>
                 <div className="space-y-2">
                   {relations.map((rel) => (
@@ -128,7 +111,6 @@ export function RelationshipList({
                         onClick={() => handleRemove(rel)}
                         disabled={removingId === rel.id}
                         className="p-2 text-gray-400 hover:text-red-500 disabled:opacity-50 transition-colors"
-                        title="Remove relationship"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -146,7 +128,7 @@ export function RelationshipList({
         className="mt-4 w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
       >
         <Plus className="w-4 h-4" />
-        Add Relationship
+        {t("add")}
       </button>
 
       <AddRelationshipDialog

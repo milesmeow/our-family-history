@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { format } from "date-fns";
 import { Edit, User, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +16,9 @@ export default async function PersonPage({ params }: PageProps) {
   const { id } = await params;
   const session = await auth();
   if (!session) redirect("/login");
+
+  const t = await getTranslations("people");
+  const tCommon = await getTranslations("common");
 
   const person = await prisma.person.findUnique({
     where: { id },
@@ -59,7 +63,7 @@ export default async function PersonPage({ params }: PageProps) {
               className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to People
+              {tCommon("back")}
             </Link>
             <div className="flex items-center gap-2">
               <Link
@@ -67,7 +71,7 @@ export default async function PersonPage({ params }: PageProps) {
                 className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
               >
                 <Edit className="w-4 h-4" />
-                Edit
+                {tCommon("edit")}
               </Link>
               <DeletePersonButton id={id} name={fullName} />
             </div>
@@ -111,11 +115,11 @@ export default async function PersonPage({ params }: PageProps) {
             <div className="mt-6 flex items-center gap-2 text-gray-600">
               <Calendar className="w-4 h-4" />
               {person.birthDate && (
-                <span>Born {format(person.birthDate, "MMMM d, yyyy")}</span>
+                <span>{t("card.born")} {format(person.birthDate, "MMMM d, yyyy")}</span>
               )}
               {person.birthDate && person.deathDate && <span>–</span>}
               {person.deathDate && (
-                <span>Died {format(person.deathDate, "MMMM d, yyyy")}</span>
+                <span>{t("card.died")} {format(person.deathDate, "MMMM d, yyyy")}</span>
               )}
             </div>
           )}
@@ -123,7 +127,7 @@ export default async function PersonPage({ params }: PageProps) {
           {/* Bio */}
           {person.bio && (
             <div className="mt-6">
-              <h2 className="font-semibold text-gray-900 mb-2">About</h2>
+              <h2 className="font-semibold text-gray-900 mb-2">{t("form.bioLabel")}</h2>
               <p className="text-gray-600 whitespace-pre-wrap">{person.bio}</p>
             </div>
           )}
@@ -142,7 +146,7 @@ export default async function PersonPage({ params }: PageProps) {
         {person.entries.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Related Stories
+              {t("entries.title")}
             </h2>
             <div className="space-y-3">
               {person.entries.map(({ entry }) => (

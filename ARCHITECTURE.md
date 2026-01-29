@@ -17,6 +17,7 @@ A full-featured web application for capturing, preserving, and visualizing famil
 | **Email** | Resend | Modern email API, 3K emails/month free, great DX |
 | **File Storage** | Uploadthing | Built for Next.js, simple uploads, free tier |
 | **Styling** | Tailwind CSS | Utility-first, consistent design, small bundle |
+| **i18n** | next-intl | Native App Router support, ICU message format, ~8KB |
 | **Hosting** | Vercel | Free tier, auto-deploys from GitHub, perfect for Next.js |
 
 ### Why This Stack?
@@ -166,6 +167,10 @@ our-family-history/
 ├── CHECKLIST.md              ← Implementation progress
 ├── README.md
 │
+├── messages/
+│   ├── en.json               # English translations
+│   └── zh-TW.json            # Traditional Chinese translations
+│
 ├── prisma/
 │   ├── schema.prisma         # Database schema
 │   └── seed.ts               # Sample data for dev
@@ -231,6 +236,7 @@ our-family-history/
 │   │   │   ├── Input.tsx
 │   │   │   ├── Modal.tsx
 │   │   │   └── DatePicker.tsx
+│   │   ├── LanguageSwitcher.tsx  # ✅ Bilingual language toggle for home page
 │   │   ├── layout/
 │   │   │   └── Footer.tsx        # ✅ App version display
 │   │   ├── entries/             # ✅ Implemented
@@ -277,6 +283,11 @@ our-family-history/
 │   │
 │   ├── types/
 │   │   └── index.ts          # Shared TypeScript types
+│   │
+│   ├── i18n/
+│   │   ├── config.ts         # Locale configuration (en, zh-TW)
+│   │   ├── request.ts        # Server-side locale detection
+│   │   └── client.ts         # Client-side locale switching
 │   │
 │   └── proxy.ts              # ✅ Route protection (Node.js runtime)
 │
@@ -655,6 +666,77 @@ The app implements invite-only access to protect family privacy. This is enforce
 - Expired invitations (7-day default, can be resent)
 - Duplicate invitations (prevented, show "resend" option instead)
 - Already-registered emails (error: "This email is already registered")
+
+---
+
+### 7. Internationalization (i18n)
+The app supports multiple languages using `next-intl`:
+
+**Supported Languages:**
+- English (en) - default
+- Traditional Chinese (zh-TW) - 繁體中文
+
+**Technical Implementation:**
+- Cookie-based locale detection (no database storage required)
+- Server components use `getTranslations()` for server-side translation
+- Client components use `useTranslations()` hook
+- Translation files in `messages/en.json` and `messages/zh-TW.json`
+- Locale stored in `NEXT_LOCALE` cookie, persisted for 1 year
+- Language selector in Settings page updates cookie and refreshes
+- Bilingual LanguageSwitcher on home page and dashboard shows "English | 繁體中文" for discoverability
+
+**File Structure:**
+```
+src/i18n/
+├── config.ts     # Locale configuration + LOCALE_COOKIE_NAME constant
+├── request.ts    # Server-side locale detection (reads cookie)
+└── client.ts     # Client-side useLocale() hook for switching
+
+messages/
+├── en.json       # ~200 translation strings organized by namespace
+└── zh-TW.json    # Traditional Chinese translations
+```
+
+**Usage Patterns:**
+
+Server Components:
+```typescript
+import { getTranslations } from "next-intl/server";
+
+export default async function Page() {
+  const t = await getTranslations("namespace");
+  return <h1>{t("title")}</h1>;
+}
+```
+
+Client Components:
+```typescript
+"use client";
+import { useTranslations } from "next-intl";
+
+export function Component() {
+  const t = useTranslations("namespace");
+  return <button>{t("label")}</button>;
+}
+```
+
+ICU Message Format (pluralization):
+```json
+{
+  "results": {
+    "showing": "Showing {count, plural, one {# entry} other {# entries}}"
+  }
+}
+```
+
+**Important: Client/Server Boundary**
+Shared constants like `LOCALE_COOKIE_NAME` must be defined in `config.ts` (not `request.ts`) because `request.ts` imports `next/headers` which is server-only. Client components importing from a server-only file will cause build errors.
+
+**Why Traditional Chinese (zh-TW)?**
+Traditional Chinese is preferred for family history/genealogical content as it preserves historical character forms. It's used in Taiwan, Hong Kong, and Macau.
+
+**Font Support:**
+Added Noto Sans TC (Traditional Chinese) font for proper Chinese character rendering.
 
 ---
 

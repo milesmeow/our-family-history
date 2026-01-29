@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 /**
  * Login Form Component
@@ -13,6 +14,7 @@ import { useSearchParams } from "next/navigation";
  * Must be wrapped in Suspense by the parent page.
  */
 export default function LoginForm() {
+  const t = useTranslations("auth.login");
   const searchParams = useSearchParams();
   // Pre-fill email from query parameter (used by invite flow)
   const initialEmail = searchParams.get("email") || "";
@@ -41,14 +43,14 @@ export default function LoginForm() {
           htmlFor="email"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Email address
+          {t("emailLabel")}
         </label>
         <input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder={t("emailPlaceholder")}
           required
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors text-gray-900 placeholder:text-gray-400"
         />
@@ -80,10 +82,10 @@ export default function LoginForm() {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            Sending magic link...
+            {t("sending")}
           </span>
         ) : (
-          "Continue with Email"
+          t("submitButton")
         )}
       </button>
     </form>

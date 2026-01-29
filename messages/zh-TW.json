@@ -1,0 +1,352 @@
+{
+  "common": {
+    "appName": "家族歷史",
+    "loading": "載入中...",
+    "save": "儲存",
+    "cancel": "取消",
+    "delete": "刪除",
+    "edit": "編輯",
+    "create": "建立",
+    "back": "返回",
+    "next": "下一步",
+    "search": "搜尋",
+    "filter": "篩選",
+    "all": "全部",
+    "none": "無",
+    "yes": "是",
+    "no": "否",
+    "or": "或",
+    "and": "和",
+    "error": "錯誤",
+    "success": "成功",
+    "required": "必填",
+    "optional": "選填"
+  },
+  "landing": {
+    "signIn": "登入",
+    "getStarted": "免費開始",
+    "heroTitle": "珍藏您家族的",
+    "heroTitleHighlight": "故事",
+    "heroDescription": "記錄回憶、分享故事，為後代建立一份永久的家族歷史記錄。",
+    "footer": "用愛為每個家庭打造",
+    "features": {
+      "captureStories": {
+        "title": "記錄故事",
+        "description": "在家族回憶、傳統和故事消逝之前，將它們記錄下來。"
+      },
+      "collaborate": {
+        "title": "共同協作",
+        "description": "邀請家族成員貢獻他們的回憶和照片。"
+      },
+      "timeline": {
+        "title": "時間軸檢視",
+        "description": "在精美的時間軸上，依時間順序瀏覽您的家族歷史。"
+      },
+      "preserve": {
+        "title": "永久珍藏",
+        "description": "為後代建立一個永久的數位檔案庫。"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "登入家族歷史",
+      "subtitle": "輸入您的電子郵件以接收魔法連結",
+      "emailLabel": "電子郵件地址",
+      "emailPlaceholder": "grandma@family.com",
+      "submitButton": "傳送魔法連結",
+      "sending": "傳送中...",
+      "inviteOnly": "家族歷史僅限受邀者使用。請向家族成員索取邀請。",
+      "backToHome": "返回首頁"
+    },
+    "checkEmail": {
+      "title": "請查看您的電子郵件",
+      "description": "我們已將登入連結傳送至您的電子郵件。請點擊連結登入。",
+      "spam": "沒看到？請檢查您的垃圾郵件資料夾。",
+      "tryAgain": "重試"
+    },
+    "notApproved": {
+      "title": "需要邀請",
+      "description": "家族歷史僅限受邀者使用。請向家族成員索取邀請。",
+      "contact": "如果您認為這是錯誤，請聯繫您的家族管理員。",
+      "backToLogin": "返回登入"
+    },
+    "error": {
+      "title": "驗證錯誤",
+      "description": "登入過程中發生錯誤，請重試。",
+      "tryAgain": "重試"
+    },
+    "invite": {
+      "title": "您已受邀！",
+      "description": "{inviter} 邀請您加入他們的家族歷史。",
+      "expired": "此邀請已過期，請索取新的邀請。",
+      "used": "此邀請已被使用。",
+      "invalid": "此邀請無效。",
+      "acceptButton": "接受邀請",
+      "signInWith": "使用您的電子郵件登入以接受邀請"
+    }
+  },
+  "dashboard": {
+    "title": "主頁面",
+    "welcome": "歡迎回來，{name}",
+    "welcomeDefault": "歡迎回來",
+    "recentEntries": "最近的記錄",
+    "viewAll": "檢視全部",
+    "noEntries": "尚無記錄",
+    "createFirst": "建立您的第一篇記錄以開始使用。",
+    "quickActions": {
+      "title": "快速操作",
+      "newEntry": "新增記錄",
+      "viewTimeline": "檢視時間軸",
+      "managePeople": "管理人物",
+      "settings": "設定"
+    },
+    "stats": {
+      "entries": "記錄",
+      "people": "人物",
+      "photos": "照片"
+    }
+  },
+  "entries": {
+    "title": "記錄",
+    "newEntry": "新增記錄",
+    "editEntry": "編輯記錄",
+    "noEntries": "找不到記錄",
+    "createFirst": "建立一篇記錄，開始珍藏您的家族歷史。",
+    "deleteConfirm": "您確定要刪除這篇記錄嗎？此操作無法復原。",
+    "form": {
+      "titleLabel": "標題",
+      "titlePlaceholder": "為您的記錄取個標題",
+      "contentLabel": "故事",
+      "contentPlaceholder": "述說這個故事...",
+      "summaryLabel": "摘要",
+      "summaryPlaceholder": "時間軸上顯示的簡短摘要",
+      "categoryLabel": "類別",
+      "eventDateLabel": "事件日期",
+      "eventDateEndLabel": "結束日期",
+      "dateApproximateLabel": "日期為約略",
+      "locationLabel": "地點",
+      "locationPlaceholder": "這發生在哪裡？",
+      "peopleLabel": "相關人物",
+      "peopleHelp": "在此記錄中標記家族成員",
+      "submit": "儲存記錄",
+      "creating": "建立中...",
+      "updating": "更新中..."
+    },
+    "categories": {
+      "STORY": "故事",
+      "BIRTH": "出生",
+      "DEATH": "逝世",
+      "WEDDING": "婚禮",
+      "GRADUATION": "畢業",
+      "MIGRATION": "移民",
+      "MILITARY": "軍旅",
+      "CAREER": "職業",
+      "TRADITION": "傳統",
+      "RECIPE": "食譜",
+      "PHOTO_MEMORY": "照片回憶",
+      "DOCUMENT": "文件",
+      "OTHER": "其他"
+    },
+    "card": {
+      "by": "作者",
+      "readMore": "閱讀更多",
+      "approximate": "約"
+    }
+  },
+  "people": {
+    "title": "人物",
+    "newPerson": "新增人物",
+    "editPerson": "編輯人物",
+    "noPeople": "尚無家族成員",
+    "addFirst": "新增人物以開始建立您的家譜。",
+    "deleteConfirm": "您確定要刪除此人物嗎？此操作無法復原。",
+    "form": {
+      "firstNameLabel": "名字",
+      "firstNamePlaceholder": "輸入名字",
+      "lastNameLabel": "姓氏",
+      "lastNamePlaceholder": "輸入姓氏",
+      "maidenNameLabel": "娘家姓",
+      "maidenNamePlaceholder": "輸入娘家姓",
+      "nicknameLabel": "暱稱",
+      "nicknamePlaceholder": "例如：阿公、奶奶",
+      "birthDateLabel": "出生日期",
+      "deathDateLabel": "逝世日期",
+      "relationshipLabel": "關係",
+      "relationshipPlaceholder": "例如：曾祖母、叔叔",
+      "bioLabel": "個人簡介",
+      "bioPlaceholder": "介紹這個人...",
+      "submit": "儲存人物",
+      "creating": "建立中...",
+      "updating": "更新中..."
+    },
+    "card": {
+      "born": "出生",
+      "died": "逝世",
+      "viewProfile": "檢視個人檔案"
+    },
+    "relationships": {
+      "title": "關係",
+      "add": "新增關係",
+      "noRelationships": "尚未新增任何關係",
+      "types": {
+        "PARENT": "父母",
+        "CHILD": "子女",
+        "SPOUSE": "配偶",
+        "SIBLING": "兄弟姐妹"
+      },
+      "dialog": {
+        "title": "新增關係",
+        "selectPerson": "選擇人物",
+        "selectType": "選擇關係類型",
+        "isParentOf": "{name}是此人的父母",
+        "isChildOf": "{name}是此人的子女",
+        "isSpouseOf": "{name}是此人的配偶",
+        "isSiblingOf": "{name}是此人的兄弟姐妹"
+      }
+    },
+    "entries": {
+      "title": "相關記錄",
+      "noEntries": "找不到此人的相關記錄"
+    }
+  },
+  "timeline": {
+    "title": "家族時間軸",
+    "subtitle": "穿越歲月探索您的家族歷史",
+    "noEvents": "沒有可顯示的事件",
+    "filters": {
+      "title": "篩選",
+      "active": "{count} 個啟用",
+      "category": "類別",
+      "allCategories": "所有類別",
+      "person": "人物",
+      "allPeople": "所有人物",
+      "fromDate": "開始日期",
+      "toDate": "結束日期",
+      "clearAll": "清除所有篩選"
+    },
+    "results": {
+      "showing": "顯示 {count} 筆記錄",
+      "filtered": "（已篩選）"
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "account": {
+      "title": "帳戶",
+      "email": "電子郵件",
+      "name": "姓名",
+      "role": "角色"
+    },
+    "language": {
+      "title": "語言",
+      "description": "選擇您偏好的介面語言",
+      "label": "介面語言",
+      "updated": "語言已成功更新"
+    },
+    "profile": {
+      "title": "您的家族檔案",
+      "titleLink": "連結您的家族檔案",
+      "description": "將您的帳戶連結到家譜中的個人檔案，讓其他人知道您是誰！",
+      "linkedToAccount": "已連結到您的帳戶",
+      "viewProfile": "檢視個人檔案",
+      "unlinking": "取消連結中...",
+      "unlinkProfile": "取消連結個人檔案",
+      "unlinkConfirm": "您確定要取消連結您的個人檔案嗎？您可以稍後重新連結。",
+      "createMyProfile": "建立我的個人檔案",
+      "createMyProfileDesc": "將自己加入家譜",
+      "linkExisting": "連結現有檔案",
+      "linkExistingDesc": "連結到家譜中已存在的檔案",
+      "createTitle": "建立您的個人檔案",
+      "linkTitle": "連結到現有檔案",
+      "loadingPeople": "載入人物中...",
+      "noUnlinkedProfiles": "沒有可用的未連結檔案。",
+      "createInstead": "改為建立新檔案",
+      "selectYourProfile": "選擇您的檔案",
+      "choosePerson": "選擇一個人物...",
+      "linking": "連結中...",
+      "linkButton": "連結檔案",
+      "creating": "建立中...",
+      "createAndLink": "建立並連結檔案",
+      "aboutYou": "關於您",
+      "aboutYouPlaceholder": "簡單介紹一下您自己...",
+      "failedToLoad": "載入人物失敗"
+    },
+    "invitations": {
+      "title": "邀請家族成員",
+      "description": "傳送邀請給家族成員，讓他們加入並為共同的家族歷史做出貢獻。",
+      "emailLabel": "電子郵件地址",
+      "emailPlaceholder": "family.member@example.com",
+      "roleLabel": "角色",
+      "sendButton": "傳送邀請",
+      "sending": "傳送中...",
+      "sent": "邀請已成功傳送！",
+      "resent": "邀請已重新傳送！",
+      "revokeConfirm": "您確定要撤銷此邀請嗎？連結將不再有效。",
+      "noInvitations": "尚未傳送任何邀請。在上方邀請家族成員！",
+      "rolesHelp": "成員可以新增故事和照片。檢視者只能瀏覽。管理員可以邀請他人。",
+      "pending": "等待中",
+      "accepted": "已接受",
+      "expired": "已過期",
+      "joined": "已於 {date} 加入",
+      "expires": "將於 {date} 過期",
+      "expiredOn": "已於 {date} 過期",
+      "resend": "重新傳送",
+      "resendTooltip": "重新傳送邀請",
+      "revokeTooltip": "撤銷邀請",
+      "status": {
+        "pending": "等待中",
+        "accepted": "已接受",
+        "expired": "已過期"
+      },
+      "roles": {
+        "ADMIN": "管理員",
+        "MEMBER": "成員",
+        "VIEWER": "檢視者"
+      }
+    }
+  },
+  "validation": {
+    "required": "{field}為必填項目",
+    "email": "請輸入有效的電子郵件地址",
+    "minLength": "{field}至少需要{min}個字元",
+    "maxLength": "{field}最多{max}個字元",
+    "invalidDate": "請輸入有效的日期",
+    "futureDate": "日期不能是未來",
+    "endBeforeStart": "結束日期必須在開始日期之後"
+  },
+  "errors": {
+    "unauthorized": "您必須登入才能執行此操作",
+    "forbidden": "您沒有權限執行此操作",
+    "notFound": "找不到請求的資源",
+    "generic": "發生錯誤，請重試。",
+    "network": "網路錯誤，請檢查您的連線。",
+    "entries": {
+      "createFailed": "建立記錄失敗",
+      "updateFailed": "更新記錄失敗",
+      "deleteFailed": "刪除記錄失敗",
+      "notOwner": "您只能編輯自己的記錄"
+    },
+    "people": {
+      "createFailed": "建立人物失敗",
+      "updateFailed": "更新人物失敗",
+      "deleteFailed": "刪除人物失敗",
+      "alreadyLinked": "此人物已連結至其他使用者帳戶",
+      "youAreLinked": "您已連結至一個個人檔案。請先取消連結以進行變更。",
+      "selfRelationship": "無法建立與自己的關係",
+      "relationshipExists": "此關係已存在",
+      "addRelationshipFailed": "新增關係失敗",
+      "removeRelationshipFailed": "移除關係失敗",
+      "linkFailed": "連結個人檔案失敗",
+      "unlinkFailed": "取消連結個人檔案失敗"
+    },
+    "invitations": {
+      "sendFailed": "傳送邀請失敗",
+      "alreadyMember": "此電子郵件已是家族成員",
+      "alreadyInvited": "此電子郵件已有待處理的邀請"
+    }
+  },
+  "footer": {
+    "version": "家族歷史 v{version}"
+  }
+}
