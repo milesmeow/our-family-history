@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 import { parseDateString } from "@/lib/utils";
 import { TimelineFilters } from "@/components/timeline/TimelineFilters";
 import { VerticalTimeline } from "@/components/timeline/VerticalTimeline";
@@ -34,6 +35,8 @@ export const metadata = {
 export default async function TimelinePage({ searchParams }: PageProps) {
   const session = await auth();
   if (!session) redirect("/login");
+
+  const t = await getTranslations("timeline");
 
   // Parse filter parameters
   const params = await searchParams;
@@ -118,14 +121,14 @@ export default async function TimelinePage({ searchParams }: PageProps) {
     endDate,
   };
 
+  const hasFilters = category || personId || startDate || endDate;
+
   return (
     <div className="max-w-5xl mx-auto">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Family Timeline</h1>
-        <p className="mt-2 text-gray-600">
-          Explore your family&apos;s history through the years
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
+        <p className="mt-2 text-gray-600">{t("subtitle")}</p>
       </div>
 
       {/* Filters */}
@@ -141,8 +144,8 @@ export default async function TimelinePage({ searchParams }: PageProps) {
       {/* Results Summary */}
       {entries.length > 0 && (
         <div className="mt-8 text-center text-sm text-gray-500">
-          Showing {entries.length} {entries.length === 1 ? "entry" : "entries"}
-          {(category || personId || startDate || endDate) && " (filtered)"}
+          {t("results.showing", { count: entries.length })}
+          {hasFilters && ` ${t("results.filtered")}`}
         </div>
       )}
     </div>

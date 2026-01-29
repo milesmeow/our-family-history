@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { EntryForm } from "@/components/entries/EntryForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -7,6 +8,9 @@ import Link from "next/link";
 export default async function NewEntryPage() {
   const session = await auth();
   if (!session) redirect("/login");
+
+  const t = await getTranslations("entries");
+  const tCommon = await getTranslations("common");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,7 +23,7 @@ export default async function NewEntryPage() {
               className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Stories
+              {tCommon("back")}
             </Link>
           </div>
         </div>
@@ -27,10 +31,7 @@ export default async function NewEntryPage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Add New Story</h1>
-          <p className="text-gray-600 mt-1">
-            Share a memory, event, or moment from your family&apos;s history.
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("newEntry")}</h1>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

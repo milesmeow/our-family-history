@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { User, Link as LinkIcon, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { linkUserToPerson, createAndLinkPerson, unlinkProfile } from "@/actions/settings";
@@ -17,6 +18,10 @@ interface PersonOption {
 }
 
 export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
+  const t = useTranslations("settings.profile");
+  const tPeople = useTranslations("people.form");
+  const tCommon = useTranslations("common");
+
   const [mode, setMode] = useState<"view" | "create" | "link">("view");
   const [people, setPeople] = useState<PersonOption[]>([]);
   const [selectedPerson, setSelectedPerson] = useState("");
@@ -38,11 +43,11 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
           setIsFetching(false);
         })
         .catch(() => {
-          setError("Failed to load people");
+          setError(t("failedToLoad"));
           setIsFetching(false);
         });
     }
-  }, [mode]);
+  }, [mode, t]);
 
   const handleLinkExisting = async () => {
     if (!selectedPerson) return;
@@ -63,7 +68,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
   };
 
   const handleUnlink = async () => {
-    if (!confirm("Are you sure you want to unlink your profile? You can re-link later.")) {
+    if (!confirm(t("unlinkConfirm"))) {
       return;
     }
 
@@ -83,7 +88,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
   if (linkedPerson) {
     return (
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Family Profile</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("title")}</h2>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
@@ -110,13 +115,13 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
             {linkedPerson.nickname && (
               <p className="text-sm text-gray-500">&ldquo;{linkedPerson.nickname}&rdquo;</p>
             )}
-            <p className="text-sm text-green-600">Linked to your account</p>
+            <p className="text-sm text-green-600">{t("linkedToAccount")}</p>
           </div>
           <Link
             href={`/people/${linkedPerson.id}`}
             className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            View Profile
+            {t("viewProfile")}
           </Link>
         </div>
 
@@ -125,7 +130,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
           disabled={isUnlinking}
           className="mt-4 text-sm text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50"
         >
-          {isUnlinking ? "Unlinking..." : "Unlink profile"}
+          {isUnlinking ? t("unlinking") : t("unlinkProfile")}
         </button>
       </div>
     );
@@ -134,10 +139,8 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
   // Not linked - show options
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">Link Your Family Profile</h2>
-      <p className="text-gray-600 text-sm mb-4">
-        Connect your account to your profile in the family tree. This helps others know who you are!
-      </p>
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("titleLink")}</h2>
+      <p className="text-gray-600 text-sm mb-4">{t("description")}</p>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
@@ -161,8 +164,8 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
               <Plus className="w-5 h-5 text-blue-600" />
             </div>
             <div className="text-left">
-              <p className="font-medium text-gray-900">Create my profile</p>
-              <p className="text-sm text-gray-500">Add yourself to the family tree</p>
+              <p className="font-medium text-gray-900">{t("createMyProfile")}</p>
+              <p className="text-sm text-gray-500">{t("createMyProfileDesc")}</p>
             </div>
           </button>
 
@@ -174,8 +177,8 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
               <LinkIcon className="w-5 h-5 text-green-600" />
             </div>
             <div className="text-left">
-              <p className="font-medium text-gray-900">Link to existing profile</p>
-              <p className="text-sm text-gray-500">Connect to a profile already in the family tree</p>
+              <p className="font-medium text-gray-900">{t("linkExisting")}</p>
+              <p className="text-sm text-gray-500">{t("linkExistingDesc")}</p>
             </div>
           </button>
         </div>
@@ -184,7 +187,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
       {mode === "create" && (
         <div className="border border-gray-200 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-900">Create Your Profile</h3>
+            <h3 className="font-medium text-gray-900">{t("createTitle")}</h3>
             <button
               onClick={() => setMode("view")}
               className="p-1 hover:bg-gray-100 rounded transition-colors"
@@ -197,7 +200,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name <span className="text-red-500">*</span>
+                  {tPeople("firstNameLabel")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -209,7 +212,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name <span className="text-red-500">*</span>
+                  {tPeople("lastNameLabel")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -224,19 +227,19 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nickname
+                  {tPeople("nicknameLabel")}
                 </label>
                 <input
                   type="text"
                   id="nickname"
                   name="nickname"
-                  placeholder='e.g., "Jamie"'
+                  placeholder={tPeople("nicknamePlaceholder")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
               <div>
                 <label htmlFor="maidenName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Maiden Name
+                  {tPeople("maidenNameLabel")}
                 </label>
                 <input
                   type="text"
@@ -249,7 +252,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
 
             <div>
               <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Birth Date
+                {tPeople("birthDateLabel")}
               </label>
               <input
                 type="date"
@@ -261,13 +264,13 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
 
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
-                About You
+                {t("aboutYou")}
               </label>
               <textarea
                 id="bio"
                 name="bio"
                 rows={3}
-                placeholder="A little about yourself..."
+                placeholder={t("aboutYouPlaceholder")}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
               />
             </div>
@@ -278,14 +281,14 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
                 onClick={() => setMode("view")}
                 className="px-4 py-2 text-gray-600 hover:text-gray-900"
               >
-                Cancel
+                {tCommon("cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isCreating}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isCreating ? "Creating..." : "Create & Link Profile"}
+                {isCreating ? t("creating") : t("createAndLink")}
               </button>
             </div>
           </form>
@@ -295,7 +298,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
       {mode === "link" && (
         <div className="border border-gray-200 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-900">Link to Existing Profile</h3>
+            <h3 className="font-medium text-gray-900">{t("linkTitle")}</h3>
             <button
               onClick={() => setMode("view")}
               className="p-1 hover:bg-gray-100 rounded transition-colors"
@@ -305,22 +308,22 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
           </div>
 
           {isFetching ? (
-            <p className="text-gray-500 text-center py-4">Loading people...</p>
+            <p className="text-gray-500 text-center py-4">{t("loadingPeople")}</p>
           ) : people.length === 0 ? (
             <div className="text-center py-4">
-              <p className="text-gray-500 mb-2">No unlinked profiles available.</p>
+              <p className="text-gray-500 mb-2">{t("noUnlinkedProfiles")}</p>
               <button
                 onClick={() => setMode("create")}
                 className="text-blue-600 hover:text-blue-700"
               >
-                Create a new profile instead
+                {t("createInstead")}
               </button>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
                 <label htmlFor="selectPerson" className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Your Profile
+                  {t("selectYourProfile")}
                 </label>
                 <select
                   id="selectPerson"
@@ -328,7 +331,7 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
                   onChange={(e) => setSelectedPerson(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 >
-                  <option value="">Choose a person...</option>
+                  <option value="">{t("choosePerson")}</option>
                   {people.map((person) => (
                     <option key={person.id} value={person.id}>
                       {person.firstName} {person.lastName}
@@ -343,14 +346,14 @@ export function LinkProfileSection({ linkedPerson }: LinkProfileSectionProps) {
                   onClick={() => setMode("view")}
                   className="px-4 py-2 text-gray-600 hover:text-gray-900"
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </button>
                 <button
                   onClick={handleLinkExisting}
                   disabled={!selectedPerson || isLinking}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {isLinking ? "Linking..." : "Link Profile"}
+                  {isLinking ? t("linking") : t("linkButton")}
                 </button>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import LoginForm from "./LoginForm";
 
 /**
@@ -7,7 +8,10 @@ import LoginForm from "./LoginForm";
  * Wraps LoginForm in Suspense because it uses useSearchParams(),
  * which requires a Suspense boundary for static page generation.
  */
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations("auth.login");
+  const tCommon = await getTranslations("common");
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
       <div className="max-w-md w-full mx-4">
@@ -15,10 +19,10 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Family History
+              {tCommon("appName")}
             </h1>
             <p className="text-gray-600">
-              Sign in to preserve and share your family stories
+              {t("subtitle")}
             </p>
           </div>
 
@@ -39,14 +43,9 @@ export default function LoginPage() {
 
           {/* Info */}
           <p className="mt-6 text-center text-sm text-gray-500">
-            We&apos;ll send you a magic link to sign in. No password needed!
+            {t("inviteOnly")}
           </p>
         </div>
-
-        {/* Footer */}
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Preserving memories for generations to come
-        </p>
       </div>
     </div>
   );

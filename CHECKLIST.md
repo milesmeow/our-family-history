@@ -544,11 +544,137 @@ After each phase, verify:
 
 ---
 
+## Phase 15: Internationalization (i18n) ✅ Mostly Complete
+**Goal:** Multi-language support with English and Traditional Chinese
+
+### Infrastructure Setup ✅
+- [x] Install `next-intl` package
+- [x] Create `src/i18n/config.ts` with locale configuration
+- [x] Create `src/i18n/request.ts` for server-side locale detection
+- [x] Create `src/i18n/client.ts` for client-side locale switching
+- [x] Create `messages/en.json` with all UI strings
+- [x] Create `messages/zh-TW.json` with Chinese translations
+- [x] Update `next.config.ts` with next-intl plugin
+- [x] Update `src/app/layout.tsx` with NextIntlClientProvider
+- [x] Add Noto Sans TC (Traditional Chinese) font
+
+### Core Pages ✅
+- [x] Landing page (`src/app/page.tsx`)
+- [x] Login page (`src/app/(auth)/login/page.tsx`)
+- [x] Login form (`src/app/(auth)/login/LoginForm.tsx`)
+- [x] Check email page
+- [x] Not approved page
+- [x] Error page
+- [x] Dashboard page
+- [x] Footer component
+- [ ] Invite page
+
+### Entry System ✅
+- [x] Entry form component
+- [x] Entry cards and list pages
+- [x] Entry detail page
+- [x] Delete entry button
+- [x] Category labels
+- [ ] Server action error messages
+
+### People System ✅
+- [x] Person form component
+- [x] Person cards and list pages
+- [x] Person detail page
+- [x] Edit person page
+- [x] Delete person button
+- [x] Relationship types and dialog
+- [x] Add relationship dialog
+
+### Timeline & Settings ✅
+- [x] Timeline page with translations
+- [x] Timeline filters with all labels translated
+- [x] Results summary with pluralization
+- [x] Settings page with language selector
+- [x] Account info translations
+- [x] Link profile section translations
+- [x] Invitation system translations (all strings)
+
+### Validation & Polish
+- [ ] Zod schemas with translatable errors
+- [ ] Test date formatting with both locales
+- [ ] Final QA in both languages
+
+**Design Decisions:**
+> **Cookie-based locale storage**: User's language preference is stored in a cookie
+> (not in the database) for simplicity. Users can switch languages anytime from
+> the Settings page; preference persists for 1 year via cookie.
+>
+> **Traditional Chinese (zh-TW)**: Chosen over Simplified Chinese because it
+> preserves historical character forms, which is more appropriate for
+> family history and genealogical content.
+>
+> **Client/Server Boundary**: Shared constants like `LOCALE_COOKIE_NAME` must live
+> in a neutral config file (`src/i18n/config.ts`), not in server-only files like
+> `request.ts`. This prevents "next/headers" import errors in client components.
+
+**Implementation Patterns:**
+> **Server Components** use `getTranslations()` from `next-intl/server`:
+> ```typescript
+> const t = await getTranslations("namespace");
+> return <h1>{t("key")}</h1>;
+> ```
+>
+> **Client Components** use `useTranslations()` hook from `next-intl`:
+> ```typescript
+> const t = useTranslations("namespace");
+> return <button>{t("label")}</button>;
+> ```
+>
+> **ICU Message Format** for pluralization and variables:
+> ```json
+> "showing": "Showing {count, plural, one {# entry} other {# entries}}"
+> ```
+> In Chinese, pluralization is simpler: `"顯示 {count} 筆記錄"`
+>
+> **Locale-aware date formatting** uses the current locale:
+> ```typescript
+> new Date(date).toLocaleDateString(locale === "zh-TW" ? "zh-TW" : "en-US", options);
+> ```
+
+**Files created:**
+- `messages/en.json` (comprehensive translation file with ~200 strings)
+- `messages/zh-TW.json` (Traditional Chinese translations)
+- `src/i18n/config.ts` (locale configuration + cookie name constant)
+- `src/i18n/request.ts` (server-side locale detection from cookie)
+- `src/i18n/client.ts` (client-side locale switching hook)
+- `src/components/settings/LanguageSelector.tsx` (language dropdown component)
+
+**Files modified:**
+- `next.config.ts` (added next-intl plugin)
+- `src/app/layout.tsx` (added NextIntlClientProvider, Chinese font, dynamic lang)
+- `src/app/page.tsx` (added translations)
+- `src/app/(auth)/login/*` (added translations to all auth pages)
+- `src/app/(main)/dashboard/page.tsx` (added translations)
+- `src/app/(main)/entries/*` (added translations to all entry pages)
+- `src/app/(main)/people/*` (added translations to all people pages)
+- `src/app/(main)/timeline/page.tsx` (added translations)
+- `src/app/(main)/settings/page.tsx` (added translations + LanguageSelector)
+- `src/components/layout/Footer.tsx` (added translations)
+- `src/components/entries/EntryCard.tsx` (converted to client component with translations)
+- `src/components/entries/EntryForm.tsx` (added translations)
+- `src/components/entries/DeleteEntryButton.tsx` (added translations)
+- `src/components/people/PersonCard.tsx` (converted to client component with translations)
+- `src/components/people/PersonForm.tsx` (added translations)
+- `src/components/people/DeletePersonButton.tsx` (added translations)
+- `src/components/people/RelationshipList.tsx` (added translations)
+- `src/components/people/AddRelationshipDialog.tsx` (added translations)
+- `src/components/timeline/TimelineFilters.tsx` (added translations)
+- `src/components/settings/LinkProfileSection.tsx` (added translations)
+- `src/components/settings/InviteFamilySection.tsx` (added translations)
+
+---
+
 ## Current Status
 
 **Last Updated:** 2025-01-28
 
-**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress
+**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress, 15 Mostly Complete
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
@@ -559,6 +685,7 @@ After each phase, verify:
 - ✅ Phase 8: Timeline View - Chronological display with filters
 - 🔶 Phase 12: Settings (mostly complete) - User-Person profile linking + Invitation system
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
+- ✅ Phase 15: i18n (mostly complete) - English + Traditional Chinese for all UI pages
 
 **Key Decisions Made:**
 > **User-Person Linking via Settings**: Users can link their account to a Person
@@ -606,8 +733,16 @@ After each phase, verify:
   - Responsive design (alternating on desktop, stacked on mobile)
   - Category-specific color coding
   - Undated entries section
+- **Internationalization (i18n) with:**
+  - English and Traditional Chinese (zh-TW) support
+  - Cookie-based locale persistence (1 year)
+  - All pages translated: landing, auth, dashboard, entries, people, timeline, settings
+  - Language selector in Settings page
+  - Noto Sans TC font for Chinese characters
+  - ICU message format for pluralization and variable interpolation
 
 **Next Steps:**
+- Complete Phase 15: Add translatable Zod validation errors, final QA
 - Complete Phase 14: Configure Vercel environment variables, deploy
 - Phase 6: Photo Uploads (Uploadthing integration)
 - Phase 9: Family Tree visualization

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { createPerson, updatePerson } from "@/actions/people";
 import type { Person } from "@prisma/client";
 import { format } from "date-fns";
@@ -11,6 +12,9 @@ interface PersonFormProps {
 }
 
 export function PersonForm({ person }: PersonFormProps) {
+  const t = useTranslations("people");
+  const tCommon = useTranslations("common");
+
   const action = person
     ? updatePerson.bind(null, person.id)
     : createPerson;
@@ -32,7 +36,7 @@ export function PersonForm({ person }: PersonFormProps) {
             htmlFor="firstName"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            First Name <span className="text-red-500">*</span>
+            {t("form.firstNameLabel")} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -40,6 +44,7 @@ export function PersonForm({ person }: PersonFormProps) {
             name="firstName"
             defaultValue={person?.firstName ?? ""}
             required
+            placeholder={t("form.firstNamePlaceholder")}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
@@ -49,7 +54,7 @@ export function PersonForm({ person }: PersonFormProps) {
             htmlFor="lastName"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Last Name <span className="text-red-500">*</span>
+            {t("form.lastNameLabel")} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -57,6 +62,7 @@ export function PersonForm({ person }: PersonFormProps) {
             name="lastName"
             defaultValue={person?.lastName ?? ""}
             required
+            placeholder={t("form.lastNamePlaceholder")}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
@@ -69,13 +75,14 @@ export function PersonForm({ person }: PersonFormProps) {
             htmlFor="maidenName"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Maiden Name
+            {t("form.maidenNameLabel")}
           </label>
           <input
             type="text"
             id="maidenName"
             name="maidenName"
             defaultValue={person?.maidenName ?? ""}
+            placeholder={t("form.maidenNamePlaceholder")}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
@@ -85,14 +92,14 @@ export function PersonForm({ person }: PersonFormProps) {
             htmlFor="nickname"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Nickname
+            {t("form.nicknameLabel")}
           </label>
           <input
             type="text"
             id="nickname"
             name="nickname"
             defaultValue={person?.nickname ?? ""}
-            placeholder='e.g., "Grandpa Joe"'
+            placeholder={t("form.nicknamePlaceholder")}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
@@ -105,7 +112,7 @@ export function PersonForm({ person }: PersonFormProps) {
             htmlFor="birthDate"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Birth Date
+            {t("form.birthDateLabel")}
           </label>
           <input
             type="date"
@@ -123,7 +130,7 @@ export function PersonForm({ person }: PersonFormProps) {
             htmlFor="deathDate"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Death Date
+            {t("form.deathDateLabel")}
           </label>
           <input
             type="date"
@@ -143,14 +150,14 @@ export function PersonForm({ person }: PersonFormProps) {
           htmlFor="bio"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Biography
+          {t("form.bioLabel")}
         </label>
         <textarea
           id="bio"
           name="bio"
           rows={4}
           defaultValue={person?.bio ?? ""}
-          placeholder="Tell us about this person..."
+          placeholder={t("form.bioPlaceholder")}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
         />
       </div>
@@ -161,14 +168,16 @@ export function PersonForm({ person }: PersonFormProps) {
           href={person ? `/people/${person.id}` : "/people"}
           className="px-6 py-2 text-gray-600 hover:text-gray-900"
         >
-          Cancel
+          {tCommon("cancel")}
         </Link>
         <button
           type="submit"
           disabled={isPending}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isPending ? "Saving..." : person ? "Update Person" : "Add Person"}
+          {isPending
+            ? (person ? t("form.updating") : t("form.creating"))
+            : t("form.submit")}
         </button>
       </div>
     </form>

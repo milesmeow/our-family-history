@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { PersonForm } from "@/components/people/PersonForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -14,13 +15,14 @@ export default async function EditPersonPage({ params }: PageProps) {
   const session = await auth();
   if (!session) redirect("/login");
 
+  const t = await getTranslations("people");
+  const tCommon = await getTranslations("common");
+
   const person = await prisma.person.findUnique({
     where: { id },
   });
 
   if (!person) notFound();
-
-  const fullName = `${person.firstName} ${person.lastName}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -33,10 +35,10 @@ export default async function EditPersonPage({ params }: PageProps) {
               className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back
+              {tCommon("back")}
             </Link>
             <span className="text-gray-300">|</span>
-            <h1 className="text-xl font-bold text-gray-900">Edit {fullName}</h1>
+            <h1 className="text-xl font-bold text-gray-900">{t("editPerson")}</h1>
           </div>
         </div>
       </header>
