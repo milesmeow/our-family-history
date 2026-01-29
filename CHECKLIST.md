@@ -595,10 +595,12 @@ After each phase, verify:
 - [x] Link profile section translations
 - [x] Invitation system translations (all strings)
 
-### Validation & Polish
-- [ ] Zod schemas with translatable errors
-- [ ] Test date formatting with both locales
-- [ ] Final QA in both languages
+### Validation & Polish ✅
+- [x] Server actions use `getTranslations()` for error messages
+- [x] All error messages in `errors.*` namespace
+- [x] Validation errors use `validation.required` pattern
+- [ ] Test date formatting with both locales (manual QA)
+- [ ] Final QA in both languages (manual QA)
 
 **Design Decisions:**
 > **Cookie-based locale storage**: User's language preference is stored in a cookie
@@ -644,13 +646,14 @@ After each phase, verify:
 - `src/i18n/request.ts` (server-side locale detection from cookie)
 - `src/i18n/client.ts` (client-side locale switching hook)
 - `src/components/settings/LanguageSelector.tsx` (language dropdown component)
+- `src/components/LanguageSwitcher.tsx` (bilingual switcher for home page header)
 
 **Files modified:**
 - `next.config.ts` (added next-intl plugin)
 - `src/app/layout.tsx` (added NextIntlClientProvider, Chinese font, dynamic lang)
 - `src/app/page.tsx` (added translations)
 - `src/app/(auth)/login/*` (added translations to all auth pages)
-- `src/app/(main)/dashboard/page.tsx` (added translations)
+- `src/app/(main)/dashboard/page.tsx` (added translations + LanguageSwitcher)
 - `src/app/(main)/entries/*` (added translations to all entry pages)
 - `src/app/(main)/people/*` (added translations to all people pages)
 - `src/app/(main)/timeline/page.tsx` (added translations)
@@ -672,7 +675,7 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2025-01-28
+**Last Updated:** 2025-01-29
 
 **Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress, 15 Mostly Complete
 
@@ -738,6 +741,7 @@ After each phase, verify:
   - Cookie-based locale persistence (1 year)
   - All pages translated: landing, auth, dashboard, entries, people, timeline, settings
   - Language selector in Settings page
+  - Bilingual language switcher on home page and dashboard (shows "English | 繁體中文" for discoverability)
   - Noto Sans TC font for Chinese characters
   - ICU message format for pluralization and variable interpolation
 

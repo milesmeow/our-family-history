@@ -9,6 +9,7 @@ import {
 } from "@/lib/validations/person";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 type ActionResult =
   | { success: true; data?: unknown }
@@ -31,8 +32,11 @@ export async function createPerson(
   formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+  const tValidation = await getTranslations("validation");
+
   if (!session) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   const rawData = {
@@ -49,7 +53,13 @@ export async function createPerson(
   const validatedFields = personFormSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    return { success: false, error: validatedFields.error.issues[0].message };
+    // Map Zod field errors to translated messages
+    const firstError = validatedFields.error.issues[0];
+    const fieldName = firstError.path[0] as string;
+    return {
+      success: false,
+      error: tValidation("required", { field: fieldName }),
+    };
   }
 
   const { birthDate, deathDate, ...rest } = validatedFields.data;
@@ -67,7 +77,7 @@ export async function createPerson(
     personId = person.id;
   } catch (error) {
     console.error("Failed to create person:", error);
-    return { success: false, error: "Failed to create person" };
+    return { success: false, error: tErrors("people.createFailed") };
   }
 
   // redirect() must be outside try-catch because it throws NEXT_REDIRECT internally
@@ -82,8 +92,11 @@ export async function updatePerson(
   formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+  const tValidation = await getTranslations("validation");
+
   if (!session) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   const rawData = {
@@ -100,7 +113,12 @@ export async function updatePerson(
   const validatedFields = personFormSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    return { success: false, error: validatedFields.error.issues[0].message };
+    const firstError = validatedFields.error.issues[0];
+    const fieldName = firstError.path[0] as string;
+    return {
+      success: false,
+      error: tValidation("required", { field: fieldName }),
+    };
   }
 
   const { birthDate, deathDate, ...rest } = validatedFields.data;
@@ -116,7 +134,7 @@ export async function updatePerson(
     });
   } catch (error) {
     console.error("Failed to update person:", error);
-    return { success: false, error: "Failed to update person" };
+    return { success: false, error: tErrors("people.updateFailed") };
   }
 
   revalidatePath(`/people/${id}`);
@@ -127,8 +145,10 @@ export async function updatePerson(
 // DELETE PERSON
 export async function deletePerson(id: string): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+
   if (!session) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   try {
@@ -137,7 +157,7 @@ export async function deletePerson(id: string): Promise<ActionResult> {
     });
   } catch (error) {
     console.error("Failed to delete person:", error);
-    return { success: false, error: "Failed to delete person" };
+    return { success: false, error: tErrors("people.deleteFailed") };
   }
 
   revalidatePath("/people");
@@ -151,21 +171,23 @@ export async function addRelationship(data: {
   relationType: string;
 }): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+
   if (!session) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   const validatedFields = relationshipSchema.safeParse(data);
 
   if (!validatedFields.success) {
-    return { success: false, error: validatedFields.error.issues[0].message };
+    return { success: false, error: tErrors("generic") };
   }
 
   const { fromPersonId, toPersonId, relationType } = validatedFields.data;
 
   // Prevent self-relationships
   if (fromPersonId === toPersonId) {
-    return { success: false, error: "Cannot create relationship with self" };
+    return { success: false, error: tErrors("people.selfRelationship") };
   }
 
   // Get the inverse relationship type
@@ -194,9 +216,9 @@ export async function addRelationship(data: {
     console.error("Failed to add relationship:", error);
     // Check for unique constraint violation
     if (error instanceof Error && error.message.includes("Unique constraint")) {
-      return { success: false, error: "This relationship already exists" };
+      return { success: false, error: tErrors("people.relationshipExists") };
     }
-    return { success: false, error: "Failed to add relationship" };
+    return { success: false, error: tErrors("people.addRelationshipFailed") };
   }
 }
 
@@ -207,8 +229,10 @@ export async function removeRelationship(
   relationType: string
 ): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+
   if (!session) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   const inverseType = getInverseRelationType(relationType);
@@ -242,6 +266,6 @@ export async function removeRelationship(
     return { success: true };
   } catch (error) {
     console.error("Failed to remove relationship:", error);
-    return { success: false, error: "Failed to remove relationship" };
+    return { success: false, error: tErrors("people.removeRelationshipFailed") };
   }
 }

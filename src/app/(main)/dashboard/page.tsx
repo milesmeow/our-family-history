@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { BookOpen, Users, Clock, TreePine, Settings } from "lucide-react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -24,6 +25,7 @@ export default async function DashboardPage() {
           <div className="flex justify-between items-center h-16">
             <h1 className="text-xl font-bold text-gray-900">{tCommon("appName")}</h1>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher />
               <span className="text-sm text-gray-600">
                 {session.user?.email}
               </span>

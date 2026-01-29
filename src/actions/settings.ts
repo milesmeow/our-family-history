@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { parseDateString } from "@/lib/utils";
 import { personFormSchema } from "@/lib/validations/person";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 
 type ActionResult =
   | { success: true; data?: unknown }
@@ -13,8 +14,10 @@ type ActionResult =
 // LINK USER TO EXISTING PERSON
 export async function linkUserToPerson(personId: string): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   const userId = session.user.id;
@@ -26,7 +29,7 @@ export async function linkUserToPerson(personId: string): Promise<ActionResult> 
     });
 
     if (existingLink) {
-      return { success: false, error: "This person is already linked to another user account" };
+      return { success: false, error: tErrors("people.alreadyLinked") };
     }
 
     // Check if the current user is already linked to a different Person
@@ -36,7 +39,7 @@ export async function linkUserToPerson(personId: string): Promise<ActionResult> 
     });
 
     if (currentUser?.personId) {
-      return { success: false, error: "You are already linked to a profile. Unlink first to change." };
+      return { success: false, error: tErrors("people.youAreLinked") };
     }
 
     // Link the user to the person
@@ -49,7 +52,7 @@ export async function linkUserToPerson(personId: string): Promise<ActionResult> 
     return { success: true };
   } catch (error) {
     console.error("Failed to link profile:", error);
-    return { success: false, error: "Failed to link profile" };
+    return { success: false, error: tErrors("people.linkFailed") };
   }
 }
 
@@ -59,8 +62,11 @@ export async function createAndLinkPerson(
   formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+  const tValidation = await getTranslations("validation");
+
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   const userId = session.user.id;
@@ -72,7 +78,7 @@ export async function createAndLinkPerson(
   });
 
   if (currentUser?.personId) {
-    return { success: false, error: "You are already linked to a profile" };
+    return { success: false, error: tErrors("people.youAreLinked") };
   }
 
   const rawData = {
@@ -89,7 +95,12 @@ export async function createAndLinkPerson(
   const validatedFields = personFormSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    return { success: false, error: validatedFields.error.issues[0].message };
+    const firstError = validatedFields.error.issues[0];
+    const fieldName = firstError.path[0] as string;
+    return {
+      success: false,
+      error: tValidation("required", { field: fieldName }),
+    };
   }
 
   const { birthDate, ...rest } = validatedFields.data;
@@ -116,15 +127,17 @@ export async function createAndLinkPerson(
     return { success: true };
   } catch (error) {
     console.error("Failed to create and link profile:", error);
-    return { success: false, error: "Failed to create profile" };
+    return { success: false, error: tErrors("people.createFailed") };
   }
 }
 
 // UNLINK USER FROM PERSON
 export async function unlinkProfile(): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   const userId = session.user.id;
@@ -139,6 +152,6 @@ export async function unlinkProfile(): Promise<ActionResult> {
     return { success: true };
   } catch (error) {
     console.error("Failed to unlink profile:", error);
-    return { success: false, error: "Failed to unlink profile" };
+    return { success: false, error: tErrors("people.unlinkFailed") };
   }
 }

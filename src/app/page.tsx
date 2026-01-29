@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BookOpen, Users, Clock, Heart } from "lucide-react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default async function HomePage() {
   const session = await auth();
@@ -21,12 +22,15 @@ export default async function HomePage() {
       <header className="absolute top-0 left-0 right-0 p-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-gray-900">{tCommon("appName")}</h1>
-          <Link
-            href="/login"
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors"
-          >
-            {t("signIn")}
-          </Link>
+          <div className="flex items-center gap-6">
+            <LanguageSwitcher />
+            <Link
+              href="/login"
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors"
+            >
+              {t("signIn")}
+            </Link>
+          </div>
         </div>
       </header>
 

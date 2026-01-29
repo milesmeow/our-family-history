@@ -324,14 +324,21 @@
     "entries": {
       "createFailed": "Failed to create entry",
       "updateFailed": "Failed to update entry",
-      "deleteFailed": "Failed to delete entry"
+      "deleteFailed": "Failed to delete entry",
+      "notOwner": "You can only edit your own entries"
     },
     "people": {
       "createFailed": "Failed to create person",
       "updateFailed": "Failed to update person",
       "deleteFailed": "Failed to delete person",
       "alreadyLinked": "This person is already linked to another user account",
-      "youAreLinked": "You are already linked to a profile. Unlink first to change."
+      "youAreLinked": "You are already linked to a profile. Unlink first to change.",
+      "selfRelationship": "Cannot create a relationship with oneself",
+      "relationshipExists": "This relationship already exists",
+      "addRelationshipFailed": "Failed to add relationship",
+      "removeRelationshipFailed": "Failed to remove relationship",
+      "linkFailed": "Failed to link profile",
+      "unlinkFailed": "Failed to unlink profile"
     },
     "invitations": {
       "sendFailed": "Failed to send invitation",

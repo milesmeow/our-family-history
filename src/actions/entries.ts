@@ -6,6 +6,7 @@ import { parseDateString } from "@/lib/utils";
 import { entryFormSchema } from "@/lib/validations/entry";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 type ActionResult =
   | { success: true; data?: unknown }
@@ -17,8 +18,11 @@ export async function createEntry(
   formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+  const tValidation = await getTranslations("validation");
+
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   // Parse peopleIds from form data (multiple values with same name)
@@ -42,7 +46,12 @@ export async function createEntry(
   const validatedFields = entryFormSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    return { success: false, error: validatedFields.error.issues[0].message };
+    const firstError = validatedFields.error.issues[0];
+    const fieldName = firstError.path[0] as string;
+    return {
+      success: false,
+      error: tValidation("required", { field: fieldName }),
+    };
   }
 
   const {
@@ -74,7 +83,7 @@ export async function createEntry(
     entryId = entry.id;
   } catch (error) {
     console.error("Failed to create entry:", error);
-    return { success: false, error: "Failed to create entry" };
+    return { success: false, error: tErrors("entries.createFailed") };
   }
 
   // redirect() must be outside try-catch because it throws NEXT_REDIRECT internally
@@ -90,8 +99,11 @@ export async function updateEntry(
   formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+  const tValidation = await getTranslations("validation");
+
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   // Verify ownership
@@ -101,11 +113,11 @@ export async function updateEntry(
   });
 
   if (!existingEntry) {
-    return { success: false, error: "Entry not found" };
+    return { success: false, error: tErrors("notFound") };
   }
 
   if (existingEntry.authorId !== session.user.id) {
-    return { success: false, error: "You can only edit your own entries" };
+    return { success: false, error: tErrors("entries.notOwner") };
   }
 
   // Parse peopleIds from form data
@@ -129,7 +141,12 @@ export async function updateEntry(
   const validatedFields = entryFormSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    return { success: false, error: validatedFields.error.issues[0].message };
+    const firstError = validatedFields.error.issues[0];
+    const fieldName = firstError.path[0] as string;
+    return {
+      success: false,
+      error: tValidation("required", { field: fieldName }),
+    };
   }
 
   const {
@@ -166,7 +183,7 @@ export async function updateEntry(
     });
   } catch (error) {
     console.error("Failed to update entry:", error);
-    return { success: false, error: "Failed to update entry" };
+    return { success: false, error: tErrors("entries.updateFailed") };
   }
 
   revalidatePath(`/entries/${id}`);
@@ -178,8 +195,10 @@ export async function updateEntry(
 // DELETE ENTRY
 export async function deleteEntry(id: string): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   // Verify ownership
@@ -189,11 +208,11 @@ export async function deleteEntry(id: string): Promise<ActionResult> {
   });
 
   if (!existingEntry) {
-    return { success: false, error: "Entry not found" };
+    return { success: false, error: tErrors("notFound") };
   }
 
   if (existingEntry.authorId !== session.user.id) {
-    return { success: false, error: "You can only delete your own entries" };
+    return { success: false, error: tErrors("entries.notOwner") };
   }
 
   try {
@@ -202,7 +221,7 @@ export async function deleteEntry(id: string): Promise<ActionResult> {
     });
   } catch (error) {
     console.error("Failed to delete entry:", error);
-    return { success: false, error: "Failed to delete entry" };
+    return { success: false, error: tErrors("entries.deleteFailed") };
   }
 
   revalidatePath("/entries");
@@ -213,8 +232,10 @@ export async function deleteEntry(id: string): Promise<ActionResult> {
 // TOGGLE PUBLISH STATUS
 export async function togglePublish(id: string): Promise<ActionResult> {
   const session = await auth();
+  const tErrors = await getTranslations("errors");
+
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: tErrors("unauthorized") };
   }
 
   // Verify ownership and get current status
@@ -224,11 +245,11 @@ export async function togglePublish(id: string): Promise<ActionResult> {
   });
 
   if (!existingEntry) {
-    return { success: false, error: "Entry not found" };
+    return { success: false, error: tErrors("notFound") };
   }
 
   if (existingEntry.authorId !== session.user.id) {
-    return { success: false, error: "You can only publish your own entries" };
+    return { success: false, error: tErrors("entries.notOwner") };
   }
 
   try {
@@ -246,6 +267,6 @@ export async function togglePublish(id: string): Promise<ActionResult> {
     return { success: true };
   } catch (error) {
     console.error("Failed to toggle publish status:", error);
-    return { success: false, error: "Failed to update publish status" };
+    return { success: false, error: tErrors("entries.updateFailed") };
   }
 }

@@ -324,14 +324,21 @@
     "entries": {
       "createFailed": "建立記錄失敗",
       "updateFailed": "更新記錄失敗",
-      "deleteFailed": "刪除記錄失敗"
+      "deleteFailed": "刪除記錄失敗",
+      "notOwner": "您只能編輯自己的記錄"
     },
     "people": {
       "createFailed": "建立人物失敗",
       "updateFailed": "更新人物失敗",
       "deleteFailed": "刪除人物失敗",
       "alreadyLinked": "此人物已連結至其他使用者帳戶",
-      "youAreLinked": "您已連結至一個個人檔案。請先取消連結以進行變更。"
+      "youAreLinked": "您已連結至一個個人檔案。請先取消連結以進行變更。",
+      "selfRelationship": "無法建立與自己的關係",
+      "relationshipExists": "此關係已存在",
+      "addRelationshipFailed": "新增關係失敗",
+      "removeRelationshipFailed": "移除關係失敗",
+      "linkFailed": "連結個人檔案失敗",
+      "unlinkFailed": "取消連結個人檔案失敗"
     },
     "invitations": {
       "sendFailed": "傳送邀請失敗",

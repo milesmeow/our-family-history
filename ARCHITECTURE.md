@@ -236,6 +236,7 @@ our-family-history/
 │   │   │   ├── Input.tsx
 │   │   │   ├── Modal.tsx
 │   │   │   └── DatePicker.tsx
+│   │   ├── LanguageSwitcher.tsx  # ✅ Bilingual language toggle for home page
 │   │   ├── layout/
 │   │   │   └── Footer.tsx        # ✅ App version display
 │   │   ├── entries/             # ✅ Implemented
@@ -682,6 +683,7 @@ The app supports multiple languages using `next-intl`:
 - Translation files in `messages/en.json` and `messages/zh-TW.json`
 - Locale stored in `NEXT_LOCALE` cookie, persisted for 1 year
 - Language selector in Settings page updates cookie and refreshes
+- Bilingual LanguageSwitcher on home page and dashboard shows "English | 繁體中文" for discoverability
 
 **File Structure:**
 ```
