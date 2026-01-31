@@ -513,24 +513,24 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 
 ---
 
-## Phase 14: Deployment (In Progress)
+## Phase 14: Deployment (Ready)
 **Goal:** Deploy to production on Vercel
 
 - [x] Connect GitHub repo to Vercel
 - [x] Fix build script for Vercel (`prisma generate && next build`)
 - [x] Migrate `middleware.ts` to `proxy.ts` (fixes Edge Runtime 1MB size limit)
-- [ ] Configure environment variables in Vercel dashboard
-  - [ ] TURSO_DATABASE_URL (all environments)
-  - [ ] TURSO_AUTH_TOKEN (all environments)
-  - [ ] NEXTAUTH_URL (**Production only** - uncheck Preview/Development)
-  - [ ] NEXTAUTH_SECRET (all environments)
-  - [ ] RESEND_API_KEY (all environments)
-  - [ ] EMAIL_FROM (all environments)
+- [x] Configure environment variables in Vercel dashboard
+  - [x] TURSO_DATABASE_URL (all environments)
+  - [x] TURSO_AUTH_TOKEN (all environments)
+  - [x] NEXTAUTH_URL (**Production only** - uncheck Preview/Development)
+  - [x] NEXTAUTH_SECRET (all environments)
+  - [x] RESEND_API_KEY (all environments)
+  - [x] EMAIL_FROM (all environments)
   - [ ] UPLOADTHING_SECRET (when Phase 6 implemented)
   - [ ] UPLOADTHING_APP_ID (when Phase 6 implemented)
   > **Important:** `NEXTAUTH_URL` must be scoped to Production only!
   > Preview deployments need to auto-detect their URL via Vercel's `VERCEL_URL`.
-  > If set in Preview, magic link callbacks will point to the wrong deployment.
+  > The NextAuth config uses `trustHost: true` to enable automatic URL detection for preview builds.
 - [ ] Set up custom email domain in Resend (required for multiple users)
   - [ ] Add subdomain in Resend (e.g., `mail.yourdomain.com`)
   - [ ] Add DNS records (DKIM, MX, SPF, DMARC) in domain provider
@@ -801,10 +801,10 @@ After each phase, verify:
   - ICU message format for pluralization and variable interpolation
 
 **Next Steps:**
-- Complete Phase 14: Configure Vercel environment variables, deploy
+- Phase 14: Vercel deployment ready (environment variables already configured)
 - Phase 6: Photo Uploads (Uploadthing integration)
-- Phase 9: Family Tree visualization
-- Optional: Create admin UI for account creation (currently via migration script only)
+- Phase 9: Family Tree visualization (interactive graph/tree view - different from chronological timeline)
+- Optional: Create admin UI for account creation in Settings (currently via migration script only)
 
 ---
 
