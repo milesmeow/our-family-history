@@ -40,9 +40,8 @@ export default function LoginForm() {
         setError(t("invalidCredentials"));
         setIsLoading(false);
       } else if (result?.ok) {
-        // Check if user needs to change password (will be handled by middleware)
-        router.push("/dashboard");
-        router.refresh();
+        // Force a full page refresh to get the session
+        window.location.href = "/change-password";
       }
     } catch (error) {
       console.error("Sign in error:", error);

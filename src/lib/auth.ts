@@ -10,15 +10,18 @@
  */
 
 import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
 import { loginSchema } from "./validations/auth";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
   debug: process.env.NODE_ENV === "development",
+
+  // Credentials provider requires JWT sessions (not database sessions)
+  session: {
+    strategy: "jwt",
+  },
 
   // Trust the host header on Vercel (required when NEXTAUTH_URL is not set)
   // This allows preview deployments to auto-detect their URL

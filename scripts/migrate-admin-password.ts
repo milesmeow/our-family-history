@@ -80,21 +80,18 @@ async function main() {
       process.exit(1);
     }
 
-    // Check if admin already has a password
-    if (admin.passwordHash) {
-      console.log(`⚠️  Admin user ${admin.email} already has a password set.`);
-      console.log("\nDo you want to reset it? (y/N)");
-
-      // In a real script, you'd wait for user input here
-      // For now, we'll just exit
-      console.log("\nExiting without changes.");
-      process.exit(0);
-    }
-
     console.log(`Found admin user:`);
     console.log(`  Email: ${admin.email}`);
     console.log(`  Name: ${admin.name || "(no name set)"}`);
-    console.log(`  ID: ${admin.id}\n`);
+    console.log(`  ID: ${admin.id}`);
+
+    // Check if admin already has a password
+    if (admin.passwordHash) {
+      console.log(`\n⚠️  This account already has a password set.`);
+      console.log(`   Generating a NEW temporary password...\n`);
+    } else {
+      console.log(`\n✓ No password set - creating initial password...\n`);
+    }
 
     // Generate temporary password
     console.log("Generating temporary password...");

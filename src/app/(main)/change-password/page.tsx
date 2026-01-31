@@ -22,6 +22,11 @@ export default async function ChangePasswordPage() {
   // @ts-expect-error - requirePasswordChange added via module augmentation
   const requirePasswordChange = session.user.requirePasswordChange;
 
+  // If user doesn't need to change password, redirect to dashboard
+  if (!requirePasswordChange) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md">

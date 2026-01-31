@@ -40,11 +40,6 @@ export default async function LoginPage() {
           >
             <LoginForm />
           </Suspense>
-
-          {/* Info */}
-          <p className="mt-6 text-center text-sm text-gray-500">
-            {t("inviteOnly")}
-          </p>
         </div>
       </div>
     </div>
