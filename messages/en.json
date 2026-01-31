@@ -351,6 +351,25 @@
         "MEMBER": "Member",
         "VIEWER": "Viewer"
       }
+    },
+    "createAccount": {
+      "title": "Create Family Member Account",
+      "description": "Create an account for a family member. They'll receive an email with a temporary password that they must change on first login.",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "family.member@example.com",
+      "nameLabel": "Full name",
+      "namePlaceholder": "Enter their full name",
+      "roleLabel": "Role",
+      "rolesHelp": "Members can add stories and photos. Viewers can only browse. Admins can invite others.",
+      "createButton": "Create Account",
+      "creating": "Creating...",
+      "success": "Account created successfully!",
+      "successDetail": "A temporary password has been sent to their email. They must change it on first login.",
+      "roles": {
+        "ADMIN": "Admin",
+        "MEMBER": "Member",
+        "VIEWER": "Viewer"
+      }
     }
   },
   "validation": {

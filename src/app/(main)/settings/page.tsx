@@ -7,6 +7,7 @@ import { ArrowLeft, Settings } from "lucide-react";
 import { LinkProfileSection } from "@/components/settings/LinkProfileSection";
 import { ManageMembersSection, type UserForManagement } from "@/components/settings/ManageMembersSection";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
+import { CreateAccountSection } from "@/components/settings/CreateAccountSection";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -91,7 +92,7 @@ export default async function SettingsPage() {
             )}
             <div>
               <label className="text-sm text-gray-500">{t("account.role")}</label>
-              <p className="text-gray-900">{t(`invitations.roles.${user.role}`)}</p>
+              <p className="text-gray-900">{t(`createAccount.roles.${user.role}`)}</p>
             </div>
           </div>
         </section>
@@ -105,6 +106,13 @@ export default async function SettingsPage() {
         <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <LinkProfileSection linkedPerson={user.person} />
         </section>
+
+        {/* Create Account (Admin only) */}
+        {user.role === "ADMIN" && (
+          <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <CreateAccountSection />
+          </section>
+        )}
 
         {/* Manage Members (Admin only) */}
         {user.role === "ADMIN" && (

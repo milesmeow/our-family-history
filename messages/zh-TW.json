@@ -351,6 +351,25 @@
         "MEMBER": "成員",
         "VIEWER": "檢視者"
       }
+    },
+    "createAccount": {
+      "title": "建立家族成員帳戶",
+      "description": "為家族成員建立帳戶。他們將會收到一封包含臨時密碼的電子郵件，首次登入時必須更改密碼。",
+      "emailLabel": "電子郵件地址",
+      "emailPlaceholder": "family.member@example.com",
+      "nameLabel": "全名",
+      "namePlaceholder": "輸入他們的全名",
+      "roleLabel": "角色",
+      "rolesHelp": "成員可以新增故事和照片。檢視者只能瀏覽。管理員可以邀請其他人。",
+      "createButton": "建立帳戶",
+      "creating": "建立中...",
+      "success": "帳戶建立成功！",
+      "successDetail": "臨時密碼已發送到他們的電子郵件。首次登入時必須更改密碼。",
+      "roles": {
+        "ADMIN": "管理員",
+        "MEMBER": "成員",
+        "VIEWER": "檢視者"
+      }
     }
   },
   "validation": {
