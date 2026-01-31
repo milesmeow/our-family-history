@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import LoginForm from "./LoginForm";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 /**
  * Login Page
@@ -16,6 +17,11 @@ export default async function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
       <div className="max-w-md w-full mx-4">
         <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Language Switcher */}
+          <div className="flex justify-end mb-6">
+            <LanguageSwitcher />
+          </div>
+
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
