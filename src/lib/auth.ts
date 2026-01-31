@@ -93,10 +93,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Add user data to session from token
       if (session.user && token) {
         session.user.id = token.sub as string;
-        // @ts-expect-error - we'll add these to the session type
-        session.user.role = token.role;
-        // @ts-expect-error - we'll add these to the session type
-        session.user.requirePasswordChange = token.requirePasswordChange;
+        session.user.role = token.role as string;
+        session.user.requirePasswordChange = token.requirePasswordChange as boolean;
       }
       return session;
     },

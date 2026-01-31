@@ -19,7 +19,6 @@ export default async function ChangePasswordPage() {
     redirect("/login");
   }
 
-  // @ts-expect-error - requirePasswordChange added via module augmentation
   const requirePasswordChange = session.user.requirePasswordChange;
 
   // If user doesn't need to change password, redirect to dashboard

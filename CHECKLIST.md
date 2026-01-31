@@ -70,49 +70,71 @@
 ---
 
 ## Phase 3: Authentication ✅
-**Goal:** Set up NextAuth with magic link authentication via Resend
+**Goal:** Password-based authentication with admin account creation
 
-- [x] Set up Resend account and get API key
+**Migration completed:** 2026-01-31 - Switched from magic links to password authentication
+
+- [x] Set up Resend account and get API key (still used for password emails)
 - [x] Create NextAuth configuration in `src/lib/auth.ts`
-  - Configure Resend provider for magic links
-  - Set up Prisma adapter
-  - Configure session handling
-  - Add callbacks for user creation (first user becomes admin)
+  - Configured Credentials provider for password authentication
+  - JWT session strategy (required for Credentials provider)
+  - Session callback includes user role and requirePasswordChange flag
+  - JWT callback refreshes user data from database on each request
 - [x] Create auth API route `src/app/api/auth/[...nextauth]/route.ts`
-- [x] Create login page `src/app/(auth)/login/page.tsx`
-- [x] Create check-email page `src/app/(auth)/login/check-email/page.tsx`
+- [x] Create login page with password field `src/app/(auth)/login/page.tsx`
+- [x] Create forgot password page `src/app/(auth)/forgot-password/page.tsx`
+- [x] Create reset password page `src/app/(auth)/reset-password/[token]/page.tsx`
+- [x] Create forced password change page `src/app/(main)/change-password/page.tsx`
 - [x] Create error page `src/app/(auth)/login/error/page.tsx`
 - [x] Create auth middleware for protected routes
 - [x] Create SessionProvider for client components
 - [x] Create landing page with sign-in CTA
 - [x] Create dashboard page for authenticated users
-- [x] Create invitation system (email gating)
-  - [x] signIn callback gates magic links to approved emails only
-  - [x] createUser event consumes invitation and sets role
-  - [x] Not-approved rejection page
-  - [x] Invitation validation schema
-  - [x] Server actions (create, resend, revoke)
-  - [x] Invitation email template
-  - [x] Invite token landing page
-  - [x] Admin UI in settings page
-- [ ] Test magic link flow end-to-end ⏳
+- [x] Password authentication features
+  - [x] bcrypt password hashing (10 rounds)
+  - [x] Temporary password generation (16 chars)
+  - [x] Password complexity validation (8+ chars, uppercase, lowercase, number)
+  - [x] Password reset tokens (32 bytes random hex, 1-hour expiry)
+  - [x] Session invalidation on password change
+  - [x] Forced password change for new/reset accounts
+- [x] Email templates
+  - [x] New account with temporary password
+  - [x] Password reset with token link
+  - [x] Password changed confirmation
+- [x] Admin migration script to set temporary password
+- [x] Test complete authentication flow (login, change password, dashboard)
 
 **Files created:**
-- `src/lib/auth.ts`
+- `src/lib/auth.ts` (updated - Credentials provider, JWT sessions)
+- `src/types/next-auth.d.ts` (NEW - extend NextAuth types)
+- `src/lib/validations/auth.ts` (NEW - password validation schemas)
+- `src/actions/auth.ts` (NEW - password operations: createUserWithPassword, changePassword, resetUserPassword, etc.)
+- `src/lib/email/new-account.ts` (NEW - temporary password email)
+- `src/lib/email/password-reset.ts` (NEW - reset token email)
+- `src/lib/email/password-changed.ts` (NEW - confirmation email)
 - `src/app/api/auth/[...nextauth]/route.ts`
-- `src/app/(auth)/login/page.tsx`
-- `src/app/(auth)/login/check-email/page.tsx`
+- `src/app/(auth)/login/page.tsx` (updated - password field)
+- `src/app/(auth)/login/LoginForm.tsx` (updated - credentials login)
+- `src/app/(auth)/forgot-password/page.tsx` (NEW)
+- `src/app/(auth)/reset-password/[token]/page.tsx` (NEW)
+- `src/app/(main)/change-password/page.tsx` (NEW - forced password change)
+- `src/app/(main)/change-password/ChangePasswordForm.tsx` (NEW)
 - `src/app/(auth)/login/error/page.tsx`
-- `src/app/(auth)/login/not-approved/page.tsx` ← Email gating rejection page
-- `src/app/(auth)/invite/[token]/page.tsx` ← Invitation landing page
-- `src/middleware.ts`
+- `src/middleware.ts` (later renamed to `src/proxy.ts`)
 - `src/components/providers/SessionProvider.tsx`
 - `src/app/page.tsx` (updated)
 - `src/app/(main)/dashboard/page.tsx`
-- `src/lib/validations/invitation.ts` ← Invitation form validation
-- `src/lib/email/invitation.ts` ← Invitation email template
-- `src/actions/invitations.ts` ← Invitation CRUD actions
-- `src/components/settings/InviteFamilySection.tsx` ← Admin invitation UI
+- `scripts/migrate-admin-password.ts` (NEW - admin password migration)
+- `docs/PASSWORD_AUTH_MIGRATION.md` (NEW - comprehensive migration documentation)
+
+**Files deprecated (invitation system removed):**
+- `src/app/(auth)/login/check-email/page.tsx` (magic link flow)
+- `src/app/(auth)/login/not-approved/page.tsx` (email gating)
+- `src/app/(auth)/invite/[token]/page.tsx` (invitation landing)
+- `src/lib/validations/invitation.ts` (invitation validation)
+- `src/lib/email/invitation.ts` (invitation email)
+- `src/actions/invitations.ts` (invitation CRUD)
+- `src/components/settings/InviteFamilySection.tsx` (admin invitation UI)
 
 ---
 
@@ -701,30 +723,30 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2026-01-29
+**Last Updated:** 2026-01-31
 
 **Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress, 15 Mostly Complete
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
-- ✅ Phase 2: Database Setup - Turso + Prisma with 14 tables
-- ✅ Phase 3: Authentication - NextAuth + Resend magic links + Email Gating
+- ✅ Phase 2: Database Setup - Turso + Prisma with password auth fields
+- ✅ Phase 3: Authentication - **Password-based auth** (migrated from magic links)
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - ✅ Phase 8: Timeline View - Chronological display with filters
-- 🔶 Phase 12: Settings (mostly complete) - User-Person profile linking + Invitation system
+- 🔶 Phase 12: Settings (mostly complete) - User-Person profile linking
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 - ✅ Phase 15: i18n (mostly complete) - English + Traditional Chinese for all UI pages
 
 **Key Decisions Made:**
+> **Password Authentication (2026-01-31)**: Switched from magic links to password-based
+> authentication. Admins create accounts directly and system generates temporary passwords
+> (16 chars random) sent via email. Users must change temp password on first login.
+> JWT sessions used (required for Credentials provider). Session invalidated on password change.
+
 > **User-Person Linking via Settings**: Users can link their account to a Person
 > record in the family tree through `/settings`. This enables relationship-aware
 > features and establishes "who you are" in the family.
-
-> **Email Gating (Invite-Only Access)**: The app is private and invite-only.
-> Magic links are only sent to approved emails (existing users, valid invitations,
-> or first-user bootstrap). Unapproved emails see a friendly rejection page.
-> This protects family privacy by preventing strangers from accessing the app.
 
 > **Entry System MVP**: Using textarea for content (rich text editor deferred).
 > Entries support 13 categories, date handling with approximate flag, and
@@ -739,12 +761,14 @@ After each phase, verify:
 > in the future without changing the data fetching or filter logic.
 
 **What's Working:**
-- Magic link authentication (login → email → dashboard)
-- **Email gating (invite-only access)**
-  - Unapproved emails redirected to friendly rejection page
-  - Admins can send/resend/revoke invitations from Settings
-  - Invitation links validate token and guide user through sign-in
-  - First user automatically becomes admin (bootstrap flow)
+- **Password authentication (login → change password → dashboard)**
+  - Login with email + password
+  - Forced password change for temporary passwords
+  - Forgot password / reset flow (email with token link, 1-hour expiry)
+  - Password complexity validation (8+ chars, uppercase, lowercase, number)
+  - bcrypt password hashing (10 rounds)
+  - Session invalidation on password change
+  - Admin can reset user passwords (generates new temp password)
 - **Admin user management**
   - Admins can view all users in Settings → Manage Members
   - Admins can delete users (preserves their entries/comments as "Unknown Author")
@@ -770,17 +794,17 @@ After each phase, verify:
 - **Internationalization (i18n) with:**
   - English and Traditional Chinese (zh-TW) support
   - Cookie-based locale persistence (1 year)
-  - All pages translated: landing, auth, dashboard, entries, people, timeline, settings
+  - All pages translated: landing, auth, dashboard, entries, people, timeline, settings, password flows
   - Language selector in Settings page
   - Bilingual language switcher on home page and dashboard (shows "English | 繁體中文" for discoverability)
   - Noto Sans TC font for Chinese characters
   - ICU message format for pluralization and variable interpolation
 
 **Next Steps:**
-- Complete Phase 15: Add translatable Zod validation errors, final QA
 - Complete Phase 14: Configure Vercel environment variables, deploy
 - Phase 6: Photo Uploads (Uploadthing integration)
 - Phase 9: Family Tree visualization
+- Optional: Create admin UI for account creation (currently via migration script only)
 
 ---
 
