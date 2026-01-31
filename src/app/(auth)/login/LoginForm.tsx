@@ -2,42 +2,62 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 /**
  * Login Form Component
  *
- * Client component that uses useSearchParams() to pre-fill email
- * from query parameters (used by the invite flow).
+ * Client component for password-based authentication.
+ * Handles email + password login with error display.
  *
  * Must be wrapped in Suspense by the parent page.
  */
 export default function LoginForm() {
   const t = useTranslations("auth.login");
   const searchParams = useSearchParams();
-  // Pre-fill email from query parameter (used by invite flow)
-  const initialEmail = searchParams.get("email") || "";
-  const [email, setEmail] = useState(initialEmail);
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
-      await signIn("resend", {
+      const result = await signIn("credentials", {
         email,
-        callbackUrl: "/dashboard",
+        password,
+        redirect: false,
       });
+
+      if (result?.error) {
+        setError(t("invalidCredentials"));
+        setIsLoading(false);
+      } else if (result?.ok) {
+        // Force a full page refresh to get the session
+        window.location.href = "/change-password";
+      }
     } catch (error) {
       console.error("Sign in error:", error);
+      setError(t("invalidCredentials"));
       setIsLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+          {error}
+        </div>
+      )}
+
       <div>
         <label
           htmlFor="email"
@@ -52,8 +72,37 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("emailPlaceholder")}
           required
+          autoComplete="email"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors text-gray-900 placeholder:text-gray-400"
         />
+      </div>
+
+      <div>
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          {t("passwordLabel")}
+        </label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder={t("passwordPlaceholder")}
+          required
+          autoComplete="current-password"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors text-gray-900 placeholder:text-gray-400"
+        />
+      </div>
+
+      <div className="flex items-center justify-end">
+        <Link
+          href="/forgot-password"
+          className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+        >
+          {t("forgotPassword")}
+        </Link>
       </div>
 
       <button
@@ -82,7 +131,7 @@ export default function LoginForm() {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            {t("sending")}
+            {t("signingIn")}
           </span>
         ) : (
           t("submitButton")

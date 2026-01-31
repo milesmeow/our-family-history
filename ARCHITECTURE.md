@@ -106,10 +106,14 @@ User
 ├── avatarUrl          String?
 ├── role               Enum (ADMIN/MEMBER/VIEWER)
 │
+├── passwordHash       String? - bcrypt hash (nullable during migration)
+├── requirePasswordChange Boolean - Force password change on next login
+├── resetToken         String? - Password reset token (32 bytes hex)
+├── resetTokenExpiry   DateTime? - Reset token expiration (1 hour)
+│
 ├── entries            Entry[] - Stories they authored (nullable for deleted users)
 ├── comments           Comment[] - (nullable for deleted users)
 ├── person             Person? - Link to their Person record
-├── sentInvites        Invitation[] - Invitations this user sent
 ```
 
 **Note on User Deletion:**
@@ -151,15 +155,6 @@ Comment
 ├── author             User
 ├── entry              Entry
 ├── createdAt          DateTime
-
-Invitation
-├── id                 String
-├── email              String
-├── token              String (unique)
-├── role               Enum (ADMIN/MEMBER/VIEWER)
-├── expiresAt          DateTime
-├── usedAt             DateTime?
-├── invitedBy          User
 ```
 
 ---
@@ -191,15 +186,20 @@ our-family-history/
 │   │   │
 │   │   ├── (auth)/           # Public auth routes
 │   │   │   ├── login/
-│   │   │   │   ├── page.tsx
-│   │   │   │   ├── check-email/page.tsx
-│   │   │   │   ├── error/page.tsx
-│   │   │   │   └── not-approved/page.tsx  # ✅ Email gating rejection
-│   │   │   └── invite/[token]/page.tsx    # ✅ Invitation landing page
+│   │   │   │   ├── page.tsx               # Login with email + password
+│   │   │   │   ├── LoginForm.tsx
+│   │   │   │   └── error/page.tsx
+│   │   │   ├── forgot-password/
+│   │   │   │   └── page.tsx               # ✅ Request password reset
+│   │   │   └── reset-password/[token]/
+│   │   │       └── page.tsx               # ✅ Reset password with token
 │   │   │
 │   │   ├── (main)/           # Protected routes
 │   │   │   ├── layout.tsx    # App shell with nav
 │   │   │   ├── dashboard/page.tsx
+│   │   │   ├── change-password/
+│   │   │   │   ├── page.tsx               # ✅ Forced password change
+│   │   │   │   └── ChangePasswordForm.tsx
 │   │   │   ├── entries/
 │   │   │   │   ├── page.tsx          # List entries
 │   │   │   │   ├── new/page.tsx      # Create entry
@@ -232,7 +232,7 @@ our-family-history/
 │   │   ├── entries.ts        # Entry CRUD + people linking
 │   │   ├── people.ts         # CRUD + relationships
 │   │   ├── settings.ts       # Profile linking
-│   │   ├── invitations.ts    # ✅ Invitation CRUD (email gating)
+│   │   ├── auth.ts           # ✅ Password operations (createUserWithPassword, changePassword, resetUserPassword, etc.)
 │   │   └── users.ts          # ✅ User deletion (admin-only)
 │   │
 │   ├── components/
@@ -262,7 +262,7 @@ our-family-history/
 │   │   │   └── DeletePersonButton.tsx
 │   │   ├── settings/             # ✅ Implemented
 │   │   │   ├── LinkProfileSection.tsx
-│   │   │   ├── InviteFamilySection.tsx  # ✅ Admin invitation management
+│   │   │   ├── LanguageSelector.tsx     # ✅ Language switcher
 │   │   │   └── ManageMembersSection.tsx # ✅ Admin user deletion
 │   │   ├── tree/
 │   │   │   ├── FamilyTree.tsx
@@ -273,15 +273,17 @@ our-family-history/
 │   │
 │   ├── lib/
 │   │   ├── prisma.ts         # Database client singleton
-│   │   ├── auth.ts           # NextAuth configuration (+ email gating)
+│   │   ├── auth.ts           # NextAuth configuration (Credentials provider + JWT)
 │   │   ├── uploadthing.ts    # Uploadthing config
 │   │   ├── utils.ts          # Helper functions (parseDateString for timezone-safe dates)
 │   │   ├── email/            # ✅ Email templates
-│   │   │   └── invitation.ts # Invitation email using Resend
+│   │   │   ├── new-account.ts       # ✅ Temporary password email
+│   │   │   ├── password-reset.ts    # ✅ Reset token email
+│   │   │   └── password-changed.ts  # ✅ Confirmation email
 │   │   └── validations/      # ✅ Zod schemas
 │   │       ├── person.ts     # Person + relationship validation
 │   │       ├── entry.ts      # Entry validation + category constants
-│   │       └── invitation.ts # ✅ Invitation form validation
+│   │       └── auth.ts       # ✅ Password validation schemas (login, changePassword, resetPassword)
 │   │
 │   ├── hooks/
 │   │   ├── useEntries.ts
@@ -289,7 +291,8 @@ our-family-history/
 │   │   └── useTimeline.ts
 │   │
 │   ├── types/
-│   │   └── index.ts          # Shared TypeScript types
+│   │   ├── index.ts          # Shared TypeScript types
+│   │   └── next-auth.d.ts    # ✅ NextAuth type extensions (User, Session, JWT)
 │   │
 │   ├── i18n/
 │   │   ├── config.ts         # Locale configuration (en, zh-TW)
@@ -297,6 +300,15 @@ our-family-history/
 │   │   └── client.ts         # Client-side locale switching
 │   │
 │   └── proxy.ts              # ✅ Route protection (Node.js runtime)
+│
+├── scripts/
+│   ├── apply-migration.ts         # Apply SQL migrations to Turso
+│   ├── migrate-admin-password.ts  # ✅ Set temp password for admin (one-time)
+│   ├── test-turso.ts              # Test Turso database connection
+│   └── test-resend.ts             # Test Resend email configuration
+│
+├── docs/
+│   └── PASSWORD_AUTH_MIGRATION.md # ✅ Complete password auth migration docs
 │
 ├── .env.local                # Local environment (gitignored)
 ├── .env.example              # Template for env vars
@@ -544,55 +556,108 @@ turso db shell family-history
 
 ## Authentication Flow
 
+**Current Implementation:** Password-based authentication (migrated 2026-01-31)
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        MAGIC LINK FLOW                          │
+│                    PASSWORD LOGIN FLOW                          │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1. User visits /login                                          │
 │           │                                                     │
 │           ▼                                                     │
-│  2. Enters email address                                        │
+│  2. Enters email + password                                     │
 │           │                                                     │
 │           ▼                                                     │
-│  3. NextAuth generates one-time token                           │
+│  3. NextAuth Credentials provider validates password            │
+│     - Finds user by email                                       │
+│     - Compares password with bcrypt hash                        │
 │           │                                                     │
 │           ▼                                                     │
-│  4. Resend sends email with magic link                          │
-│     Link: https://app.vercel.app/api/auth/callback/resend?...   │
+│  4. JWT session created with user data                          │
+│     (id, email, role, requirePasswordChange)                    │
 │           │                                                     │
 │           ▼                                                     │
-│  5. User clicks link in email                                   │
+│  5. User redirected to /change-password                         │
 │           │                                                     │
 │           ▼                                                     │
-│  6. NextAuth verifies token, creates session                    │
-│           │                                                     │
-│           ▼                                                     │
-│  7. User redirected to /dashboard (logged in!)                  │
+│  6a. If requirePasswordChange=true:                             │
+│      → Shows change password form                               │
+│      → User sets new permanent password                         │
+│      → Sets requirePasswordChange=false                         │
+│      → Redirects to /dashboard                                  │
+│                                                                 │
+│  6b. If requirePasswordChange=false:                            │
+│      → Auto-redirects to /dashboard (already logged in!)        │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                      INVITATION FLOW                            │
+│                  NEW ACCOUNT CREATION FLOW                      │
+│                   (Admin creates accounts)                      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  1. Admin visits /settings → Invite Family                      │
+│  1. Admin creates account (via migration script or future UI)   │
 │           │                                                     │
 │           ▼                                                     │
-│  2. Enters family member's email + role (member/viewer)         │
+│  2. System generates temporary password (16 chars random)       │
 │           │                                                     │
 │           ▼                                                     │
-│  3. System creates Invitation record with token                 │
+│  3. Password hashed with bcrypt (10 rounds)                     │
 │           │                                                     │
 │           ▼                                                     │
-│  4. Resend sends invitation email                               │
-│     Link: https://app.vercel.app/invite/[token]                 │
+│  4. User record created with:                                   │
+│     - passwordHash                                              │
+│     - requirePasswordChange = true                              │
 │           │                                                     │
 │           ▼                                                     │
-│  5. Family member clicks link                                   │
+│  5. Resend sends email with temporary password                  │
+│     Subject: "Your Family History account has been created"     │
 │           │                                                     │
 │           ▼                                                     │
-│  6. Token validated, User created, logged in                    │
+│  6. User clicks login link in email                             │
+│           │                                                     │
+│           ▼                                                     │
+│  7. User logs in with email + temp password                     │
+│     (follows PASSWORD LOGIN FLOW above, forced to change)       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                   FORGOT PASSWORD FLOW                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. User clicks "Forgot Password?" on login page                │
+│           │                                                     │
+│           ▼                                                     │
+│  2. Enters email address                                        │
+│           │                                                     │
+│           ▼                                                     │
+│  3. System generates reset token (32 bytes random hex)          │
+│           │                                                     │
+│           ▼                                                     │
+│  4. User record updated with:                                   │
+│     - resetToken (hashed)                                       │
+│     - resetTokenExpiry (1 hour from now)                        │
+│           │                                                     │
+│           ▼                                                     │
+│  5. Resend sends email with reset link                          │
+│     Link: https://app.vercel.app/reset-password/[token]         │
+│           │                                                     │
+│           ▼                                                     │
+│  6. User clicks link (within 1 hour)                            │
+│           │                                                     │
+│           ▼                                                     │
+│  7. Token validated (not expired, matches hash)                 │
+│           │                                                     │
+│           ▼                                                     │
+│  8. User enters new password                                    │
+│           │                                                     │
+│           ▼                                                     │
+│  9. Password updated, reset token cleared                       │
+│           │                                                     │
+│           ▼                                                     │
+│ 10. User redirected to /login with success message              │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -645,34 +710,60 @@ Next.js 16 deprecates `middleware.ts` in favor of `proxy.ts`. We migrated for tw
 
 The functionality is identical - route protection, auth checks, and redirects - but the runtime changed from Edge to Node.js.
 
-### 6. Email Gating (Invite-Only Access)
-The app implements invite-only access to protect family privacy. This is enforced at the authentication layer:
+### 6. Password Authentication (Migrated 2026-01-31)
+Switched from magic link authentication to password-based authentication for better usability and control.
 
-**How it works:**
-- The NextAuth `signIn` callback intercepts magic link requests BEFORE emails are sent
-- An email is "approved" if it matches one of three criteria:
-  1. Already exists as a User in the database
-  2. Has a valid (non-expired, unused) Invitation record
-  3. Database has zero users (first-user bootstrap)
-- Unapproved emails are redirected to `/login/not-approved` with a friendly message
+**Implementation:**
+- NextAuth v5 with Credentials provider (email + password)
+- JWT session strategy (required for Credentials provider)
+- bcrypt password hashing with 10 rounds (industry standard)
+- Temporary passwords: 16 chars cryptographically random via `crypto.randomBytes()`
+- Password complexity requirements: min 8 chars, uppercase, lowercase, number
 
-**Why gate at signIn instead of after?**
-- **Security**: Prevents strangers from receiving any authentication emails
-- **UX**: Users immediately know if they need an invitation (no waiting for email)
-- **Privacy**: Email addresses aren't stored unless approved
+**Why password-based instead of magic links?**
+- **Usability**: Magic links were confusing to users and unreliable (email delays, spam filters)
+- **Control**: Admins create accounts directly rather than sending invitations
+- **Simplicity**: No invitation system to manage (reduced code complexity)
+- **Familiarity**: Users understand email + password authentication
 
-**Invitation lifecycle:**
-1. Admin creates invitation via Settings → email sent with unique token
-2. Invitee clicks link → lands on `/invite/[token]` → validates token
-3. Invitee proceeds to login → email pre-filled → magic link sent
-4. On first login, `createUser` event consumes invitation and sets role
-5. Invitation marked as "used" (cannot be reused)
+**Session Management:**
+- Sessions use JWT tokens (not database sessions) as required by Credentials provider
+- Session includes: `id`, `email`, `name`, `role`, `requirePasswordChange`
+- JWT callback refreshes user data from database on each request to keep `requirePasswordChange` flag current
+- All sessions invalidated on password change (via database transaction)
 
-**Edge cases handled:**
-- First user bootstrap (empty database = anyone can sign up, becomes admin)
-- Expired invitations (7-day default, can be resent)
-- Duplicate invitations (prevented, show "resend" option instead)
-- Already-registered emails (error: "This email is already registered")
+**Temporary Password Flow:**
+1. Admin creates account (currently via migration script, UI to be added)
+2. System generates 16-char random password using `crypto.randomBytes()`
+3. Password hashed with bcrypt (10 rounds), `requirePasswordChange=true` set
+4. Email sent to user with temporary password prominently displayed
+5. User logs in → automatically redirected to `/change-password`
+6. Change password page checks `requirePasswordChange` flag:
+   - If `true`: shows password change form (required)
+   - If `false`: redirects to dashboard
+7. After changing password, `requirePasswordChange` set to `false`, user can access app
+
+**Password Reset Flow:**
+1. User clicks "Forgot Password?" on login page
+2. System generates 32-byte random hex token with 1-hour expiry
+3. Token stored in `resetToken` field (user record), expiry in `resetTokenExpiry`
+4. Email sent with reset link: `/reset-password/[token]`
+5. User clicks link → token validated (not expired, matches hash)
+6. User enters new password → password updated, reset token cleared
+7. User redirected to login with success message
+
+**Security Features:**
+- Passwords never stored in plaintext (bcrypt hashing)
+- Generic error messages to prevent email enumeration ("Invalid email or password")
+- Reset tokens expire after 1 hour
+- Session invalidation on password change prevents session fixation
+- Password complexity enforced via Zod validation
+
+**Migration from Magic Links:**
+- Removed: Resend provider, PrismaAdapter, email gating system, invitation system
+- Added: Credentials provider, JWT sessions, password fields in User model
+- Migration script created for existing admin account (sets temp password)
+- See `docs/PASSWORD_AUTH_MIGRATION.md` for complete migration documentation
 
 ---
 

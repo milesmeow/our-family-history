@@ -51,13 +51,59 @@
   "auth": {
     "login": {
       "title": "登入家族歷史",
-      "subtitle": "輸入您的電子郵件以接收魔法連結",
+      "subtitle": "輸入您的電子郵件和密碼",
       "emailLabel": "電子郵件地址",
       "emailPlaceholder": "grandma@family.com",
-      "submitButton": "傳送魔法連結",
-      "sending": "傳送中...",
-      "inviteOnly": "家族歷史僅限受邀者使用。請向家族成員索取邀請。",
+      "passwordLabel": "密碼",
+      "passwordPlaceholder": "輸入您的密碼",
+      "forgotPassword": "忘記密碼？",
+      "submitButton": "登入",
+      "signingIn": "登入中...",
+      "invalidCredentials": "電子郵件或密碼無效",
+      "inviteOnly": "家族歷史為私人使用。請使用您的帳戶登入。",
       "backToHome": "返回首頁"
+    },
+    "forgotPassword": {
+      "title": "重設密碼",
+      "description": "輸入您的電子郵件，我們將寄送重設連結給您",
+      "emailLabel": "電子郵件地址",
+      "emailPlaceholder": "grandma@family.com",
+      "submitButton": "傳送重設連結",
+      "sending": "傳送中...",
+      "success": "如果該電子郵件存在，我們已寄送重設連結",
+      "checkEmail": "請查看您的電子郵件以取得重設連結",
+      "backToLogin": "返回登入"
+    },
+    "resetPassword": {
+      "title": "設定新密碼",
+      "description": "為您的帳戶選擇一個強密碼",
+      "newPasswordLabel": "新密碼",
+      "newPasswordPlaceholder": "輸入新密碼",
+      "confirmPasswordLabel": "確認密碼",
+      "confirmPasswordPlaceholder": "重新輸入密碼",
+      "passwordHint": "至少 8 個字元，包含大寫、小寫和數字",
+      "submitButton": "重設密碼",
+      "resetting": "重設中...",
+      "successTitle": "密碼重設成功",
+      "successMessage": "您現在可以使用新密碼登入",
+      "goToLogin": "前往登入",
+      "requestNew": "請求新的重設連結"
+    },
+    "changePassword": {
+      "title": "更改密碼",
+      "description": "為了安全起見，請更改您的臨時密碼",
+      "currentPasswordLabel": "目前密碼",
+      "currentPasswordPlaceholder": "輸入目前密碼",
+      "newPasswordLabel": "新密碼",
+      "newPasswordPlaceholder": "輸入新密碼",
+      "confirmPasswordLabel": "確認密碼",
+      "confirmPasswordPlaceholder": "重新輸入密碼",
+      "passwordHint": "至少 8 個字元，包含大寫、小寫和數字",
+      "submitButton": "更改密碼",
+      "changing": "更改中...",
+      "successTitle": "密碼已更改",
+      "successMessage": "您的密碼已成功更新",
+      "redirecting": "重新導向至登入..."
     },
     "checkEmail": {
       "title": "請查看您的電子郵件",
@@ -300,6 +346,25 @@
         "accepted": "已接受",
         "expired": "已過期"
       },
+      "roles": {
+        "ADMIN": "管理員",
+        "MEMBER": "成員",
+        "VIEWER": "檢視者"
+      }
+    },
+    "createAccount": {
+      "title": "建立家族成員帳戶",
+      "description": "為家族成員建立帳戶。他們將會收到一封包含臨時密碼的電子郵件，首次登入時必須更改密碼。",
+      "emailLabel": "電子郵件地址",
+      "emailPlaceholder": "family.member@example.com",
+      "nameLabel": "全名",
+      "namePlaceholder": "輸入他們的全名",
+      "roleLabel": "角色",
+      "rolesHelp": "成員可以新增故事和照片。檢視者只能瀏覽。管理員可以邀請其他人。",
+      "createButton": "建立帳戶",
+      "creating": "建立中...",
+      "success": "帳戶建立成功！",
+      "successDetail": "臨時密碼已發送到他們的電子郵件。首次登入時必須更改密碼。",
       "roles": {
         "ADMIN": "管理員",
         "MEMBER": "成員",
