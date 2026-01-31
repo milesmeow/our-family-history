@@ -5,9 +5,9 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ArrowLeft, Settings } from "lucide-react";
 import { LinkProfileSection } from "@/components/settings/LinkProfileSection";
-import { InviteFamilySection, type InvitationWithStatus } from "@/components/settings/InviteFamilySection";
 import { ManageMembersSection, type UserForManagement } from "@/components/settings/ManageMembersSection";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
+import { CreateAccountSection } from "@/components/settings/CreateAccountSection";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -31,37 +31,10 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
-  // Fetch invitations and users if user is admin
-  let initialInvitations: InvitationWithStatus[] = [];
+  // Fetch users if user is admin
   let allUsers: UserForManagement[] = [];
 
   if (user.role === "ADMIN") {
-    // Fetch invitations
-    const invitations = await prisma.invitation.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        invitedBy: {
-          select: { name: true, email: true },
-        },
-      },
-    });
-
-    const now = new Date();
-    initialInvitations = invitations.map((inv) => ({
-      id: inv.id,
-      email: inv.email,
-      role: inv.role,
-      createdAt: inv.createdAt,
-      expiresAt: inv.expiresAt,
-      usedAt: inv.usedAt,
-      invitedBy: inv.invitedBy,
-      status: inv.usedAt
-        ? ("accepted" as const)
-        : inv.expiresAt < now
-          ? ("expired" as const)
-          : ("pending" as const),
-    }));
-
     // Fetch all users for member management
     const users = await prisma.user.findMany({
       orderBy: [
@@ -119,7 +92,7 @@ export default async function SettingsPage() {
             )}
             <div>
               <label className="text-sm text-gray-500">{t("account.role")}</label>
-              <p className="text-gray-900">{t(`invitations.roles.${user.role}`)}</p>
+              <p className="text-gray-900">{t(`createAccount.roles.${user.role}`)}</p>
             </div>
           </div>
         </section>
@@ -134,10 +107,10 @@ export default async function SettingsPage() {
           <LinkProfileSection linkedPerson={user.person} />
         </section>
 
-        {/* Invite Family Members (Admin only) */}
+        {/* Create Account (Admin only) */}
         {user.role === "ADMIN" && (
           <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <InviteFamilySection initialInvitations={initialInvitations} />
+            <CreateAccountSection />
           </section>
         )}
 
