@@ -1,3 +1,9 @@
+// Load environment variables FIRST before any other imports
+import { config } from "dotenv";
+import { join } from "path";
+
+config({ path: join(process.cwd(), ".env.local") });
+
 /**
  * Admin Password Migration Script
  *
@@ -16,9 +22,21 @@
  * 6. Display the temporary password (SAVE THIS!)
  */
 
-import { prisma } from "../src/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+
+// Create a fresh Prisma client for this script
+const adapter = new PrismaLibSql({
+  url: process.env.TURSO_DATABASE_URL!,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
+const prisma = new PrismaClient({
+  adapter,
+  log: ["error"],
+});
 
 /**
  * Generate a secure random password.
@@ -38,16 +56,22 @@ async function main() {
   console.log("🔐 Admin Password Migration Script");
   console.log("=====================================\n");
 
+  // Debug: Check if env vars are loaded
+  if (!process.env.TURSO_DATABASE_URL) {
+    console.error("❌ Error: TURSO_DATABASE_URL not found in environment variables");
+    console.log("\nMake sure .env.local exists with:");
+    console.log("TURSO_DATABASE_URL=libsql://...");
+    console.log("TURSO_AUTH_TOKEN=...");
+    process.exit(1);
+  }
+
+  console.log("✓ Environment variables loaded");
+  console.log(`✓ Database URL: ${process.env.TURSO_DATABASE_URL.substring(0, 30)}...\n`);
+
   try {
     // Find the admin user
     const admin = await prisma.user.findFirst({
       where: { role: "ADMIN" },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        passwordHash: true,
-      },
     });
 
     if (!admin) {
