@@ -63,7 +63,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           defaultValue={entry?.title ?? ""}
           required
           placeholder={t("form.titlePlaceholder")}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
         />
       </div>
 
@@ -79,7 +79,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           id="category"
           name="category"
           defaultValue={entry?.category ?? "STORY"}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-gray-900"
         >
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
@@ -105,7 +105,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             defaultValue={
               entry?.eventDate ? format(entry.eventDate, "yyyy-MM-dd") : ""
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
           />
         </div>
 
@@ -123,7 +123,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             defaultValue={
               entry?.eventDateEnd ? format(entry.eventDateEnd, "yyyy-MM-dd") : ""
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
           />
         </div>
       </div>
@@ -154,7 +154,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             id="datePrecision"
             name="datePrecision"
             defaultValue={entry?.datePrecision ?? "DAY"}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-gray-900"
           >
             {DATE_PRECISIONS.map((precision) => (
               <option key={precision} value={precision}>
@@ -180,7 +180,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             name="era"
             defaultValue={entry?.era ?? ""}
             placeholder='e.g., "World War II", "The Great Depression"'
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
           />
         </div>
 
@@ -197,7 +197,7 @@ export function EntryForm({ entry }: EntryFormProps) {
             name="location"
             defaultValue={entry?.location ?? ""}
             placeholder={t("form.locationPlaceholder")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
           />
         </div>
       </div>
@@ -217,7 +217,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           defaultValue={entry?.content ?? ""}
           required
           placeholder={t("form.contentPlaceholder")}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none text-gray-900"
         />
       </div>
 
@@ -235,7 +235,7 @@ export function EntryForm({ entry }: EntryFormProps) {
           rows={2}
           defaultValue={entry?.summary ?? ""}
           placeholder={t("form.summaryPlaceholder")}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none text-gray-900"
         />
       </div>
 
