@@ -25,6 +25,42 @@ export async function createEntry(
     return { success: false, error: tErrors("unauthorized") };
   }
 
+  // Check role permissions - VIEWERs can only browse, not create
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: "Viewers have read-only access. Contact an admin to upgrade your account.",
+    };
+  }
+
+  // Verify user exists in database (JWT sessions don't auto-check this)
+  const userExists = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, personId: true },
+  });
+
+  if (!userExists) {
+    return {
+      success: false,
+      error: "Your account no longer exists. Please contact an administrator.",
+    };
+  }
+
+  // Check if user's personId references a deleted person
+  if (userExists.personId) {
+    const linkedPerson = await prisma.person.findUnique({
+      where: { id: userExists.personId },
+      select: { id: true },
+    });
+
+    if (!linkedPerson) {
+      return {
+        success: false,
+        error: `Your account is linked to a deleted person profile (ID: ${userExists.personId}). Please ask an admin to unlink your profile in Settings.`,
+      };
+    }
+  }
+
   // Parse peopleIds from form data (multiple values with same name)
   const peopleIds = formData.getAll("peopleIds").map((id) => String(id));
 
@@ -62,6 +98,23 @@ export async function createEntry(
     ...rest
   } = validatedFields.data;
 
+  // Verify all selected people exist in database
+  if (validatedPeopleIds.length > 0) {
+    const existingPeople = await prisma.person.findMany({
+      where: { id: { in: validatedPeopleIds } },
+      select: { id: true },
+    });
+
+    if (existingPeople.length !== validatedPeopleIds.length) {
+      const existingIds = new Set(existingPeople.map((p) => p.id));
+      const missingIds = validatedPeopleIds.filter((id) => !existingIds.has(id));
+      return {
+        success: false,
+        error: `Some selected people no longer exist (IDs: ${missingIds.join(", ")}). Please refresh and try again.`,
+      };
+    }
+  }
+
   let entryId: string;
 
   try {
@@ -83,6 +136,13 @@ export async function createEntry(
     entryId = entry.id;
   } catch (error) {
     console.error("Failed to create entry:", error);
+
+    // In development, show more detailed error messages
+    if (process.env.NODE_ENV === "development") {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: `Database error: ${errorMessage}` };
+    }
+
     return { success: false, error: tErrors("entries.createFailed") };
   }
 
@@ -104,6 +164,14 @@ export async function updateEntry(
 
   if (!session?.user?.id) {
     return { success: false, error: tErrors("unauthorized") };
+  }
+
+  // Check role permissions - VIEWERs can only browse, not edit
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: "Viewers have read-only access. Contact an admin to upgrade your account.",
+    };
   }
 
   // Verify ownership
@@ -183,6 +251,13 @@ export async function updateEntry(
     });
   } catch (error) {
     console.error("Failed to update entry:", error);
+
+    // In development, show more detailed error messages
+    if (process.env.NODE_ENV === "development") {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { success: false, error: `Database error: ${errorMessage}` };
+    }
+
     return { success: false, error: tErrors("entries.updateFailed") };
   }
 
@@ -199,6 +274,14 @@ export async function deleteEntry(id: string): Promise<ActionResult> {
 
   if (!session?.user?.id) {
     return { success: false, error: tErrors("unauthorized") };
+  }
+
+  // Check role permissions - VIEWERs can only browse, not delete
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: "Viewers have read-only access. Contact an admin to upgrade your account.",
+    };
   }
 
   // Verify ownership
@@ -236,6 +319,14 @@ export async function togglePublish(id: string): Promise<ActionResult> {
 
   if (!session?.user?.id) {
     return { success: false, error: tErrors("unauthorized") };
+  }
+
+  // Check role permissions - VIEWERs can only browse, not publish
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: "Viewers have read-only access. Contact an admin to upgrade your account.",
+    };
   }
 
   // Verify ownership and get current status
