@@ -774,6 +774,10 @@ After each phase, verify:
   - Admins can delete users (preserves their entries/comments as "Unknown Author")
   - Last admin protection prevents orphaning the family
   - User's Person profile is preserved in family tree when deleted
+- **Dashboard quick actions (5 navigation cards)**
+  - New Entry, Manage People, View Timeline, View Stories (→ /entries), Settings
+  - Card-based navigation with color-coded icons (BookOpen, Users, Clock, BookText, TreePine)
+  - Responsive grid layout (1 col mobile → 2 col tablet → 4 col desktop with wrap)
 - People management (create, edit, delete, view profiles)
 - Family relationships (add/remove bidirectional PARENT/CHILD/SPOUSE/SIBLING)
 - Settings page with profile linking (create new or link to existing Person)

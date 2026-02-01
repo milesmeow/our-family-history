@@ -2,7 +2,7 @@ import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { BookOpen, Users, Clock, TreePine, Settings } from "lucide-react";
+import { BookOpen, Users, Clock, TreePine, Settings, BookText } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default async function DashboardPage() {
@@ -84,6 +84,12 @@ export default async function DashboardPage() {
             color="green"
           />
           <QuickActionCard
+            icon={<BookText className="w-6 h-6" />}
+            title={t("quickActions.viewStories")}
+            href="/entries"
+            color="indigo"
+          />
+          <QuickActionCard
             icon={<TreePine className="w-6 h-6" />}
             title={t("quickActions.settings")}
             href="/settings"
@@ -104,13 +110,14 @@ function QuickActionCard({
   icon: React.ReactNode;
   title: string;
   href: string;
-  color: "amber" | "blue" | "green" | "purple";
+  color: "amber" | "blue" | "green" | "purple" | "indigo";
 }) {
   const colorClasses = {
     amber: "bg-amber-50 text-amber-600 group-hover:bg-amber-100",
     blue: "bg-blue-50 text-blue-600 group-hover:bg-blue-100",
     green: "bg-green-50 text-green-600 group-hover:bg-green-100",
     purple: "bg-purple-50 text-purple-600 group-hover:bg-purple-100",
+    indigo: "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100",
   };
 
   return (
