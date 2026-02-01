@@ -7,7 +7,11 @@
     "build": "next build",
     "postinstall": "prisma generate",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:verify": "tsx scripts/verify-schema.ts",
+    "db:check-users": "tsx scripts/check-users.ts",
+    "db:cleanup": "tsx scripts/cleanup-orphaned-tables.ts",
+    "db:test": "tsx scripts/test-turso.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
