@@ -923,6 +923,59 @@ The `_old` table won't affect your app - it's just orphaned data.
 
 ---
 
+### 10. Foreign Key Synchronization (Critical for Table Rebuilds)
+
+**Problem:** When you rebuild a table (like User), foreign keys in OTHER tables may still point to the old table.
+
+**Example Issue Fixed (2026-01-31):**
+When we rebuilt the `User` table to remove `invitedById`, the `Entry` table's foreign key was still pointing to `User_old.id` instead of `User.id`. This caused `FOREIGN KEY constraint failed` errors when creating entries, even though all validation checks passed.
+
+**Root Cause:**
+SQLite foreign key constraints are embedded in the table schema. When you rebuild `User` → `User_new` → `User`, the Entry table's FK definition doesn't automatically update.
+
+**How to Detect:**
+```bash
+# Check which tables foreign keys point to
+npx tsx scripts/check-entries.ts
+
+# Look for output like:
+# Foreign keys on Entry table:
+#   - Column: authorId -> User_old.id  ❌ BAD!
+#   - Column: authorId -> User.id      ✅ GOOD!
+```
+
+**How to Fix:**
+When you rebuild a table that other tables reference, you MUST also rebuild those tables:
+
+1. **Identify dependent tables:**
+   - Check `schema.prisma` for all models with foreign keys to the rebuilt table
+   - In our case: `Entry`, `Comment`, `Account`, `Session` all reference `User`
+
+2. **Rebuild each dependent table:**
+   ```bash
+   # Use the table rebuild pattern (see section 9)
+   # Example: scripts/fix-entry-fk.sql
+   ```
+
+3. **Verify the fix:**
+   ```bash
+   npx tsx scripts/check-entries.ts
+   # Should show: authorId -> User.id (not User_old.id)
+   ```
+
+**Prevention:**
+- When using the table rebuild pattern, document which tables have FKs to the table being rebuilt
+- After rebuilding a table, check all dependent tables' foreign keys
+- Use `prisma/fresh-schema.sql` for clean database setup from scratch
+- See comment in `schema.prisma` Entry model (line 116) for reminder
+
+**Files:**
+- `scripts/fix-entry-fk.sql` - Example fix for Entry table FK
+- `scripts/apply-entry-fix.ts` - Script to apply FK fix
+- `prisma/fresh-schema.sql` - Clean schema from scratch (correct FKs guaranteed)
+
+---
+
 ## Future Extensibility
 
 1. **Map View**: Location fields support geographic visualization

@@ -111,6 +111,8 @@ model Entry {
   locationLng     Float?
 
   // Relations (nullable to preserve content when user is deleted)
+  // IMPORTANT: If you rebuild the User table, you MUST also rebuild Entry table
+  // to update the foreign key constraint. See scripts/fix-entry-fk.sql
   author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId        String?
 
