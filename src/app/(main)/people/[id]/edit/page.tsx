@@ -24,6 +24,11 @@ export default async function EditPersonPage({ params }: PageProps) {
 
   if (!person) notFound();
 
+  // Block viewers from accessing edit page
+  if (session.user?.role === "VIEWER") {
+    redirect(`/people/${id}`);
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

@@ -65,16 +65,19 @@ export default async function PersonPage({ params }: PageProps) {
               <ArrowLeft className="w-4 h-4" />
               {tCommon("back")}
             </Link>
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/people/${id}/edit`}
-                className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
-              >
-                <Edit className="w-4 h-4" />
-                {tCommon("edit")}
-              </Link>
-              <DeletePersonButton id={id} name={fullName} />
-            </div>
+            {/* Show edit/delete for admins and members, hide for viewers */}
+            {session.user?.role !== "VIEWER" && (
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/people/${id}/edit`}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
+                >
+                  <Edit className="w-4 h-4" />
+                  {tCommon("edit")}
+                </Link>
+                <DeletePersonButton id={id} name={fullName} />
+              </div>
+            )}
           </div>
         </div>
       </header>
