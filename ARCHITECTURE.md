@@ -765,6 +765,61 @@ Switched from magic link authentication to password-based authentication for bet
 - Migration script created for existing admin account (sets temp password)
 - See `docs/PASSWORD_AUTH_MIGRATION.md` for complete migration documentation
 
+### 7. Role-Based Authorization (Implemented 2026-02-01)
+The app implements a three-tier role system (ADMIN, MEMBER, VIEWER) with granular content permissions.
+
+**Permission Model:**
+
+| Action | ADMIN | MEMBER | VIEWER |
+|--------|-------|--------|--------|
+| **Entries** | | | |
+| Create entry | ✅ | ✅ | ❌ |
+| Edit any entry | ✅ | Own only | ❌ |
+| Delete any entry | ✅ | Own only | ❌ |
+| Publish any entry | ✅ | Own only | ❌ |
+| **People** | | | |
+| Create person | ✅ | ✅ | ❌ |
+| Edit any person | ✅ | ✅ | ❌ |
+| Delete any person | ✅ | ✅ | ❌ |
+| Manage relationships | ✅ | ✅ | ❌ |
+| **Admin Functions** | | | |
+| User management | ✅ | ❌ | ❌ |
+| Create accounts | ✅ | ❌ | ❌ |
+| Reset passwords | ✅ | ❌ | ❌ |
+
+**Design Rationale:**
+
+**Entries (Ownership Model):**
+- Entries are personal stories with individual authorship
+- Members can only edit their own entries (authorship matters)
+- Admins can edit any entry (data cleanup, moderation, fixing orphaned entries)
+- Authorization pattern: `session.user.role !== "ADMIN" && entry.authorId !== session.user.id`
+
+**People (Collaborative Model):**
+- People are shared family entities, not individually owned
+- Multiple family members can contribute information about the same person
+- Example: One member adds birthdate, another adds biography
+- Members have full edit access (no ownership restrictions)
+- Only VIEWERs are blocked from editing
+
+**Implementation Strategy:**
+- **Inline role checks** (no centralized permission helpers) for explicitness and easy auditing
+- **Server-side enforcement** in actions - UI buttons are convenience, not security
+- **Direct URL protection** - Edit pages check authorization and redirect if unauthorized
+- **Session includes role** - `session.user.role` available in all server components and actions
+
+**Security Fix (2026-02-01):**
+Prior to this implementation, the people module had **NO role checks** - all authenticated users (including VIEWERs) could create, edit, and delete people and relationships. This critical vulnerability was patched by adding VIEWER role blocks to all 5 people server actions.
+
+**Why not use centralized permission helpers?**
+- Permission logic differs between modules (entries check ownership, people don't)
+- Inline checks are more explicit: `if (session.user.role !== "ADMIN" && ...)` is self-documenting
+- Avoids premature abstraction - only 2 permission patterns in the entire app
+- Follows existing patterns in the codebase (e.g., `src/actions/users.ts` line 56)
+
+**Admin Bonus Feature:**
+Admins can edit "orphaned" entries (entries with `authorId: null` due to user deletion) - useful for maintaining data quality and fixing historical content.
+
 ---
 
 ### 7. Internationalization (i18n)

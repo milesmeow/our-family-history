@@ -47,7 +47,8 @@ export default async function EntryPage({ params }: PageProps) {
 
   if (!entry) notFound();
 
-  const isAuthor = entry.author?.id === session.user?.id;
+  // Show edit/delete if user is author OR admin
+  const canEdit = entry.author?.id === session.user?.id || session.user?.role === "ADMIN";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -62,7 +63,7 @@ export default async function EntryPage({ params }: PageProps) {
               <ArrowLeft className="w-4 h-4" />
               {tCommon("back")}
             </Link>
-            {isAuthor && (
+            {canEdit && (
               <div className="flex items-center gap-2">
                 <Link
                   href={`/entries/${id}/edit`}

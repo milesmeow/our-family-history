@@ -388,6 +388,9 @@
     "notFound": "The requested resource was not found",
     "generic": "Something went wrong. Please try again.",
     "network": "Network error. Please check your connection.",
+    "common": {
+      "viewerReadOnly": "Viewers have read-only access and cannot make changes"
+    },
     "entries": {
       "createFailed": "Failed to create entry",
       "updateFailed": "Failed to update entry",

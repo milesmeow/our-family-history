@@ -438,8 +438,14 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
   - [x] Last admin protection (cannot delete sole admin)
   - [x] Person profile unlinking before deletion (preserves family tree)
   - [x] Content preservation (entries/comments show "Unknown Author")
-- [ ] Add role-based access controls throughout app
-- [ ] Test admin vs member vs viewer permissions
+- [x] Add role-based access controls throughout app
+  - [x] **Admin permissions for entries** - Admins can edit/delete any entry (not just their own)
+  - [x] **Admin permissions for people** - Admins can edit/delete any person
+  - [x] **VIEWER role security fix** - Block VIEWERs from editing people (critical vulnerability patched)
+  - [x] **UI permission checks** - Edit/delete buttons show based on role and ownership
+  - [x] **Direct URL protection** - Edit pages redirect unauthorized users
+  - [x] **Translation support** - Added `errors.common.viewerReadOnly` error message
+- [x] Test admin vs member vs viewer permissions
 
 **Decision: User-Person Linking**
 > Users can link their account to a Person record in the family tree via Settings.
@@ -474,6 +480,42 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 > PersonForm and the profile page display. It was redundant since relationships are now
 > tracked via the FamilyRelation system and user profile linking.
 
+**Admin Role Permissions (2026-02-01)**
+> Implemented comprehensive role-based authorization allowing ADMINs to edit all content
+> while maintaining MEMBER/VIEWER restrictions. Also fixed a **critical security vulnerability**
+> where VIEWERs could edit people due to missing role checks.
+
+**Authorization Model:**
+- **ADMIN**: Full access - can edit/delete any entry, person, or relationship
+- **MEMBER**: Can edit own entries, can edit all people (collaborative family tree model)
+- **VIEWER**: Read-only access - cannot create or edit anything
+
+**Entry Module Changes:**
+- `updateEntry`, `deleteEntry`, `togglePublish` now allow admin bypass using pattern:
+  ```typescript
+  if (session.user.role !== "ADMIN" && existingEntry.authorId !== session.user.id)
+  ```
+- Admins can edit "orphaned" entries (no author) for data cleanup
+- UI: Entry detail/edit pages show edit buttons for admins even if not the author
+
+**People Module Changes (SECURITY FIX):**
+- **Before**: All authenticated users (including VIEWERs) could create/edit/delete people - NO role checks existed!
+- **After**: All 5 people actions now block VIEWER role:
+  - `createPerson`, `updatePerson`, `deletePerson`, `addRelationship`, `removeRelationship`
+- Collaborative model: MEMBERs can edit all people (family history is shared, not individually owned)
+- UI: People detail/edit pages hide edit buttons from VIEWERs
+
+**Implementation Pattern:**
+- **Inline role checks** (no helper functions) - more explicit and easier to audit
+- **Server-side enforcement** in actions - UI buttons are convenience, not security
+- **Direct URL protection** - Edit pages redirect unauthorized users
+- **Consistent error messages** - `errors.common.viewerReadOnly` translated to English/Chinese
+
+**Why collaborative model for people?**
+> Unlike entries (personal stories with individual authorship), people are shared family
+> entities. Multiple family members may have information about the same person (e.g., one
+> adds birthdate, another adds biography). Only VIEWERs are restricted from editing.
+
 **Files created:**
 - `src/app/(main)/settings/page.tsx`
 - `src/components/settings/LinkProfileSection.tsx`
@@ -491,10 +533,14 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 - `src/app/(main)/dashboard/page.tsx` (added Settings icon in header)
 - `src/lib/auth.ts` (added signIn callback + updated createUser event, removed invitedById setting)
 - `prisma/schema.prisma` (made authorId nullable on Entry/Comment/Invitation, removed invitedById from User)
-- `src/app/(main)/entries/[id]/page.tsx` (handle null author gracefully)
-- `src/app/(main)/entries/[id]/edit/page.tsx` (block editing orphaned entries)
-- `messages/en.json` (added entries.card.unknownAuthor)
-- `messages/zh-TW.json` (added entries.card.unknownAuthor)
+- `src/app/(main)/entries/[id]/page.tsx` (handle null author gracefully, admin permission check)
+- `src/app/(main)/entries/[id]/edit/page.tsx` (admin bypass for edit page access)
+- `src/app/(main)/people/[id]/page.tsx` (hide edit buttons from VIEWERs)
+- `src/app/(main)/people/[id]/edit/page.tsx` (redirect VIEWERs from edit page)
+- `src/actions/entries.ts` (admin bypass for updateEntry, deleteEntry, togglePublish)
+- `src/actions/people.ts` (VIEWER role blocks on all 5 functions - SECURITY FIX)
+- `messages/en.json` (added entries.card.unknownAuthor, errors.common.viewerReadOnly)
+- `messages/zh-TW.json` (added entries.card.unknownAuthor, errors.common.viewerReadOnly)
 
 ---
 
@@ -723,9 +769,9 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2026-01-31
+**Last Updated:** 2026-02-01
 
-**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress, 15 Mostly Complete
+**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
@@ -734,7 +780,7 @@ After each phase, verify:
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - ✅ Phase 8: Timeline View - Chronological display with filters
-- 🔶 Phase 12: Settings (mostly complete) - User-Person profile linking
+- ✅ Phase 12: Settings & Admin - User-Person profile linking + **role-based permissions**
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 - ✅ Phase 15: i18n (mostly complete) - English + Traditional Chinese for all UI pages
 
@@ -760,6 +806,11 @@ After each phase, verify:
 > `VerticalTimeline` can be swapped with `HorizontalTimeline` or `YearGroupedCards`
 > in the future without changing the data fetching or filter logic.
 
+> **Admin Role Permissions (2026-02-01)**: Implemented comprehensive role-based authorization.
+> ADMINs can edit/delete any entry or person (bypassing ownership checks). MEMBERs can edit their
+> own entries and all people (collaborative model). VIEWERs have read-only access. Fixed critical
+> security vulnerability where VIEWERs could edit people due to missing role checks.
+
 **What's Working:**
 - **Password authentication (login → change password → dashboard)**
   - Login with email + password
@@ -774,6 +825,14 @@ After each phase, verify:
   - Admins can delete users (preserves their entries/comments as "Unknown Author")
   - Last admin protection prevents orphaning the family
   - User's Person profile is preserved in family tree when deleted
+- **Role-based permissions (ADMIN/MEMBER/VIEWER)**
+  - Admins can edit/delete ANY entry (not just their own)
+  - Admins can edit/delete ANY person
+  - Members can edit own entries, can edit all people (collaborative family model)
+  - Viewers blocked from all editing operations (read-only access)
+  - Security fix: VIEWERs can no longer edit people (vulnerability patched)
+  - UI shows edit/delete buttons only when authorized
+  - Direct URL navigation to edit pages redirects unauthorized users
 - **Dashboard quick actions (5 navigation cards)**
   - New Entry, Manage People, View Timeline, View Stories (→ /entries), Settings
   - Card-based navigation with color-coded icons (BookOpen, Users, Clock, BookText, TreePine)

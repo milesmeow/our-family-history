@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
@@ -37,6 +39,7 @@ export default async function TimelinePage({ searchParams }: PageProps) {
   if (!session) redirect("/login");
 
   const t = await getTranslations("timeline");
+  const tDashboard = await getTranslations("dashboard");
 
   // Parse filter parameters
   const params = await searchParams;
@@ -124,30 +127,48 @@ export default async function TimelinePage({ searchParams }: PageProps) {
   const hasFilters = category || personId || startDate || endDate;
 
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-        <p className="mt-2 text-gray-600">{t("subtitle")}</p>
-      </div>
-
-      {/* Filters */}
-      <Suspense fallback={<div className="h-16 bg-gray-100 rounded-xl animate-pulse mb-8" />}>
-        <TimelineFilters currentFilters={currentFilters} />
-      </Suspense>
-
-      {/* Timeline */}
-      <div className="py-4">
-        <VerticalTimeline entries={timelineEntries} />
-      </div>
-
-      {/* Results Summary */}
-      {entries.length > 0 && (
-        <div className="mt-8 text-center text-sm text-gray-500">
-          {t("results.showing", { count: entries.length })}
-          {hasFilters && ` ${t("results.filtered")}`}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard"
+                className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {tDashboard("title")}
+              </Link>
+              <span className="text-gray-300">|</span>
+              <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
+            </div>
+          </div>
         </div>
-      )}
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Subtitle */}
+        <p className="text-gray-600 mb-6">{t("subtitle")}</p>
+
+        {/* Filters */}
+        <Suspense fallback={<div className="h-16 bg-gray-100 rounded-xl animate-pulse mb-8" />}>
+          <TimelineFilters currentFilters={currentFilters} />
+        </Suspense>
+
+        {/* Timeline */}
+        <div className="py-4">
+          <VerticalTimeline entries={timelineEntries} />
+        </div>
+
+        {/* Results Summary */}
+        {entries.length > 0 && (
+          <div className="mt-8 text-center text-sm text-gray-500">
+            {t("results.showing", { count: entries.length })}
+            {hasFilters && ` ${t("results.filtered")}`}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

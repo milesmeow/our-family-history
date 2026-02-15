@@ -184,7 +184,8 @@ export async function updateEntry(
     return { success: false, error: tErrors("notFound") };
   }
 
-  if (existingEntry.authorId !== session.user.id) {
+  // Allow admins to edit any entry, or authors to edit their own
+  if (session.user.role !== "ADMIN" && existingEntry.authorId !== session.user.id) {
     return { success: false, error: tErrors("entries.notOwner") };
   }
 
@@ -294,7 +295,8 @@ export async function deleteEntry(id: string): Promise<ActionResult> {
     return { success: false, error: tErrors("notFound") };
   }
 
-  if (existingEntry.authorId !== session.user.id) {
+  // Allow admins to edit any entry, or authors to edit their own
+  if (session.user.role !== "ADMIN" && existingEntry.authorId !== session.user.id) {
     return { success: false, error: tErrors("entries.notOwner") };
   }
 
@@ -339,7 +341,8 @@ export async function togglePublish(id: string): Promise<ActionResult> {
     return { success: false, error: tErrors("notFound") };
   }
 
-  if (existingEntry.authorId !== session.user.id) {
+  // Allow admins to edit any entry, or authors to edit their own
+  if (session.user.role !== "ADMIN" && existingEntry.authorId !== session.user.id) {
     return { success: false, error: tErrors("entries.notOwner") };
   }
 
