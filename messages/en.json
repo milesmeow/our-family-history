@@ -224,6 +224,10 @@
       "relationshipPlaceholder": "e.g., Great-grandmother, Uncle",
       "bioLabel": "Biography",
       "bioPlaceholder": "Tell us about this person...",
+      "photoLabel": "Profile Photo",
+      "uploadPhoto": "Upload Photo",
+      "removePhoto": "Remove",
+      "uploading": "Uploading...",
       "submit": "Save Person",
       "creating": "Creating...",
       "updating": "Updating..."

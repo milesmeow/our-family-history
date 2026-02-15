@@ -56,6 +56,7 @@ export async function createPerson(
     deathDate: formData.get("deathDate") || null,
     relationship: formData.get("relationship") || null,
     bio: formData.get("bio") || null,
+    avatarUrl: formData.get("avatarUrl") || null,
   };
 
   const validatedFields = personFormSchema.safeParse(rawData);
@@ -124,6 +125,7 @@ export async function updatePerson(
     deathDate: formData.get("deathDate") || null,
     relationship: formData.get("relationship") || null,
     bio: formData.get("bio") || null,
+    avatarUrl: formData.get("avatarUrl") || null,
   };
 
   const validatedFields = personFormSchema.safeParse(rawData);

@@ -224,6 +224,10 @@
       "relationshipPlaceholder": "例如：曾祖母、叔叔",
       "bioLabel": "個人簡介",
       "bioPlaceholder": "介紹這個人...",
+      "photoLabel": "個人照片",
+      "uploadPhoto": "上傳照片",
+      "removePhoto": "移除",
+      "uploading": "上傳中...",
       "submit": "儲存人物",
       "creating": "建立中...",
       "updating": "更新中..."
