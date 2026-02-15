@@ -224,6 +224,10 @@
       "relationshipPlaceholder": "例如：曾祖母、叔叔",
       "bioLabel": "個人簡介",
       "bioPlaceholder": "介紹這個人...",
+      "photoLabel": "個人照片",
+      "uploadPhoto": "上傳照片",
+      "removePhoto": "移除",
+      "uploading": "上傳中...",
       "submit": "儲存人物",
       "creating": "建立中...",
       "updating": "更新中..."
@@ -388,6 +392,9 @@
     "notFound": "找不到請求的資源",
     "generic": "發生錯誤，請重試。",
     "network": "網路錯誤，請檢查您的連線。",
+    "common": {
+      "viewerReadOnly": "查看者具有唯讀存取權限，無法進行變更"
+    },
     "entries": {
       "createFailed": "建立記錄失敗",
       "updateFailed": "更新記錄失敗",

@@ -1,58 +1,25 @@
-import { auth, signOut } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+import { auth } from "@/lib/auth";
 import { getTranslations } from "next-intl/server";
-import { BookOpen, Users, Clock, TreePine, Settings, BookText } from "lucide-react";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BookOpen, Users, Clock, TreePine, BookText } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function DashboardPage() {
   const session = await auth();
 
-  if (!session) {
-    redirect("/login");
-  }
-
   const t = await getTranslations("dashboard");
   const tCommon = await getTranslations("common");
 
-  const userName = session.user?.name || session.user?.email?.split("@")[0];
+  const userName = session!.user?.name || session!.user?.email?.split("@")[0];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-bold text-gray-900">{tCommon("appName")}</h1>
-            <div className="flex items-center gap-4">
-              <LanguageSwitcher />
-              <span className="text-sm text-gray-600">
-                {session.user?.email}
-              </span>
-              <Link
-                href="/settings"
-                className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                title={t("quickActions.settings")}
-              >
-                <Settings className="w-5 h-5" />
-              </Link>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/" });
-                }}
-              >
-                <button
-                  type="submit"
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  Sign out
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        variant="dashboard"
+        appName={tCommon("appName")}
+        userEmail={session!.user?.email || ""}
+        settingsLabel={t("quickActions.settings")}
+        signOutLabel="Sign out"
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -39,6 +39,14 @@ export async function createPerson(
     return { success: false, error: tErrors("unauthorized") };
   }
 
+  // Block viewers from creating people
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: tErrors("common.viewerReadOnly"),
+    };
+  }
+
   const rawData = {
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
@@ -48,6 +56,7 @@ export async function createPerson(
     deathDate: formData.get("deathDate") || null,
     relationship: formData.get("relationship") || null,
     bio: formData.get("bio") || null,
+    avatarUrl: formData.get("avatarUrl") || null,
   };
 
   const validatedFields = personFormSchema.safeParse(rawData);
@@ -99,6 +108,14 @@ export async function updatePerson(
     return { success: false, error: tErrors("unauthorized") };
   }
 
+  // Block viewers from editing people
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: tErrors("common.viewerReadOnly"),
+    };
+  }
+
   const rawData = {
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
@@ -108,6 +125,7 @@ export async function updatePerson(
     deathDate: formData.get("deathDate") || null,
     relationship: formData.get("relationship") || null,
     bio: formData.get("bio") || null,
+    avatarUrl: formData.get("avatarUrl") || null,
   };
 
   const validatedFields = personFormSchema.safeParse(rawData);
@@ -151,6 +169,14 @@ export async function deletePerson(id: string): Promise<ActionResult> {
     return { success: false, error: tErrors("unauthorized") };
   }
 
+  // Block viewers from deleting people
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: tErrors("common.viewerReadOnly"),
+    };
+  }
+
   try {
     await prisma.person.delete({
       where: { id },
@@ -175,6 +201,14 @@ export async function addRelationship(data: {
 
   if (!session) {
     return { success: false, error: tErrors("unauthorized") };
+  }
+
+  // Block viewers from adding relationships
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: tErrors("common.viewerReadOnly"),
+    };
   }
 
   const validatedFields = relationshipSchema.safeParse(data);
@@ -233,6 +267,14 @@ export async function removeRelationship(
 
   if (!session) {
     return { success: false, error: tErrors("unauthorized") };
+  }
+
+  // Block viewers from removing relationships
+  if (session.user.role === "VIEWER") {
+    return {
+      success: false,
+      error: tErrors("common.viewerReadOnly"),
+    };
   }
 
   const inverseType = getInverseRelationType(relationType);

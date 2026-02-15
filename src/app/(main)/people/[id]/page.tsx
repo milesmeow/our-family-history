@@ -1,12 +1,13 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { format } from "date-fns";
-import { Edit, User, Calendar, ArrowLeft } from "lucide-react";
+import { Edit, User, Calendar } from "lucide-react";
 import Link from "next/link";
 import { DeletePersonButton } from "@/components/people/DeletePersonButton";
 import { RelationshipList } from "@/components/people/RelationshipList";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -15,7 +16,6 @@ interface PageProps {
 export default async function PersonPage({ params }: PageProps) {
   const { id } = await params;
   const session = await auth();
-  if (!session) redirect("/login");
 
   const t = await getTranslations("people");
   const tCommon = await getTranslations("common");
@@ -54,18 +54,13 @@ export default async function PersonPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link
-              href="/people"
-              className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {tCommon("back")}
-            </Link>
-            <div className="flex items-center gap-2">
+      <PageHeader
+        variant="subpage"
+        backHref="/people"
+        backLabel={tCommon("back")}
+        actions={
+          session?.user?.role !== "VIEWER" ? (
+            <>
               <Link
                 href={`/people/${id}/edit`}
                 className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
@@ -74,10 +69,10 @@ export default async function PersonPage({ params }: PageProps) {
                 {tCommon("edit")}
               </Link>
               <DeletePersonButton id={id} name={fullName} />
-            </div>
-          </div>
-        </div>
-      </header>
+            </>
+          ) : undefined
+        }
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header */}

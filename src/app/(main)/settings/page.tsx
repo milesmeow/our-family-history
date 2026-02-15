@@ -2,26 +2,21 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { ArrowLeft, Settings } from "lucide-react";
 import { LinkProfileSection } from "@/components/settings/LinkProfileSection";
 import { ManageMembersSection, type UserForManagement } from "@/components/settings/ManageMembersSection";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
 import { CreateAccountSection } from "@/components/settings/CreateAccountSection";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function SettingsPage() {
   const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
 
   const t = await getTranslations("settings");
   const tCommon = await getTranslations("common");
 
   // Fetch user with their linked person
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: session!.user!.id },
     include: {
       person: true,
     },
@@ -55,24 +50,13 @@ export default async function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
-            <Link
-              href="/dashboard"
-              className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="sr-only">{tCommon("back")}</span>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Settings className="w-5 h-5 text-gray-600" />
-              <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        variant="subpage"
+        backHref="/dashboard"
+        backLabel={tCommon("back")}
+        title={t("title")}
+        maxWidth="3xl"
+      />
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -117,7 +101,7 @@ export default async function SettingsPage() {
         {/* Manage Members (Admin only) */}
         {user.role === "ADMIN" && (
           <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <ManageMembersSection users={allUsers} currentUserId={session.user.id} />
+            <ManageMembersSection users={allUsers} currentUserId={session!.user!.id} />
           </section>
         )}
       </main>

@@ -1,35 +1,20 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { PersonForm } from "@/components/people/PersonForm";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function NewPersonPage() {
-  const session = await auth();
-  if (!session) redirect("/login");
-
   const t = await getTranslations("people");
   const tCommon = await getTranslations("common");
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 h-16">
-            <Link
-              href="/people"
-              className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {tCommon("back")}
-            </Link>
-            <span className="text-gray-300">|</span>
-            <h1 className="text-xl font-bold text-gray-900">{t("newPerson")}</h1>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        variant="subpage"
+        backHref="/people"
+        backLabel={tCommon("back")}
+        title={t("newPerson")}
+        maxWidth="3xl"
+      />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

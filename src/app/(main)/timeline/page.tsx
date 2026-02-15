@@ -1,11 +1,10 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
 import { parseDateString } from "@/lib/utils";
 import { TimelineFilters } from "@/components/timeline/TimelineFilters";
 import { VerticalTimeline } from "@/components/timeline/VerticalTimeline";
+import { PageHeader } from "@/components/layout/PageHeader";
 import type { TimelineEntryData } from "@/components/timeline/TimelineEvent";
 import type { Prisma } from "@prisma/client";
 
@@ -33,10 +32,8 @@ export const metadata = {
  * - Undated entries shown in a separate section
  */
 export default async function TimelinePage({ searchParams }: PageProps) {
-  const session = await auth();
-  if (!session) redirect("/login");
-
   const t = await getTranslations("timeline");
+  const tDashboard = await getTranslations("dashboard");
 
   // Parse filter parameters
   const params = await searchParams;
@@ -124,30 +121,37 @@ export default async function TimelinePage({ searchParams }: PageProps) {
   const hasFilters = category || personId || startDate || endDate;
 
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-        <p className="mt-2 text-gray-600">{t("subtitle")}</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader
+        variant="subpage"
+        backHref="/dashboard"
+        backLabel={tDashboard("title")}
+        title={t("title")}
+        maxWidth="5xl"
+      />
 
-      {/* Filters */}
-      <Suspense fallback={<div className="h-16 bg-gray-100 rounded-xl animate-pulse mb-8" />}>
-        <TimelineFilters currentFilters={currentFilters} />
-      </Suspense>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Subtitle */}
+        <p className="text-gray-600 mb-6">{t("subtitle")}</p>
 
-      {/* Timeline */}
-      <div className="py-4">
-        <VerticalTimeline entries={timelineEntries} />
-      </div>
+        {/* Filters */}
+        <Suspense fallback={<div className="h-16 bg-gray-100 rounded-xl animate-pulse mb-8" />}>
+          <TimelineFilters currentFilters={currentFilters} />
+        </Suspense>
 
-      {/* Results Summary */}
-      {entries.length > 0 && (
-        <div className="mt-8 text-center text-sm text-gray-500">
-          {t("results.showing", { count: entries.length })}
-          {hasFilters && ` ${t("results.filtered")}`}
+        {/* Timeline */}
+        <div className="py-4">
+          <VerticalTimeline entries={timelineEntries} />
         </div>
-      )}
+
+        {/* Results Summary */}
+        {entries.length > 0 && (
+          <div className="mt-8 text-center text-sm text-gray-500">
+            {t("results.showing", { count: entries.length })}
+            {hasFilters && ` ${t("results.filtered")}`}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

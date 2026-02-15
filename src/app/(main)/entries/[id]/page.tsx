@@ -1,12 +1,13 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { format } from "date-fns";
-import { Edit, Calendar, MapPin, Tag, ArrowLeft, User } from "lucide-react";
+import { Edit, Calendar, MapPin, Tag, User } from "lucide-react";
 import Link from "next/link";
 import { DeleteEntryButton } from "@/components/entries/DeleteEntryButton";
 import { type Category } from "@/lib/validations/entry";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -15,7 +16,6 @@ interface PageProps {
 export default async function EntryPage({ params }: PageProps) {
   const { id } = await params;
   const session = await auth();
-  if (!session) redirect("/login");
 
   const t = await getTranslations("entries");
   const tCommon = await getTranslations("common");
@@ -47,36 +47,30 @@ export default async function EntryPage({ params }: PageProps) {
 
   if (!entry) notFound();
 
-  const isAuthor = entry.author?.id === session.user?.id;
+  // Show edit/delete if user is author OR admin
+  const canEdit = entry.author?.id === session?.user?.id || session?.user?.role === "ADMIN";
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link
-              href="/entries"
-              className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {tCommon("back")}
-            </Link>
-            {isAuthor && (
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/entries/${id}/edit`}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
-                >
-                  <Edit className="w-4 h-4" />
-                  {tCommon("edit")}
-                </Link>
-                <DeleteEntryButton id={id} title={entry.title} />
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        variant="subpage"
+        backHref="/entries"
+        backLabel={tCommon("back")}
+        actions={
+          canEdit ? (
+            <>
+              <Link
+                href={`/entries/${id}/edit`}
+                className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
+              >
+                <Edit className="w-4 h-4" />
+                {tCommon("edit")}
+              </Link>
+              <DeleteEntryButton id={id} title={entry.title} />
+            </>
+          ) : undefined
+        }
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Entry Content Card */}

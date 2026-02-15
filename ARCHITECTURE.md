@@ -88,6 +88,7 @@ Person
 ├── deathDate          DateTime?
 ├── relationship       String? - "Great-grandmother", "Uncle"
 ├── bio                String?
+├── avatarUrl          String? - Uploadthing URL for profile photo
 │
 ├── entries            Entry[] - Stories they appear in
 ├── familyRelations    FamilyRelation[] - Parent/child/spouse links
@@ -225,7 +226,7 @@ our-family-history/
 │   │       │   ├── route.ts          # GET people list
 │   │       │   └── unlinked/route.ts # GET unlinked people (for profile linking)
 │   │       ├── comments/route.ts
-│   │       ├── upload/route.ts
+│   │       ├── uploadthing/route.ts  # ✅ Uploadthing API handler
 │   │       └── invite/route.ts
 │   │
 │   ├── actions/              # ✅ Server Actions
@@ -236,14 +237,16 @@ our-family-history/
 │   │   └── users.ts          # ✅ User deletion (admin-only)
 │   │
 │   ├── components/
-│   │   ├── ui/               # Reusable primitives
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   └── DatePicker.tsx
+│   │   ├── ui/               # Reusable UI primitives
+│   │   │   ├── Button.tsx    # 6 variants: primary, brand, danger, ghost, success, icon
+│   │   │   ├── Card.tsx      # Content container with interactive + padding options
+│   │   │   ├── Badge.tsx     # Labels/tags with 13 colors, sm/md sizes
+│   │   │   ├── Alert.tsx     # Error/success/info feedback
+│   │   │   ├── Modal.tsx     # Overlay dialog (client component)
+│   │   │   └── index.ts      # Barrel exports
 │   │   ├── LanguageSwitcher.tsx  # ✅ Bilingual language toggle for home page
 │   │   ├── layout/
+│   │   │   ├── PageHeader.tsx    # ✅ Shared header (dashboard + subpage variants)
 │   │   │   └── Footer.tsx        # ✅ App version display
 │   │   ├── entries/             # ✅ Implemented
 │   │   │   ├── EntryCard.tsx
@@ -257,6 +260,7 @@ our-family-history/
 │   │   ├── people/               # ✅ Implemented
 │   │   │   ├── PersonCard.tsx
 │   │   │   ├── PersonForm.tsx
+│   │   │   ├── AvatarUploader.tsx  # ✅ Photo upload with Uploadthing
 │   │   │   ├── RelationshipList.tsx
 │   │   │   ├── AddRelationshipDialog.tsx
 │   │   │   └── DeletePersonButton.tsx
@@ -274,7 +278,7 @@ our-family-history/
 │   ├── lib/
 │   │   ├── prisma.ts         # Database client singleton
 │   │   ├── auth.ts           # NextAuth configuration (Credentials provider + JWT)
-│   │   ├── uploadthing.ts    # Uploadthing config
+│   │   ├── uploadthing.ts    # ✅ Uploadthing file router (avatarUploader endpoint)
 │   │   ├── utils.ts          # Helper functions (parseDateString for timezone-safe dates)
 │   │   ├── email/            # ✅ Email templates
 │   │   │   ├── new-account.ts       # ✅ Temporary password email
@@ -336,9 +340,8 @@ NEXTAUTH_SECRET="generate-with: openssl rand -base64 32"
 RESEND_API_KEY="re_xxxxxxxxxx"
 EMAIL_FROM="Family History <login@yourdomain.com>"
 
-# === File Upload (Uploadthing) ===
-UPLOADTHING_SECRET="sk_live_xxxxxxxxxx"
-UPLOADTHING_APP_ID="your-app-id"
+# === File Upload (Uploadthing v7) ===
+UPLOADTHING_TOKEN="your-uploadthing-token"
 ```
 
 ---
@@ -765,6 +768,61 @@ Switched from magic link authentication to password-based authentication for bet
 - Migration script created for existing admin account (sets temp password)
 - See `docs/PASSWORD_AUTH_MIGRATION.md` for complete migration documentation
 
+### 7. Role-Based Authorization (Implemented 2026-02-01)
+The app implements a three-tier role system (ADMIN, MEMBER, VIEWER) with granular content permissions.
+
+**Permission Model:**
+
+| Action | ADMIN | MEMBER | VIEWER |
+|--------|-------|--------|--------|
+| **Entries** | | | |
+| Create entry | ✅ | ✅ | ❌ |
+| Edit any entry | ✅ | Own only | ❌ |
+| Delete any entry | ✅ | Own only | ❌ |
+| Publish any entry | ✅ | Own only | ❌ |
+| **People** | | | |
+| Create person | ✅ | ✅ | ❌ |
+| Edit any person | ✅ | ✅ | ❌ |
+| Delete any person | ✅ | ✅ | ❌ |
+| Manage relationships | ✅ | ✅ | ❌ |
+| **Admin Functions** | | | |
+| User management | ✅ | ❌ | ❌ |
+| Create accounts | ✅ | ❌ | ❌ |
+| Reset passwords | ✅ | ❌ | ❌ |
+
+**Design Rationale:**
+
+**Entries (Ownership Model):**
+- Entries are personal stories with individual authorship
+- Members can only edit their own entries (authorship matters)
+- Admins can edit any entry (data cleanup, moderation, fixing orphaned entries)
+- Authorization pattern: `session.user.role !== "ADMIN" && entry.authorId !== session.user.id`
+
+**People (Collaborative Model):**
+- People are shared family entities, not individually owned
+- Multiple family members can contribute information about the same person
+- Example: One member adds birthdate, another adds biography
+- Members have full edit access (no ownership restrictions)
+- Only VIEWERs are blocked from editing
+
+**Implementation Strategy:**
+- **Inline role checks** (no centralized permission helpers) for explicitness and easy auditing
+- **Server-side enforcement** in actions - UI buttons are convenience, not security
+- **Direct URL protection** - Edit pages check authorization and redirect if unauthorized
+- **Session includes role** - `session.user.role` available in all server components and actions
+
+**Security Fix (2026-02-01):**
+Prior to this implementation, the people module had **NO role checks** - all authenticated users (including VIEWERs) could create, edit, and delete people and relationships. This critical vulnerability was patched by adding VIEWER role blocks to all 5 people server actions.
+
+**Why not use centralized permission helpers?**
+- Permission logic differs between modules (entries check ownership, people don't)
+- Inline checks are more explicit: `if (session.user.role !== "ADMIN" && ...)` is self-documenting
+- Avoids premature abstraction - only 2 permission patterns in the entire app
+- Follows existing patterns in the codebase (e.g., `src/actions/users.ts` line 56)
+
+**Admin Bonus Feature:**
+Admins can edit "orphaned" entries (entries with `authorId: null` due to user deletion) - useful for maintaining data quality and fixing historical content.
+
 ---
 
 ### 7. Internationalization (i18n)
@@ -973,6 +1031,46 @@ When you rebuild a table that other tables reference, you MUST also rebuild thos
 - `scripts/fix-entry-fk.sql` - Example fix for Entry table FK
 - `scripts/apply-entry-fix.ts` - Script to apply FK fix
 - `prisma/fresh-schema.sql` - Clean schema from scratch (correct FKs guaranteed)
+
+---
+
+### 11. Shared Layout & PageHeader (Implemented 2026-02-14)
+
+The `(main)/layout.tsx` provides auth gating for all protected routes. Per-page headers use a shared `PageHeader` component.
+
+**Why PageHeader is in pages, not in layout:**
+Next.js App Router layouts cannot receive per-page props. Since each page needs different back links, titles, and action buttons, the header must be rendered by each page. The layout handles only what's truly shared (auth check + redirect).
+
+**PageHeader Component (`src/components/layout/PageHeader.tsx`):**
+
+Two variants via discriminated union:
+
+```typescript
+// Dashboard variant - app name, user email, language switcher, settings, sign out
+<PageHeader variant="dashboard" appName="..." userEmail="..." settingsLabel="..." signOutLabel="..." />
+
+// Sub-page variant - back arrow, optional title, optional right-side actions
+<PageHeader variant="subpage" backHref="/dashboard" backLabel="Dashboard" title="Entries" maxWidth="7xl"
+  actions={<Link href="/entries/new">New Entry</Link>} />
+```
+
+**Max-width values by page type:**
+- `7xl` - Dashboard + list pages (entries, people) — wide grids
+- `5xl` - Timeline — medium width
+- `4xl` - Detail pages (entries/[id], people/[id]) — reading width (default)
+- `3xl` - Form pages (settings, people/new, people/edit) — focused forms
+
+**UI Component Library (`src/components/ui/`):**
+
+| Component | Purpose | Key Props |
+|-----------|---------|-----------|
+| `Button` | 6 variants (primary/blue, brand/amber, danger, ghost, success, icon) | `variant`, `size`, `isLoading` |
+| `Card` | Content container with optional hover effects | `interactive`, `padding` (sm/md/lg) |
+| `Badge` | Labels/tags with 13 color options | `color`, `size` (sm/md) |
+| `Alert` | Feedback messages | `variant` (error/success/info) |
+| `Modal` | Overlay dialog with Escape key + backdrop click | `isOpen`, `onClose`, `title` |
+
+All components are barrel-exported from `src/components/ui/index.ts`.
 
 ---
 

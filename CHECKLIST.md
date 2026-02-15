@@ -138,39 +138,51 @@
 
 ---
 
-## Phase 4: Core Layout & UI
+## Phase 4: Core Layout & UI ✅
 **Goal:** Create the app shell and reusable UI components
 
-- [ ] Create root layout with providers `src/app/layout.tsx`
-- [ ] Create main app layout `src/app/(main)/layout.tsx`
-  - Header with user info
-  - Sidebar navigation
-  - Responsive design
-- [ ] Create UI components in `src/components/ui/`
-  - [ ] Button
-  - [ ] Card
-  - [ ] Input
-  - [ ] Textarea
-  - [ ] Modal
-  - [ ] Avatar
-  - [ ] Badge
-  - [ ] DatePicker
-  - [ ] Select
-- [ ] Create layout components in `src/components/layout/`
-  - [ ] Header
-  - [ ] Sidebar
-  - [ ] Navigation
-- [ ] Create landing page `src/app/page.tsx`
-- [ ] Create dashboard page `src/app/(main)/dashboard/page.tsx`
-- [ ] Add global styles and Tailwind customizations
+- [x] Create root layout with providers `src/app/layout.tsx`
+- [x] Create main app layout `src/app/(main)/layout.tsx`
+  - Auth-only shell (redirects unauthenticated users to /login)
+  - Per-page headers via shared `PageHeader` component
+  - No sidebar (card-based navigation on dashboard instead)
+- [x] Create UI components in `src/components/ui/`
+  - [x] Button (6 variants: primary, brand, danger, ghost, success, icon)
+  - [x] Card (with interactive and padding options)
+  - [x] Modal (with Escape key and backdrop click to close)
+  - [x] Badge (sm/md sizes, 13 color options)
+  - [x] Alert (error, success, info variants)
+- [x] Create layout components in `src/components/layout/`
+  - [x] PageHeader (dashboard variant + subpage variant with back button, title, actions)
+  - [x] Footer (app version display)
+- [x] Create landing page `src/app/page.tsx`
+- [x] Create dashboard page `src/app/(main)/dashboard/page.tsx`
+- [x] Add global styles and Tailwind customizations
+
+**Design Decision: PageHeader over Shared Layout Header**
+> Next.js App Router layouts cannot receive per-page props. Since each page needs
+> different back links, titles, and action buttons, the header is rendered by each
+> page via a shared `PageHeader` component rather than in the layout. The layout
+> handles only auth gating. This is the recommended App Router pattern.
+
+**Design Decision: No Sidebar Navigation**
+> Instead of a traditional sidebar, the app uses card-based navigation on the
+> dashboard (5 quick-action cards). Sub-pages use back arrows to navigate up.
+> This is simpler for a family app with a shallow page hierarchy.
 
 **Files created:**
 - `src/app/layout.tsx`
-- `src/app/(main)/layout.tsx`
+- `src/app/(main)/layout.tsx` (auth shell)
 - `src/app/page.tsx`
 - `src/app/(main)/dashboard/page.tsx`
-- `src/components/ui/*.tsx`
-- `src/components/layout/*.tsx`
+- `src/components/ui/Button.tsx`
+- `src/components/ui/Card.tsx`
+- `src/components/ui/Badge.tsx`
+- `src/components/ui/Alert.tsx`
+- `src/components/ui/Modal.tsx`
+- `src/components/ui/index.ts` (barrel exports)
+- `src/components/layout/PageHeader.tsx` (shared header: dashboard + subpage variants)
+- `src/components/layout/Footer.tsx`
 - `src/app/globals.css` (updated)
 
 ---
@@ -215,24 +227,38 @@
 
 ---
 
-## Phase 6: Photo Uploads
+## Phase 6: Photo Uploads (Partially Complete)
 **Goal:** Integrate Uploadthing for media uploads
 
-- [ ] Set up Uploadthing account and get credentials
-- [ ] Create Uploadthing configuration `src/lib/uploadthing.ts`
-- [ ] Create upload API route `src/app/api/uploadthing/route.ts`
+### Step 1: Person Avatar Uploads ✅
+- [x] Set up Uploadthing account and get credentials
+- [x] Create Uploadthing configuration `src/lib/uploadthing.ts`
+- [x] Create upload API route `src/app/api/uploadthing/route.ts`
+- [x] Create `src/components/people/AvatarUploader.tsx` — reusable avatar upload component
+- [x] Integrate avatar upload into PersonForm (appears above name fields)
+- [x] Update `createPerson` and `updatePerson` server actions to handle `avatarUrl`
+- [x] Add translation keys for photo upload UI (English + Traditional Chinese)
+- [x] Test upload flow (upload, preview, remove, save)
+
+### Step 2: Entry Media Uploads (Pending)
 - [ ] Create media components
   - [ ] `src/components/media/MediaUploader.tsx`
   - [ ] `src/components/media/MediaGallery.tsx`
   - [ ] `src/components/media/ImagePreview.tsx`
 - [ ] Integrate uploads into EntryForm
 - [ ] Add media display to entry detail page
-- [ ] Test upload flow
+- [ ] Test entry media upload flow
 
 **Files created:**
-- `src/lib/uploadthing.ts`
-- `src/app/api/uploadthing/route.ts`
-- `src/components/media/*.tsx`
+- `src/lib/uploadthing.ts` — Uploadthing file router with `avatarUploader` endpoint (4MB image limit, auth middleware)
+- `src/app/api/uploadthing/route.ts` — Next.js API route handler for Uploadthing
+- `src/components/people/AvatarUploader.tsx` — Client component with upload preview, loading state, error handling
+
+**Files modified:**
+- `src/actions/people.ts` — Added `avatarUrl` to `rawData` in `createPerson` and `updatePerson`
+- `src/components/people/PersonForm.tsx` — Integrated `AvatarUploader` at top of form
+- `messages/en.json` — Added `people.form.photoLabel`, `uploadPhoto`, `removePhoto`, `uploading`
+- `messages/zh-TW.json` — Same keys in Traditional Chinese
 
 ---
 
@@ -438,8 +464,14 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
   - [x] Last admin protection (cannot delete sole admin)
   - [x] Person profile unlinking before deletion (preserves family tree)
   - [x] Content preservation (entries/comments show "Unknown Author")
-- [ ] Add role-based access controls throughout app
-- [ ] Test admin vs member vs viewer permissions
+- [x] Add role-based access controls throughout app
+  - [x] **Admin permissions for entries** - Admins can edit/delete any entry (not just their own)
+  - [x] **Admin permissions for people** - Admins can edit/delete any person
+  - [x] **VIEWER role security fix** - Block VIEWERs from editing people (critical vulnerability patched)
+  - [x] **UI permission checks** - Edit/delete buttons show based on role and ownership
+  - [x] **Direct URL protection** - Edit pages redirect unauthorized users
+  - [x] **Translation support** - Added `errors.common.viewerReadOnly` error message
+- [x] Test admin vs member vs viewer permissions
 
 **Decision: User-Person Linking**
 > Users can link their account to a Person record in the family tree via Settings.
@@ -474,6 +506,42 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 > PersonForm and the profile page display. It was redundant since relationships are now
 > tracked via the FamilyRelation system and user profile linking.
 
+**Admin Role Permissions (2026-02-01)**
+> Implemented comprehensive role-based authorization allowing ADMINs to edit all content
+> while maintaining MEMBER/VIEWER restrictions. Also fixed a **critical security vulnerability**
+> where VIEWERs could edit people due to missing role checks.
+
+**Authorization Model:**
+- **ADMIN**: Full access - can edit/delete any entry, person, or relationship
+- **MEMBER**: Can edit own entries, can edit all people (collaborative family tree model)
+- **VIEWER**: Read-only access - cannot create or edit anything
+
+**Entry Module Changes:**
+- `updateEntry`, `deleteEntry`, `togglePublish` now allow admin bypass using pattern:
+  ```typescript
+  if (session.user.role !== "ADMIN" && existingEntry.authorId !== session.user.id)
+  ```
+- Admins can edit "orphaned" entries (no author) for data cleanup
+- UI: Entry detail/edit pages show edit buttons for admins even if not the author
+
+**People Module Changes (SECURITY FIX):**
+- **Before**: All authenticated users (including VIEWERs) could create/edit/delete people - NO role checks existed!
+- **After**: All 5 people actions now block VIEWER role:
+  - `createPerson`, `updatePerson`, `deletePerson`, `addRelationship`, `removeRelationship`
+- Collaborative model: MEMBERs can edit all people (family history is shared, not individually owned)
+- UI: People detail/edit pages hide edit buttons from VIEWERs
+
+**Implementation Pattern:**
+- **Inline role checks** (no helper functions) - more explicit and easier to audit
+- **Server-side enforcement** in actions - UI buttons are convenience, not security
+- **Direct URL protection** - Edit pages redirect unauthorized users
+- **Consistent error messages** - `errors.common.viewerReadOnly` translated to English/Chinese
+
+**Why collaborative model for people?**
+> Unlike entries (personal stories with individual authorship), people are shared family
+> entities. Multiple family members may have information about the same person (e.g., one
+> adds birthdate, another adds biography). Only VIEWERs are restricted from editing.
+
 **Files created:**
 - `src/app/(main)/settings/page.tsx`
 - `src/components/settings/LinkProfileSection.tsx`
@@ -491,10 +559,14 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
 - `src/app/(main)/dashboard/page.tsx` (added Settings icon in header)
 - `src/lib/auth.ts` (added signIn callback + updated createUser event, removed invitedById setting)
 - `prisma/schema.prisma` (made authorId nullable on Entry/Comment/Invitation, removed invitedById from User)
-- `src/app/(main)/entries/[id]/page.tsx` (handle null author gracefully)
-- `src/app/(main)/entries/[id]/edit/page.tsx` (block editing orphaned entries)
-- `messages/en.json` (added entries.card.unknownAuthor)
-- `messages/zh-TW.json` (added entries.card.unknownAuthor)
+- `src/app/(main)/entries/[id]/page.tsx` (handle null author gracefully, admin permission check)
+- `src/app/(main)/entries/[id]/edit/page.tsx` (admin bypass for edit page access)
+- `src/app/(main)/people/[id]/page.tsx` (hide edit buttons from VIEWERs)
+- `src/app/(main)/people/[id]/edit/page.tsx` (redirect VIEWERs from edit page)
+- `src/actions/entries.ts` (admin bypass for updateEntry, deleteEntry, togglePublish)
+- `src/actions/people.ts` (VIEWER role blocks on all 5 functions - SECURITY FIX)
+- `messages/en.json` (added entries.card.unknownAuthor, errors.common.viewerReadOnly)
+- `messages/zh-TW.json` (added entries.card.unknownAuthor, errors.common.viewerReadOnly)
 
 ---
 
@@ -526,8 +598,7 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
   - [x] NEXTAUTH_SECRET (all environments)
   - [x] RESEND_API_KEY (all environments)
   - [x] EMAIL_FROM (all environments)
-  - [ ] UPLOADTHING_SECRET (when Phase 6 implemented)
-  - [ ] UPLOADTHING_APP_ID (when Phase 6 implemented)
+  - [x] UPLOADTHING_TOKEN (Phase 6 — single token for Uploadthing v7)
   > **Important:** `NEXTAUTH_URL` must be scoped to Production only!
   > Preview deployments need to auto-detect their URL via Vercel's `VERCEL_URL`.
   > The NextAuth config uses `trustHost: true` to enable automatic URL detection for preview builds.
@@ -723,18 +794,20 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2026-01-31
+**Last Updated:** 2026-02-15
 
-**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Mostly Complete, 14 In Progress, 15 Mostly Complete
+**Current Phase:** 4 Complete, 5 Complete, 6 Partially Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
 - ✅ Phase 2: Database Setup - Turso + Prisma with password auth fields
 - ✅ Phase 3: Authentication - **Password-based auth** (migrated from magic links)
+- ✅ Phase 4: Core Layout & UI - Shared layout, PageHeader, UI component library (Button, Card, Badge, Alert, Modal)
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - ✅ Phase 8: Timeline View - Chronological display with filters
-- 🔶 Phase 12: Settings (mostly complete) - User-Person profile linking
+- ✅ Phase 12: Settings & Admin - User-Person profile linking + **role-based permissions**
+- 🔶 Phase 6: Photo Uploads (partially complete) - Person avatar uploads via Uploadthing
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 - ✅ Phase 15: i18n (mostly complete) - English + Traditional Chinese for all UI pages
 
@@ -760,6 +833,11 @@ After each phase, verify:
 > `VerticalTimeline` can be swapped with `HorizontalTimeline` or `YearGroupedCards`
 > in the future without changing the data fetching or filter logic.
 
+> **Admin Role Permissions (2026-02-01)**: Implemented comprehensive role-based authorization.
+> ADMINs can edit/delete any entry or person (bypassing ownership checks). MEMBERs can edit their
+> own entries and all people (collaborative model). VIEWERs have read-only access. Fixed critical
+> security vulnerability where VIEWERs could edit people due to missing role checks.
+
 **What's Working:**
 - **Password authentication (login → change password → dashboard)**
   - Login with email + password
@@ -774,6 +852,14 @@ After each phase, verify:
   - Admins can delete users (preserves their entries/comments as "Unknown Author")
   - Last admin protection prevents orphaning the family
   - User's Person profile is preserved in family tree when deleted
+- **Role-based permissions (ADMIN/MEMBER/VIEWER)**
+  - Admins can edit/delete ANY entry (not just their own)
+  - Admins can edit/delete ANY person
+  - Members can edit own entries, can edit all people (collaborative family model)
+  - Viewers blocked from all editing operations (read-only access)
+  - Security fix: VIEWERs can no longer edit people (vulnerability patched)
+  - UI shows edit/delete buttons only when authorized
+  - Direct URL navigation to edit pages redirects unauthorized users
 - **Dashboard quick actions (5 navigation cards)**
   - New Entry, Manage People, View Timeline, View Stories (→ /entries), Settings
   - Card-based navigation with color-coded icons (BookOpen, Users, Clock, BookText, TreePine)
@@ -805,8 +891,8 @@ After each phase, verify:
   - ICU message format for pluralization and variable interpolation
 
 **Next Steps:**
+- Phase 6 Step 2: Entry media uploads (integrate MediaUploader into EntryForm, add MediaGallery to entry detail page)
 - Phase 14: Vercel deployment ready (environment variables already configured)
-- Phase 6: Photo Uploads (Uploadthing integration)
 - Phase 9: Family Tree visualization (interactive graph/tree view - different from chronological timeline)
 - Optional: Create admin UI for account creation in Settings (currently via migration script only)
 

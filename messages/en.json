@@ -224,6 +224,10 @@
       "relationshipPlaceholder": "e.g., Great-grandmother, Uncle",
       "bioLabel": "Biography",
       "bioPlaceholder": "Tell us about this person...",
+      "photoLabel": "Profile Photo",
+      "uploadPhoto": "Upload Photo",
+      "removePhoto": "Remove",
+      "uploading": "Uploading...",
       "submit": "Save Person",
       "creating": "Creating...",
       "updating": "Updating..."
@@ -388,6 +392,9 @@
     "notFound": "The requested resource was not found",
     "generic": "Something went wrong. Please try again.",
     "network": "Network error. Please check your connection.",
+    "common": {
+      "viewerReadOnly": "Viewers have read-only access and cannot make changes"
+    },
     "entries": {
       "createFailed": "Failed to create entry",
       "updateFailed": "Failed to update entry",

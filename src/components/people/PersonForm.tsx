@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { createPerson, updatePerson } from "@/actions/people";
+import { AvatarUploader } from "@/components/people/AvatarUploader";
 import type { Person } from "@prisma/client";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -28,6 +29,19 @@ export function PersonForm({ person }: PersonFormProps) {
           {state.error}
         </div>
       )}
+
+      {/* Profile Photo */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          {t("form.photoLabel")}
+        </label>
+        <AvatarUploader
+          initialUrl={person?.avatarUrl}
+          inputName="avatarUrl"
+        />
+      </div>
+
+      <hr className="border-gray-200" />
 
       {/* Name Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
