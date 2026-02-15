@@ -236,14 +236,16 @@ our-family-history/
 │   │   └── users.ts          # ✅ User deletion (admin-only)
 │   │
 │   ├── components/
-│   │   ├── ui/               # Reusable primitives
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   └── DatePicker.tsx
+│   │   ├── ui/               # Reusable UI primitives
+│   │   │   ├── Button.tsx    # 6 variants: primary, brand, danger, ghost, success, icon
+│   │   │   ├── Card.tsx      # Content container with interactive + padding options
+│   │   │   ├── Badge.tsx     # Labels/tags with 13 colors, sm/md sizes
+│   │   │   ├── Alert.tsx     # Error/success/info feedback
+│   │   │   ├── Modal.tsx     # Overlay dialog (client component)
+│   │   │   └── index.ts      # Barrel exports
 │   │   ├── LanguageSwitcher.tsx  # ✅ Bilingual language toggle for home page
 │   │   ├── layout/
+│   │   │   ├── PageHeader.tsx    # ✅ Shared header (dashboard + subpage variants)
 │   │   │   └── Footer.tsx        # ✅ App version display
 │   │   ├── entries/             # ✅ Implemented
 │   │   │   ├── EntryCard.tsx
@@ -1028,6 +1030,46 @@ When you rebuild a table that other tables reference, you MUST also rebuild thos
 - `scripts/fix-entry-fk.sql` - Example fix for Entry table FK
 - `scripts/apply-entry-fix.ts` - Script to apply FK fix
 - `prisma/fresh-schema.sql` - Clean schema from scratch (correct FKs guaranteed)
+
+---
+
+### 11. Shared Layout & PageHeader (Implemented 2026-02-14)
+
+The `(main)/layout.tsx` provides auth gating for all protected routes. Per-page headers use a shared `PageHeader` component.
+
+**Why PageHeader is in pages, not in layout:**
+Next.js App Router layouts cannot receive per-page props. Since each page needs different back links, titles, and action buttons, the header must be rendered by each page. The layout handles only what's truly shared (auth check + redirect).
+
+**PageHeader Component (`src/components/layout/PageHeader.tsx`):**
+
+Two variants via discriminated union:
+
+```typescript
+// Dashboard variant - app name, user email, language switcher, settings, sign out
+<PageHeader variant="dashboard" appName="..." userEmail="..." settingsLabel="..." signOutLabel="..." />
+
+// Sub-page variant - back arrow, optional title, optional right-side actions
+<PageHeader variant="subpage" backHref="/dashboard" backLabel="Dashboard" title="Entries" maxWidth="7xl"
+  actions={<Link href="/entries/new">New Entry</Link>} />
+```
+
+**Max-width values by page type:**
+- `7xl` - Dashboard + list pages (entries, people) — wide grids
+- `5xl` - Timeline — medium width
+- `4xl` - Detail pages (entries/[id], people/[id]) — reading width (default)
+- `3xl` - Form pages (settings, people/new, people/edit) — focused forms
+
+**UI Component Library (`src/components/ui/`):**
+
+| Component | Purpose | Key Props |
+|-----------|---------|-----------|
+| `Button` | 6 variants (primary/blue, brand/amber, danger, ghost, success, icon) | `variant`, `size`, `isLoading` |
+| `Card` | Content container with optional hover effects | `interactive`, `padding` (sm/md/lg) |
+| `Badge` | Labels/tags with 13 color options | `color`, `size` (sm/md) |
+| `Alert` | Feedback messages | `variant` (error/success/info) |
+| `Modal` | Overlay dialog with Escape key + backdrop click | `isOpen`, `onClose`, `title` |
+
+All components are barrel-exported from `src/components/ui/index.ts`.
 
 ---
 

@@ -138,39 +138,51 @@
 
 ---
 
-## Phase 4: Core Layout & UI
+## Phase 4: Core Layout & UI ✅
 **Goal:** Create the app shell and reusable UI components
 
-- [ ] Create root layout with providers `src/app/layout.tsx`
-- [ ] Create main app layout `src/app/(main)/layout.tsx`
-  - Header with user info
-  - Sidebar navigation
-  - Responsive design
-- [ ] Create UI components in `src/components/ui/`
-  - [ ] Button
-  - [ ] Card
-  - [ ] Input
-  - [ ] Textarea
-  - [ ] Modal
-  - [ ] Avatar
-  - [ ] Badge
-  - [ ] DatePicker
-  - [ ] Select
-- [ ] Create layout components in `src/components/layout/`
-  - [ ] Header
-  - [ ] Sidebar
-  - [ ] Navigation
-- [ ] Create landing page `src/app/page.tsx`
-- [ ] Create dashboard page `src/app/(main)/dashboard/page.tsx`
-- [ ] Add global styles and Tailwind customizations
+- [x] Create root layout with providers `src/app/layout.tsx`
+- [x] Create main app layout `src/app/(main)/layout.tsx`
+  - Auth-only shell (redirects unauthenticated users to /login)
+  - Per-page headers via shared `PageHeader` component
+  - No sidebar (card-based navigation on dashboard instead)
+- [x] Create UI components in `src/components/ui/`
+  - [x] Button (6 variants: primary, brand, danger, ghost, success, icon)
+  - [x] Card (with interactive and padding options)
+  - [x] Modal (with Escape key and backdrop click to close)
+  - [x] Badge (sm/md sizes, 13 color options)
+  - [x] Alert (error, success, info variants)
+- [x] Create layout components in `src/components/layout/`
+  - [x] PageHeader (dashboard variant + subpage variant with back button, title, actions)
+  - [x] Footer (app version display)
+- [x] Create landing page `src/app/page.tsx`
+- [x] Create dashboard page `src/app/(main)/dashboard/page.tsx`
+- [x] Add global styles and Tailwind customizations
+
+**Design Decision: PageHeader over Shared Layout Header**
+> Next.js App Router layouts cannot receive per-page props. Since each page needs
+> different back links, titles, and action buttons, the header is rendered by each
+> page via a shared `PageHeader` component rather than in the layout. The layout
+> handles only auth gating. This is the recommended App Router pattern.
+
+**Design Decision: No Sidebar Navigation**
+> Instead of a traditional sidebar, the app uses card-based navigation on the
+> dashboard (5 quick-action cards). Sub-pages use back arrows to navigate up.
+> This is simpler for a family app with a shallow page hierarchy.
 
 **Files created:**
 - `src/app/layout.tsx`
-- `src/app/(main)/layout.tsx`
+- `src/app/(main)/layout.tsx` (auth shell)
 - `src/app/page.tsx`
 - `src/app/(main)/dashboard/page.tsx`
-- `src/components/ui/*.tsx`
-- `src/components/layout/*.tsx`
+- `src/components/ui/Button.tsx`
+- `src/components/ui/Card.tsx`
+- `src/components/ui/Badge.tsx`
+- `src/components/ui/Alert.tsx`
+- `src/components/ui/Modal.tsx`
+- `src/components/ui/index.ts` (barrel exports)
+- `src/components/layout/PageHeader.tsx` (shared header: dashboard + subpage variants)
+- `src/components/layout/Footer.tsx`
 - `src/app/globals.css` (updated)
 
 ---
@@ -769,14 +781,15 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-02-14
 
-**Current Phase:** 5 Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
+**Current Phase:** 4 Complete, 5 Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
 - ✅ Phase 2: Database Setup - Turso + Prisma with password auth fields
 - ✅ Phase 3: Authentication - **Password-based auth** (migrated from magic links)
+- ✅ Phase 4: Core Layout & UI - Shared layout, PageHeader, UI component library (Button, Card, Badge, Alert, Modal)
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - ✅ Phase 8: Timeline View - Chronological display with filters
