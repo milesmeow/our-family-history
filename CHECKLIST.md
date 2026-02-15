@@ -227,24 +227,38 @@
 
 ---
 
-## Phase 6: Photo Uploads
+## Phase 6: Photo Uploads (Partially Complete)
 **Goal:** Integrate Uploadthing for media uploads
 
-- [ ] Set up Uploadthing account and get credentials
-- [ ] Create Uploadthing configuration `src/lib/uploadthing.ts`
-- [ ] Create upload API route `src/app/api/uploadthing/route.ts`
+### Step 1: Person Avatar Uploads ✅
+- [x] Set up Uploadthing account and get credentials
+- [x] Create Uploadthing configuration `src/lib/uploadthing.ts`
+- [x] Create upload API route `src/app/api/uploadthing/route.ts`
+- [x] Create `src/components/people/AvatarUploader.tsx` — reusable avatar upload component
+- [x] Integrate avatar upload into PersonForm (appears above name fields)
+- [x] Update `createPerson` and `updatePerson` server actions to handle `avatarUrl`
+- [x] Add translation keys for photo upload UI (English + Traditional Chinese)
+- [x] Test upload flow (upload, preview, remove, save)
+
+### Step 2: Entry Media Uploads (Pending)
 - [ ] Create media components
   - [ ] `src/components/media/MediaUploader.tsx`
   - [ ] `src/components/media/MediaGallery.tsx`
   - [ ] `src/components/media/ImagePreview.tsx`
 - [ ] Integrate uploads into EntryForm
 - [ ] Add media display to entry detail page
-- [ ] Test upload flow
+- [ ] Test entry media upload flow
 
 **Files created:**
-- `src/lib/uploadthing.ts`
-- `src/app/api/uploadthing/route.ts`
-- `src/components/media/*.tsx`
+- `src/lib/uploadthing.ts` — Uploadthing file router with `avatarUploader` endpoint (4MB image limit, auth middleware)
+- `src/app/api/uploadthing/route.ts` — Next.js API route handler for Uploadthing
+- `src/components/people/AvatarUploader.tsx` — Client component with upload preview, loading state, error handling
+
+**Files modified:**
+- `src/actions/people.ts` — Added `avatarUrl` to `rawData` in `createPerson` and `updatePerson`
+- `src/components/people/PersonForm.tsx` — Integrated `AvatarUploader` at top of form
+- `messages/en.json` — Added `people.form.photoLabel`, `uploadPhoto`, `removePhoto`, `uploading`
+- `messages/zh-TW.json` — Same keys in Traditional Chinese
 
 ---
 
@@ -584,8 +598,7 @@ Architecture supports future timeline styles (horizontal, year-grouped cards).
   - [x] NEXTAUTH_SECRET (all environments)
   - [x] RESEND_API_KEY (all environments)
   - [x] EMAIL_FROM (all environments)
-  - [ ] UPLOADTHING_SECRET (when Phase 6 implemented)
-  - [ ] UPLOADTHING_APP_ID (when Phase 6 implemented)
+  - [x] UPLOADTHING_TOKEN (Phase 6 — single token for Uploadthing v7)
   > **Important:** `NEXTAUTH_URL` must be scoped to Production only!
   > Preview deployments need to auto-detect their URL via Vercel's `VERCEL_URL`.
   > The NextAuth config uses `trustHost: true` to enable automatic URL detection for preview builds.
@@ -781,9 +794,9 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2026-02-14
+**Last Updated:** 2026-02-15
 
-**Current Phase:** 4 Complete, 5 Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
+**Current Phase:** 4 Complete, 5 Complete, 6 Partially Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
@@ -794,6 +807,7 @@ After each phase, verify:
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - ✅ Phase 8: Timeline View - Chronological display with filters
 - ✅ Phase 12: Settings & Admin - User-Person profile linking + **role-based permissions**
+- 🔶 Phase 6: Photo Uploads (partially complete) - Person avatar uploads via Uploadthing
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 - ✅ Phase 15: i18n (mostly complete) - English + Traditional Chinese for all UI pages
 
@@ -877,8 +891,8 @@ After each phase, verify:
   - ICU message format for pluralization and variable interpolation
 
 **Next Steps:**
+- Phase 6 Step 2: Entry media uploads (integrate MediaUploader into EntryForm, add MediaGallery to entry detail page)
 - Phase 14: Vercel deployment ready (environment variables already configured)
-- Phase 6: Photo Uploads (Uploadthing integration)
 - Phase 9: Family Tree visualization (interactive graph/tree view - different from chronological timeline)
 - Optional: Create admin UI for account creation in Settings (currently via migration script only)
 

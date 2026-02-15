@@ -88,6 +88,7 @@ Person
 ├── deathDate          DateTime?
 ├── relationship       String? - "Great-grandmother", "Uncle"
 ├── bio                String?
+├── avatarUrl          String? - Uploadthing URL for profile photo
 │
 ├── entries            Entry[] - Stories they appear in
 ├── familyRelations    FamilyRelation[] - Parent/child/spouse links
@@ -225,7 +226,7 @@ our-family-history/
 │   │       │   ├── route.ts          # GET people list
 │   │       │   └── unlinked/route.ts # GET unlinked people (for profile linking)
 │   │       ├── comments/route.ts
-│   │       ├── upload/route.ts
+│   │       ├── uploadthing/route.ts  # ✅ Uploadthing API handler
 │   │       └── invite/route.ts
 │   │
 │   ├── actions/              # ✅ Server Actions
@@ -259,6 +260,7 @@ our-family-history/
 │   │   ├── people/               # ✅ Implemented
 │   │   │   ├── PersonCard.tsx
 │   │   │   ├── PersonForm.tsx
+│   │   │   ├── AvatarUploader.tsx  # ✅ Photo upload with Uploadthing
 │   │   │   ├── RelationshipList.tsx
 │   │   │   ├── AddRelationshipDialog.tsx
 │   │   │   └── DeletePersonButton.tsx
@@ -276,7 +278,7 @@ our-family-history/
 │   ├── lib/
 │   │   ├── prisma.ts         # Database client singleton
 │   │   ├── auth.ts           # NextAuth configuration (Credentials provider + JWT)
-│   │   ├── uploadthing.ts    # Uploadthing config
+│   │   ├── uploadthing.ts    # ✅ Uploadthing file router (avatarUploader endpoint)
 │   │   ├── utils.ts          # Helper functions (parseDateString for timezone-safe dates)
 │   │   ├── email/            # ✅ Email templates
 │   │   │   ├── new-account.ts       # ✅ Temporary password email
@@ -338,9 +340,8 @@ NEXTAUTH_SECRET="generate-with: openssl rand -base64 32"
 RESEND_API_KEY="re_xxxxxxxxxx"
 EMAIL_FROM="Family History <login@yourdomain.com>"
 
-# === File Upload (Uploadthing) ===
-UPLOADTHING_SECRET="sk_live_xxxxxxxxxx"
-UPLOADTHING_APP_ID="your-app-id"
+# === File Upload (Uploadthing v7) ===
+UPLOADTHING_TOKEN="your-uploadthing-token"
 ```
 
 ---
