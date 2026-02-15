@@ -1,13 +1,10 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
 import { parseDateString } from "@/lib/utils";
 import { TimelineFilters } from "@/components/timeline/TimelineFilters";
 import { VerticalTimeline } from "@/components/timeline/VerticalTimeline";
+import { PageHeader } from "@/components/layout/PageHeader";
 import type { TimelineEntryData } from "@/components/timeline/TimelineEvent";
 import type { Prisma } from "@prisma/client";
 
@@ -35,9 +32,6 @@ export const metadata = {
  * - Undated entries shown in a separate section
  */
 export default async function TimelinePage({ searchParams }: PageProps) {
-  const session = await auth();
-  if (!session) redirect("/login");
-
   const t = await getTranslations("timeline");
   const tDashboard = await getTranslations("dashboard");
 
@@ -128,24 +122,13 @@ export default async function TimelinePage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/dashboard"
-                className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {tDashboard("title")}
-              </Link>
-              <span className="text-gray-300">|</span>
-              <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        variant="subpage"
+        backHref="/dashboard"
+        backLabel={tDashboard("title")}
+        title={t("title")}
+        maxWidth="5xl"
+      />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Subtitle */}

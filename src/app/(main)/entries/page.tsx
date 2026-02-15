@@ -1,20 +1,16 @@
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { EntryCard } from "@/components/entries/EntryCard";
-import { Plus, BookOpen, ArrowLeft } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { CATEGORIES, type Category } from "@/lib/validations/entry";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 interface PageProps {
   searchParams: Promise<{ category?: string }>;
 }
 
 export default async function EntriesPage({ searchParams }: PageProps) {
-  const session = await auth();
-  if (!session) redirect("/login");
-
   const t = await getTranslations("entries");
   const tCommon = await getTranslations("common");
   const tDashboard = await getTranslations("dashboard");
@@ -36,31 +32,22 @@ export default async function EntriesPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/dashboard"
-                className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {tDashboard("title")}
-              </Link>
-              <span className="text-gray-300">|</span>
-              <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
-            </div>
-            <Link
-              href="/entries/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              {t("newEntry")}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        variant="subpage"
+        backHref="/dashboard"
+        backLabel={tDashboard("title")}
+        title={t("title")}
+        maxWidth="7xl"
+        actions={
+          <Link
+            href="/entries/new"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            {t("newEntry")}
+          </Link>
+        }
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Category Filter */}
