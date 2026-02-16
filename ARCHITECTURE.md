@@ -1074,10 +1074,14 @@ All components are barrel-exported from `src/components/ui/index.ts`.
 
 ---
 
+## Planned Enhancements
+
+1. **Rich Text Editor (Phase 5b)**: Replace textarea with Tiptap WYSIWYG editor for entry stories. Basic formatting (bold, italic, headings, lists, links). Content stored as HTML in existing `content` column. Sanitized with DOMPurify on render.
+2. **Location Map (Phase 5c)**: Render Google Maps embed on entry detail pages using existing `location`, `locationLat`, `locationLng` fields already in the Entry schema.
+
 ## Future Extensibility
 
-1. **Map View**: Location fields support geographic visualization
-2. **AI Features**: Content structure supports summarization/generation
-3. **Export**: Can generate PDF books, GEDCOM files, static sites
-4. **Mobile App**: API-first design enables React Native app
-5. **Collaboration**: Comment system can expand to suggestions/edits
+1. **AI Features**: Content structure supports summarization/generation
+2. **Export**: Can generate PDF books, GEDCOM files, static sites
+3. **Mobile App**: API-first design enables React Native app
+4. **Collaboration**: Comment system can expand to suggestions/edits
