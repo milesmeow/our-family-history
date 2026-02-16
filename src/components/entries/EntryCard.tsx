@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { Calendar, MapPin, Users, FileEdit } from "lucide-react";
 import { type Category } from "@/lib/validations/entry";
+import { stripHtml } from "@/lib/utils";
 
 interface EntryCardProps {
   entry: {
@@ -27,8 +28,8 @@ export function EntryCard({ entry }: EntryCardProps) {
   const t = useTranslations("entries");
   const isDraft = entry.publishedAt === null;
 
-  // Use summary if available, otherwise truncate content
-  const displayText = entry.summary || entry.content;
+  // Use summary if available, otherwise strip HTML and truncate content
+  const displayText = entry.summary || stripHtml(entry.content);
   const truncatedText = displayText.length > 150
     ? displayText.substring(0, 150) + "..."
     : displayText;

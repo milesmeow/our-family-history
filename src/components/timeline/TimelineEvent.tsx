@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
-import { formatEventDate } from "@/lib/utils";
+import { formatEventDate, stripHtml } from "@/lib/utils";
 import { CATEGORY_LABELS, type Category } from "@/lib/validations/entry";
 
 /**
@@ -46,8 +46,8 @@ export function TimelineEvent({ entry, position }: TimelineEventProps) {
   const categoryLabel = CATEGORY_LABELS[entry.category as Category] || entry.category;
   const colors = CATEGORY_COLORS[entry.category] || CATEGORY_COLORS.OTHER;
 
-  // Use summary if available, otherwise truncate content
-  const displayText = entry.summary || entry.content;
+  // Use summary if available, otherwise strip HTML and truncate content
+  const displayText = entry.summary || stripHtml(entry.content);
   const truncatedText =
     displayText.length > 120 ? displayText.substring(0, 120) + "..." : displayText;
 

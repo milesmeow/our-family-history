@@ -57,3 +57,12 @@ export function formatEventDate(
 export function getEventYear(date: Date | null): number | null {
   return date ? date.getFullYear() : null;
 }
+
+/**
+ * Strip HTML tags from a string for plain-text preview.
+ * Returns the input unchanged if it doesn't appear to be HTML.
+ */
+export function stripHtml(html: string): string {
+  if (!html.trimStart().startsWith("<")) return html;
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}

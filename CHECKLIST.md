@@ -227,6 +227,49 @@
 
 ---
 
+## Phase 5b: Rich Text Editor
+**Goal:** Replace plain textarea with Tiptap WYSIWYG editor for entry stories
+
+- [ ] Install Tiptap packages (`@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-link`, `@tiptap/pm`)
+- [ ] Create `src/components/entries/RichTextEditor.tsx` — Tiptap editor with toolbar
+  - Bold, italic, headings (H2, H3), bullet list, ordered list, blockquote, links
+  - Styled toolbar matching existing Tailwind design
+  - Hidden input carries HTML content into form's FormData
+- [ ] Replace `<textarea>` in `EntryForm.tsx` with `RichTextEditor`
+- [ ] Update entry detail page to render HTML content safely (sanitized with DOMPurify)
+- [ ] Update timeline/entry card to handle HTML in summaries (strip tags for preview)
+- [ ] Add translation keys for toolbar labels (English + Traditional Chinese)
+- [ ] Handle backward compatibility with existing plain-text entries
+- [ ] Test with English and Chinese content
+
+**Design Decisions:**
+> **Tiptap over Novel**: Tiptap is headless (no opinionated UI), giving full control over toolbar
+> styling to match the existing Tailwind design. Novel provides a Notion-like experience but
+> is harder to customize.
+>
+> **HTML storage**: Content stored as HTML string in the existing `content` column. No schema
+> changes needed. Simpler than Tiptap's JSON document format and easier to render on the
+> detail page.
+>
+> **DOMPurify for sanitization**: Even though users are trusted (invite-only app), sanitizing
+> HTML before rendering prevents accidental XSS from pasted content.
+
+---
+
+## Phase 5c: Location Map on Entry Detail Page
+**Goal:** Show a Google Maps embed on entry detail pages when a location is set
+
+- [ ] Add Google Maps embed to entry detail page (uses existing `location`, `locationLat`, `locationLng` fields)
+- [ ] Add location input with optional geocoding to EntryForm (or keep as manual text + coordinates)
+- [ ] Test with various locations
+
+**Notes:**
+> The Entry model already has `location String?`, `locationLat Float?`, and `locationLng Float?`
+> fields in the Prisma schema. These are not currently surfaced in the UI. This phase wires
+> them up with a static Google Maps embed on the entry detail page.
+
+---
+
 ## Phase 6: Photo Uploads (Partially Complete)
 **Goal:** Integrate Uploadthing for media uploads
 
@@ -891,6 +934,8 @@ After each phase, verify:
   - ICU message format for pluralization and variable interpolation
 
 **Next Steps:**
+- Phase 5b: Rich Text Editor (Tiptap integration for entry stories)
+- Phase 5c: Location Map on entry detail page (use existing location fields)
 - Phase 6 Step 2: Entry media uploads (integrate MediaUploader into EntryForm, add MediaGallery to entry detail page)
 - Phase 14: Vercel deployment ready (environment variables already configured)
 - Phase 9: Family Tree visualization (interactive graph/tree view - different from chronological timeline)
