@@ -200,6 +200,18 @@
       "readMore": "閱讀更多",
       "approximate": "約",
       "unknownAuthor": "未知作者"
+    },
+    "editor": {
+      "bold": "粗體",
+      "italic": "斜體",
+      "heading2": "標題 2",
+      "heading3": "標題 3",
+      "bulletList": "無序清單",
+      "orderedList": "有序清單",
+      "blockquote": "引用",
+      "link": "插入連結",
+      "unlink": "移除連結",
+      "setLink": "設定"
     }
   },
   "people": {

@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { format } from "date-fns";
 import { Edit, Calendar, MapPin, Tag, User } from "lucide-react";
 import Link from "next/link";
+import { SafeHtml } from "@/components/entries/SafeHtml";
 import { DeleteEntryButton } from "@/components/entries/DeleteEntryButton";
 import { type Category } from "@/lib/validations/entry";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -122,9 +123,16 @@ export default async function EntryPage({ params }: PageProps) {
 
           {/* Content */}
           <div className="prose prose-gray max-w-none">
-            <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-              {entry.content}
-            </p>
+            {entry.content.trimStart().startsWith("<") ? (
+              <SafeHtml
+                html={entry.content}
+                className="text-gray-700 leading-relaxed [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-1 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_a]:text-blue-600 [&_a]:underline [&_p]:mb-3 [&_p:last-child]:mb-0"
+              />
+            ) : (
+              <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                {entry.content}
+              </p>
+            )}
           </div>
 
           {/* Author Info */}

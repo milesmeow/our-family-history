@@ -200,6 +200,18 @@
       "readMore": "Read more",
       "approximate": "circa",
       "unknownAuthor": "Unknown Author"
+    },
+    "editor": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "bulletList": "Bullet List",
+      "orderedList": "Numbered List",
+      "blockquote": "Block Quote",
+      "link": "Insert Link",
+      "unlink": "Remove Link",
+      "setLink": "Set"
     }
   },
   "people": {
