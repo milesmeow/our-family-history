@@ -61,8 +61,12 @@ export async function createEntry(
     }
   }
 
-  // Parse peopleIds from form data (multiple values with same name)
+  // Parse peopleIds and media URLs from form data
   const peopleIds = formData.getAll("peopleIds").map((id) => String(id));
+  const newMediaUrls = formData
+    .getAll("newMediaUrls")
+    .map(String)
+    .filter(Boolean);
 
   const rawData = {
     title: formData.get("title"),
@@ -118,20 +122,34 @@ export async function createEntry(
   let entryId: string;
 
   try {
-    const entry = await prisma.entry.create({
-      data: {
-        ...rest,
-        eventDate: eventDate ? parseDateString(eventDate) : null,
-        eventDateEnd: eventDateEnd ? parseDateString(eventDateEnd) : null,
-        publishedAt: isPublished ? new Date() : null,
-        authorId: session.user.id,
-        // Create PersonOnEntry records for linked people
-        peopleInvolved: {
-          create: validatedPeopleIds.map((personId) => ({
-            personId,
-          })),
+    const entry = await prisma.$transaction(async (tx) => {
+      const created = await tx.entry.create({
+        data: {
+          ...rest,
+          eventDate: eventDate ? parseDateString(eventDate) : null,
+          eventDateEnd: eventDateEnd ? parseDateString(eventDateEnd) : null,
+          publishedAt: isPublished ? new Date() : null,
+          authorId: session.user.id,
+          // Create PersonOnEntry records for linked people
+          peopleInvolved: {
+            create: validatedPeopleIds.map((personId) => ({
+              personId,
+            })),
+          },
         },
-      },
+      });
+
+      if (newMediaUrls.length > 0) {
+        await tx.media.createMany({
+          data: newMediaUrls.map((url) => ({
+            url,
+            type: "IMAGE",
+            entryId: created.id,
+          })),
+        });
+      }
+
+      return created;
     });
     entryId = entry.id;
   } catch (error) {
@@ -189,8 +207,16 @@ export async function updateEntry(
     return { success: false, error: tErrors("entries.notOwner") };
   }
 
-  // Parse peopleIds from form data
+  // Parse peopleIds and media from form data
   const peopleIds = formData.getAll("peopleIds").map((id) => String(id));
+  const newMediaUrls = formData
+    .getAll("newMediaUrls")
+    .map(String)
+    .filter(Boolean);
+  const removedMediaIds = formData
+    .getAll("removedMediaIds")
+    .map(String)
+    .filter(Boolean);
 
   const rawData = {
     title: formData.get("title"),
@@ -227,12 +253,30 @@ export async function updateEntry(
   } = validatedFields.data;
 
   try {
-    // Use transaction to update entry and replace people links
+    // Use transaction to update entry, replace people links, and manage media
     await prisma.$transaction(async (tx) => {
       // Delete existing PersonOnEntry records
       await tx.personOnEntry.deleteMany({
         where: { entryId: id },
       });
+
+      // Remove media items the user explicitly deleted
+      if (removedMediaIds.length > 0) {
+        await tx.media.deleteMany({
+          where: { id: { in: removedMediaIds }, entryId: id },
+        });
+      }
+
+      // Add newly uploaded media
+      if (newMediaUrls.length > 0) {
+        await tx.media.createMany({
+          data: newMediaUrls.map((url) => ({
+            url,
+            type: "IMAGE",
+            entryId: id,
+          })),
+        });
+      }
 
       // Update entry and create new PersonOnEntry records
       await tx.entry.update({
