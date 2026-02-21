@@ -176,9 +176,17 @@
       "locationPlaceholder": "Where did this happen?",
       "peopleLabel": "People Involved",
       "peopleHelp": "Tag family members in this entry",
+      "photosLabel": "Photos",
+      "addPhotos": "Add Photos",
+      "removePhoto": "Remove photo",
+      "uploadingPhotos": "Uploading...",
+      "photoAlt": "Story photo",
       "submit": "Save Entry",
       "creating": "Creating...",
       "updating": "Updating..."
+    },
+    "detail": {
+      "photos": "Photos"
     },
     "categories": {
       "STORY": "Story",

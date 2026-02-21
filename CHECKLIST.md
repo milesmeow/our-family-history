@@ -283,24 +283,29 @@
 - [x] Add translation keys for photo upload UI (English + Traditional Chinese)
 - [x] Test upload flow (upload, preview, remove, save)
 
-### Step 2: Entry Media Uploads (Pending)
-- [ ] Create media components
-  - [ ] `src/components/media/MediaUploader.tsx`
-  - [ ] `src/components/media/MediaGallery.tsx`
-  - [ ] `src/components/media/ImagePreview.tsx`
-- [ ] Integrate uploads into EntryForm
-- [ ] Add media display to entry detail page
-- [ ] Test entry media upload flow
+### Step 2: Entry Media Uploads ✅
+- [x] Create media components
+  - [x] `src/components/media/MediaUploader.tsx`
+  - [x] `src/components/media/MediaGallery.tsx`
+- [x] Integrate uploads into EntryForm
+- [x] Add media display to entry detail page
+- [x] Translation keys added (English + Traditional Chinese)
 
 **Files created:**
-- `src/lib/uploadthing.ts` — Uploadthing file router with `avatarUploader` endpoint (4MB image limit, auth middleware)
+- `src/lib/uploadthing.ts` — Uploadthing file router with `avatarUploader` (4MB, 1 image) and `storyImageUploader` (8MB, up to 10 images) endpoints
 - `src/app/api/uploadthing/route.ts` — Next.js API route handler for Uploadthing
 - `src/components/people/AvatarUploader.tsx` — Client component with upload preview, loading state, error handling
+- `src/components/media/MediaUploader.tsx` — Multi-image uploader for stories (grid preview, add/remove, hidden inputs for server action)
+- `src/components/media/MediaGallery.tsx` — Photo grid display on entry detail page (click to open full-size)
 
 **Files modified:**
 - `src/actions/people.ts` — Added `avatarUrl` to `rawData` in `createPerson` and `updatePerson`
+- `src/actions/entries.ts` — `createEntry` and `updateEntry` now handle `newMediaUrls` and `removedMediaIds` to create/delete Media records
 - `src/components/people/PersonForm.tsx` — Integrated `AvatarUploader` at top of form
-- `messages/en.json` — Added `people.form.photoLabel`, `uploadPhoto`, `removePhoto`, `uploading`
+- `src/components/entries/EntryForm.tsx` — Integrated `MediaUploader`, updated `Entry` interface to include `media`
+- `src/app/(main)/entries/[id]/page.tsx` — Queries `media`, renders `MediaGallery`
+- `src/app/(main)/entries/[id]/edit/page.tsx` — Queries `media` for pre-populating `MediaUploader`
+- `messages/en.json` — Added `people.form.photoLabel`, `uploadPhoto`, `removePhoto`, `uploading`; `entries.form.photosLabel`, `addPhotos`, `removePhoto`, `uploadingPhotos`, `photoAlt`; `entries.detail.photos`
 - `messages/zh-TW.json` — Same keys in Traditional Chinese
 
 ---
@@ -837,9 +842,9 @@ After each phase, verify:
 
 ## Current Status
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-02-21
 
-**Current Phase:** 4 Complete, 5 Complete, 6 Partially Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
+**Current Phase:** 4 Complete, 5 Complete, 6 Complete, 7 Complete, 8 Complete, 12 Complete, 14 In Progress, 15 Mostly Complete
 
 **Completed Phases:**
 - ✅ Phase 1: Project Setup - Next.js 16 + TypeScript + Tailwind
@@ -847,10 +852,10 @@ After each phase, verify:
 - ✅ Phase 3: Authentication - **Password-based auth** (migrated from magic links)
 - ✅ Phase 4: Core Layout & UI - Shared layout, PageHeader, UI component library (Button, Card, Badge, Alert, Modal)
 - ✅ Phase 5: Entry System - Full CRUD for stories with people linking
+- ✅ Phase 6: Photo Uploads - Person avatars + **Story picture uploads** (multi-image gallery)
 - ✅ Phase 7: People Management - Full CRUD + bidirectional relationships
 - ✅ Phase 8: Timeline View - Chronological display with filters
 - ✅ Phase 12: Settings & Admin - User-Person profile linking + **role-based permissions**
-- 🔶 Phase 6: Photo Uploads (partially complete) - Person avatar uploads via Uploadthing
 - 🔶 Phase 14: Deployment (in progress) - Vercel connected, build script fixed
 - ✅ Phase 15: i18n (mostly complete) - English + Traditional Chinese for all UI pages
 
@@ -936,7 +941,6 @@ After each phase, verify:
 **Next Steps:**
 - Phase 5b: Rich Text Editor (Tiptap integration for entry stories)
 - Phase 5c: Location Map on entry detail page (use existing location fields)
-- Phase 6 Step 2: Entry media uploads (integrate MediaUploader into EntryForm, add MediaGallery to entry detail page)
 - Phase 14: Vercel deployment ready (environment variables already configured)
 - Phase 9: Family Tree visualization (interactive graph/tree view - different from chronological timeline)
 - Optional: Create admin UI for account creation in Settings (currently via migration script only)

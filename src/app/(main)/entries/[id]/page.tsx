@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { format } from "date-fns";
-import { Edit, Calendar, MapPin, Tag, User } from "lucide-react";
+import { Edit, Calendar, MapPin, Tag, User, Images } from "lucide-react";
 import Link from "next/link";
 import { SafeHtml } from "@/components/entries/SafeHtml";
 import { DeleteEntryButton } from "@/components/entries/DeleteEntryButton";
+import { MediaGallery } from "@/components/media/MediaGallery";
 import { type Category } from "@/lib/validations/entry";
 import { PageHeader } from "@/components/layout/PageHeader";
 
@@ -42,6 +43,10 @@ export default async function EntryPage({ params }: PageProps) {
             },
           },
         },
+      },
+      media: {
+        select: { id: true, url: true, caption: true },
+        orderBy: { createdAt: "asc" },
       },
     },
   });
@@ -146,6 +151,17 @@ export default async function EntryPage({ params }: PageProps) {
             </p>
           </div>
         </article>
+
+        {/* Photo Gallery */}
+        {entry.media.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Images className="w-5 h-5" />
+              {t("detail.photos")}
+            </h2>
+            <MediaGallery media={entry.media} />
+          </div>
+        )}
 
         {/* People in Story */}
         {entry.peopleInvolved.length > 0 && (
