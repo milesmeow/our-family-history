@@ -28,6 +28,10 @@ export default async function EditEntryPage({ params }: PageProps) {
           },
         },
       },
+      media: {
+        select: { id: true, url: true },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 

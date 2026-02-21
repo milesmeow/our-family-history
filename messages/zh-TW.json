@@ -176,9 +176,17 @@
       "locationPlaceholder": "這發生在哪裡？",
       "peopleLabel": "相關人物",
       "peopleHelp": "在此記錄中標記家族成員",
+      "photosLabel": "照片",
+      "addPhotos": "新增照片",
+      "removePhoto": "移除照片",
+      "uploadingPhotos": "上傳中...",
+      "photoAlt": "故事照片",
       "submit": "儲存記錄",
       "creating": "建立中...",
       "updating": "更新中..."
+    },
+    "detail": {
+      "photos": "照片"
     },
     "categories": {
       "STORY": "故事",
