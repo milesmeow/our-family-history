@@ -34,6 +34,8 @@ export function RichTextEditor({
   const [showLinkPopover, setShowLinkPopover] = useState(false);
   const linkPopoverRef = useRef<HTMLDivElement>(null);
 
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -55,6 +57,11 @@ export function RichTextEditor({
       }),
     ],
     content: initialContent,
+    onUpdate: ({ editor }) => {
+      if (hiddenInputRef.current) {
+        hiddenInputRef.current.value = editor.isEmpty ? "" : editor.getHTML();
+      }
+    },
     editorProps: {
       attributes: {
         class:
@@ -88,9 +95,6 @@ export function RichTextEditor({
     );
   }
 
-  // Empty editor sends "" so Zod min(1) catches it
-  const hiddenValue = editor.isEmpty ? "" : editor.getHTML();
-
   const handleSetLink = () => {
     if (!linkUrl) {
       editor.chain().focus().unsetLink().run();
@@ -110,8 +114,10 @@ export function RichTextEditor({
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-      {/* Hidden input carries HTML into FormData */}
-      <input type="hidden" name={inputName} value={hiddenValue} />
+      {/* Hidden input carries HTML into FormData.
+          Uses defaultValue + ref so onUpdate can write directly to the DOM,
+          avoiding React's batched re-render cycle dropping in-flight keystrokes. */}
+      <input ref={hiddenInputRef} type="hidden" name={inputName} defaultValue={initialContent} />
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-gray-200 bg-gray-50">
