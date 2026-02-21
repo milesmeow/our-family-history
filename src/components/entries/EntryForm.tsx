@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, startTransition } from "react";
 import { useTranslations } from "next-intl";
 import { createEntry, updateEntry } from "@/actions/entries";
 import { CATEGORIES, DATE_PRECISIONS, type Category } from "@/lib/validations/entry";
@@ -43,8 +43,19 @@ export function EntryForm({ entry }: EntryFormProps) {
     entry?.peopleInvolved.map((p) => p.person.id) ?? []
   );
 
+  // Call formAction imperatively to prevent React 19's automatic form reset.
+  // When using <form action={fn}>, React resets all uncontrolled inputs after
+  // the action completes — even on error — wiping the title and other fields.
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startTransition(() => {
+      formAction(formData);
+    });
+  };
+
   return (
-    <form action={formAction} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {state && !state.success && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
           {state.error}
