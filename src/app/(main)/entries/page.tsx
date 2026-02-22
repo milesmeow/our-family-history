@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { format } from "date-fns";
 import { getTranslations } from "next-intl/server";
 import { EntryCard } from "@/components/entries/EntryCard";
 import { Plus, BookOpen } from "lucide-react";
@@ -29,6 +30,13 @@ export default async function EntriesPage({ searchParams }: PageProps) {
       },
     },
   });
+
+  const formattedEntries = entries.map((entry) => ({
+    ...entry,
+    eventDateFormatted: entry.eventDate
+      ? format(entry.eventDate, "MMM d, yyyy")
+      : null,
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,7 +89,7 @@ export default async function EntriesPage({ searchParams }: PageProps) {
           <EmptyState categoryFilter={categoryFilter} t={t} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {entries.map((entry) => (
+            {formattedEntries.map((entry) => (
               <EntryCard key={entry.id} entry={entry} />
             ))}
           </div>

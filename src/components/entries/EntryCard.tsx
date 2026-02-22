@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { Calendar, MapPin, Users, FileEdit } from "lucide-react";
 import { type Category } from "@/lib/validations/entry";
@@ -14,6 +13,7 @@ interface EntryCardProps {
     summary: string | null;
     content: string;
     eventDate: Date | null;
+    eventDateFormatted: string | null;
     dateApproximate: boolean;
     category: string;
     location: string | null;
@@ -68,7 +68,7 @@ export function EntryCard({ entry }: EntryCardProps) {
           <span className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
             {entry.dateApproximate && t("card.approximate")}
-            {format(entry.eventDate, "MMM d, yyyy")}
+            {entry.eventDateFormatted}
           </span>
         )}
         {entry.location && (
