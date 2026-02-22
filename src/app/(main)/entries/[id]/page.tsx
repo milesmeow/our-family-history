@@ -10,6 +10,7 @@ import { DeleteEntryButton } from "@/components/entries/DeleteEntryButton";
 import { MediaGallery } from "@/components/media/MediaGallery";
 import { type Category } from "@/lib/validations/entry";
 import { PageHeader } from "@/components/layout/PageHeader";
+import Image from "next/image";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -179,10 +180,12 @@ export default async function EntryPage({ params }: PageProps) {
                 >
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                     {person.avatarUrl ? (
-                      <img
+                      <Image
                         src={person.avatarUrl}
                         alt={`${person.firstName} ${person.lastName}`}
-                        className="w-8 h-8 rounded-full object-cover"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
                       />
                     ) : (
                       <User className="w-4 h-4 text-blue-600" />

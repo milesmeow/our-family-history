@@ -8,6 +8,7 @@ import Link from "next/link";
 import { DeletePersonButton } from "@/components/people/DeletePersonButton";
 import { RelationshipList } from "@/components/people/RelationshipList";
 import { PageHeader } from "@/components/layout/PageHeader";
+import Image from "next/image";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -81,10 +82,12 @@ export default async function PersonPage({ params }: PageProps) {
             {/* Avatar */}
             <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
               {person.avatarUrl ? (
-                <img
+                <Image
                   src={person.avatarUrl}
                   alt={fullName}
-                  className="w-24 h-24 rounded-full object-cover"
+                  width={96}
+                  height={96}
+                  className="rounded-full object-cover"
                 />
               ) : (
                 <User className="w-12 h-12 text-blue-600" />

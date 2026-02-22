@@ -104,19 +104,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = user.role;
         token.requirePasswordChange = user.requirePasswordChange;
+        token.lastRefreshed = Date.now();
       }
 
-      // On subsequent requests, refresh user data from database
-      // This ensures requirePasswordChange flag is up-to-date
-      if (token.sub) {
+      // Refresh user data from database at most once every 5 minutes.
+      // Avoids a DB round-trip on every single request while keeping
+      // role/requirePasswordChange reasonably fresh.
+      const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+      const lastRefreshed = token.lastRefreshed as number | undefined;
+      const needsRefresh =
+        token.sub &&
+        (!lastRefreshed || Date.now() - lastRefreshed > REFRESH_INTERVAL_MS);
+
+      if (needsRefresh) {
         const dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
+          where: { id: token.sub as string },
           select: { role: true, requirePasswordChange: true },
         });
 
         if (dbUser) {
           token.role = dbUser.role;
           token.requirePasswordChange = dbUser.requirePasswordChange;
+          token.lastRefreshed = Date.now();
         }
       }
 

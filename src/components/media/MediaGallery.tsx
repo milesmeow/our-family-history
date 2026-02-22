@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface MediaItem {
   id: string;
   url: string;
@@ -19,12 +21,14 @@ export function MediaGallery({ media }: MediaGalleryProps) {
           href={item.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="block aspect-square overflow-hidden rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
+          className="relative block aspect-square overflow-hidden rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
         >
-          <img
+          <Image
             src={item.url}
             alt={item.caption ?? "Story photo"}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 640px) 50vw, 33vw"
+            className="object-cover hover:scale-105 transition-transform duration-300"
           />
         </a>
       ))}

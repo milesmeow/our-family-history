@@ -4,22 +4,11 @@ import { PersonCard } from "@/components/people/PersonCard";
 import { Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Suspense } from "react";
 
 export default async function PeoplePage() {
   const t = await getTranslations("people");
   const tDashboard = await getTranslations("dashboard");
-
-  const people = await prisma.person.findMany({
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    include: {
-      _count: {
-        select: {
-          entries: true,
-          relationsFrom: true,
-        },
-      },
-    },
-  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,16 +30,50 @@ export default async function PeoplePage() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {people.length === 0 ? (
-          <EmptyState t={t} />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {people.map((person) => (
-              <PersonCard key={person.id} person={person} />
-            ))}
-          </div>
-        )}
+        {/* Grid streams in once the DB query resolves */}
+        <Suspense fallback={<PeopleGridSkeleton />}>
+          <PeopleGrid />
+        </Suspense>
       </main>
+    </div>
+  );
+}
+
+async function PeopleGrid() {
+  const t = await getTranslations("people");
+
+  const people = await prisma.person.findMany({
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    take: 50,
+    include: {
+      _count: {
+        select: {
+          entries: true,
+          relationsFrom: true,
+        },
+      },
+    },
+  });
+
+  if (people.length === 0) {
+    return <EmptyState t={t} />;
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {people.map((person) => (
+        <PersonCard key={person.id} person={person} />
+      ))}
+    </div>
+  );
+}
+
+function PeopleGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-40 bg-gray-200 rounded-xl animate-pulse" />
+      ))}
     </div>
   );
 }

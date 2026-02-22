@@ -6,6 +6,10 @@ import { useTranslations } from "next-intl";
 import { Filter, X, ChevronDown, ChevronUp } from "lucide-react";
 import { CATEGORIES, type Category } from "@/lib/validations/entry";
 
+// Module-level cache shared with PersonSelector to avoid duplicate API calls.
+let cachedPeople: { id: string; firstName: string; lastName: string | null }[] | null = null;
+let peoplePromise: Promise<{ id: string; firstName: string; lastName: string | null }[]> | null = null;
+
 interface Person {
   id: string;
   firstName: string;
@@ -38,20 +42,22 @@ export function TimelineFilters({ currentFilters }: TimelineFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [people, setPeople] = useState<Person[]>([]);
 
-  // Fetch people list for the person filter dropdown
+  // Fetch people list for the person filter dropdown, using a module-level
+  // cache so navigating back doesn't re-fetch on every mount.
   useEffect(() => {
-    async function fetchPeople() {
-      try {
-        const response = await fetch("/api/people");
-        if (response.ok) {
-          const data = await response.json();
-          setPeople(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch people:", error);
-      }
+    if (cachedPeople) {
+      setPeople(cachedPeople);
+      return;
     }
-    fetchPeople();
+    if (!peoplePromise) {
+      peoplePromise = fetch("/api/people")
+        .then((res) => (res.ok ? res.json() : []))
+        .catch(() => []);
+    }
+    peoplePromise.then((data) => {
+      cachedPeople = data;
+      setPeople(data);
+    });
   }, []);
 
   // Build URL with current filters

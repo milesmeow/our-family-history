@@ -947,6 +947,47 @@ After each phase, verify:
 
 ---
 
+## Performance Optimization (2026-02-21)
+**Goal:** Reduce server-side page load times by eliminating redundant DB queries, unbounded data fetching, and unoptimized image delivery.
+
+### P1 — CRITICAL: JWT Callback DB Query on Every Request
+- [x] Add TTL-based refresh (5 min) to JWT callback in `src/lib/auth.ts:111`
+  - Before: `prisma.user.findUnique()` ran on **every** request
+  - After: Only refreshes if `token.lastRefreshed` is older than 5 minutes
+
+### P2 — HIGH: Unbounded Queries (No Pagination)
+- [x] Add `take: 50` guard to `src/app/(main)/entries/page.tsx`
+- [x] Add `take: 50` guard to `src/app/(main)/people/page.tsx`
+- [x] Add `take: 100` guard to `src/app/(main)/timeline/page.tsx`
+
+### P3 — HIGH: PersonSelector + TimelineFilters Fetch All People With No Cache
+- [x] Add `{ next: { revalidate: 300 } }` to `fetch("/api/people")` in `PersonSelector.tsx`
+- [x] Add `{ next: { revalidate: 300 } }` to `fetch("/api/people")` in `TimelineFilters.tsx`
+
+### P4 — MEDIUM: Raw `<img>` Tags Instead of Next.js `<Image>`
+- [x] Add `utfs.io` to `remotePatterns` in `next.config.ts`
+- [x] Replace `<img>` with `<Image>` in `src/components/media/MediaGallery.tsx`
+- [x] Replace `<img>` with `<Image>` in `src/app/(main)/entries/[id]/page.tsx` (person avatars)
+- [x] Replace `<img>` with `<Image>` in `src/app/(main)/people/[id]/page.tsx` (profile avatar)
+
+### P5 — MEDIUM: Missing Suspense Boundaries on List Pages
+- [x] Add Suspense + skeleton to `src/app/(main)/entries/page.tsx`
+- [x] Add Suspense + skeleton to `src/app/(main)/people/page.tsx`
+
+**Files Modified:**
+- `src/lib/auth.ts`
+- `next.config.ts`
+- `src/components/media/MediaGallery.tsx`
+- `src/components/entries/PersonSelector.tsx`
+- `src/components/timeline/TimelineFilters.tsx`
+- `src/app/(main)/entries/page.tsx`
+- `src/app/(main)/people/page.tsx`
+- `src/app/(main)/timeline/page.tsx`
+- `src/app/(main)/entries/[id]/page.tsx`
+- `src/app/(main)/people/[id]/page.tsx`
+
+---
+
 ## Quick Reference
 
 ### Dev Commands

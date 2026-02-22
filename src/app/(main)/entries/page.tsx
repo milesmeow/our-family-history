@@ -6,6 +6,7 @@ import { Plus, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { CATEGORIES, type Category } from "@/lib/validations/entry";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Suspense } from "react";
 
 interface PageProps {
   searchParams: Promise<{ category?: string }>;
@@ -18,25 +19,6 @@ export default async function EntriesPage({ searchParams }: PageProps) {
 
   const params = await searchParams;
   const categoryFilter = params.category;
-
-  const entries = await prisma.entry.findMany({
-    where: categoryFilter ? { category: categoryFilter } : undefined,
-    orderBy: { createdAt: "desc" },
-    include: {
-      _count: {
-        select: {
-          peopleInvolved: true,
-        },
-      },
-    },
-  });
-
-  const formattedEntries = entries.map((entry) => ({
-    ...entry,
-    eventDateFormatted: entry.eventDate
-      ? format(entry.eventDate, "MMM d, yyyy")
-      : null,
-  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,7 +40,7 @@ export default async function EntriesPage({ searchParams }: PageProps) {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Category Filter */}
+        {/* Category Filter — renders immediately, no DB needed */}
         <div className="mb-6 flex flex-wrap gap-2">
           <Link
             href="/entries"
@@ -85,16 +67,57 @@ export default async function EntriesPage({ searchParams }: PageProps) {
           ))}
         </div>
 
-        {entries.length === 0 ? (
-          <EmptyState categoryFilter={categoryFilter} t={t} />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {formattedEntries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} />
-            ))}
-          </div>
-        )}
+        {/* Grid streams in once the DB query resolves */}
+        <Suspense fallback={<EntriesGridSkeleton />}>
+          <EntriesGrid categoryFilter={categoryFilter} />
+        </Suspense>
       </main>
+    </div>
+  );
+}
+
+async function EntriesGrid({ categoryFilter }: { categoryFilter?: string }) {
+  const t = await getTranslations("entries");
+
+  const entries = await prisma.entry.findMany({
+    where: categoryFilter ? { category: categoryFilter } : undefined,
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    include: {
+      _count: {
+        select: {
+          peopleInvolved: true,
+        },
+      },
+    },
+  });
+
+  if (entries.length === 0) {
+    return <EmptyState categoryFilter={categoryFilter} t={t} />;
+  }
+
+  const formattedEntries = entries.map((entry) => ({
+    ...entry,
+    eventDateFormatted: entry.eventDate
+      ? format(entry.eventDate, "MMM d, yyyy")
+      : null,
+  }));
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {formattedEntries.map((entry) => (
+        <EntryCard key={entry.id} entry={entry} />
+      ))}
+    </div>
+  );
+}
+
+function EntriesGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-48 bg-gray-200 rounded-xl animate-pulse" />
+      ))}
     </div>
   );
 }

@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { Users, X, ChevronDown, ChevronUp } from "lucide-react";
 
+// Module-level cache so repeated mounts (e.g. navigating back) reuse the
+// same fetch result without hitting the API again.
+let cachedPeople: Person[] | null = null;
+let peoplePromise: Promise<Person[]> | null = null;
+
 interface Person {
   id: string;
   firstName: string;
@@ -21,20 +26,21 @@ export function PersonSelector({ selectedIds, onChange }: PersonSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    async function fetchPeople() {
-      try {
-        const response = await fetch("/api/people");
-        if (response.ok) {
-          const data = await response.json();
-          setPeople(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch people:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    if (cachedPeople) {
+      setPeople(cachedPeople);
+      setIsLoading(false);
+      return;
     }
-    fetchPeople();
+    if (!peoplePromise) {
+      peoplePromise = fetch("/api/people")
+        .then((res) => (res.ok ? res.json() : []))
+        .catch(() => []);
+    }
+    peoplePromise.then((data) => {
+      cachedPeople = data;
+      setPeople(data);
+      setIsLoading(false);
+    });
   }, []);
 
   const filteredPeople = people.filter((person) => {

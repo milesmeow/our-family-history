@@ -77,6 +77,7 @@ export default async function TimelinePage({ searchParams }: PageProps) {
       { eventDate: "asc" },
       { createdAt: "asc" }, // Secondary sort for entries with same date
     ],
+    take: 100,
     include: {
       peopleInvolved: {
         include: {
